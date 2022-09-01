@@ -1,0 +1,13 @@
+*venv*
+*node_modules*
+.DS_Store
+.idea/
+frontend/lerna-debug.log
+frontend/node_modules
+frontend/npm-debug.log
+frontend/test-reports
+frontend/coverage_report
+frontend/yarn-error.log
+frontend/licenses.json
+frontend/functional-temp
+frontend/splunktional-temp
