@@ -12,7 +12,7 @@ function ProfilePanel() {
     useEffect(() => {
     let isMounted = true;
     console.log('use effect')
-    axios.get('http://localhost:5000/profiles/all')
+    axios.get('http://127.0.0.1:5000/profiles/all')
     .then((response) => {
         if (isMounted)
             setProfiles(response.data);

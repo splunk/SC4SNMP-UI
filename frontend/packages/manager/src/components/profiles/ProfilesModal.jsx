@@ -4,8 +4,8 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
-import VarbindsCreator from "./VarbindsCreator";
-import Conditions from "./Conditions";
+import VarbindsCreator from "../VarbindsCreator";
+import Conditions from "../Conditions";
 import axios from "axios";
 
 
@@ -46,7 +46,7 @@ function ProfilesModal() {
     }
 
     const postProfile = (profileObj) => {
-        axios.post('http://localhost:5000/profiles/add', profileObj)
+        axios.post('http://127.0.0.1:5000/profiles/add', profileObj)
             .then((response) => {
                 console.log(response)
         })
@@ -58,8 +58,10 @@ function ProfilesModal() {
         frequency: frequency,
         varBinds: varBinds,
         conditions: conditions}
-        postProfile(profileObj)},
-        [frequency, profileName, varBinds, conditions]
+        postProfile(profileObj)
+        setOpen(false);
+        modalToggle?.current?.focus();},
+        [frequency, profileName, varBinds, conditions, setOpen, modalToggle]
     );
 
     return (

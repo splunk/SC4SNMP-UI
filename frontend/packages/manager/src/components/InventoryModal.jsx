@@ -37,7 +37,7 @@ function InventoryModal() {
     useEffect(() => {
         let isMounted = true;
         console.log('use effect')
-        axios.get('http://localhost:5000/profiles')
+        axios.get('http://127.0.0.1:5000/profiles')
         .then((response) => {
             if (isMounted)
                 setInitProfiles(response.data);
@@ -47,7 +47,7 @@ function InventoryModal() {
     }, [setInitProfiles]);
 
     const postInventory = (inventoryObj) => {
-        axios.post('http://localhost:5000/inventory/add', inventoryObj)
+        axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
             .then((response) => {
                 console.log(response)
         })

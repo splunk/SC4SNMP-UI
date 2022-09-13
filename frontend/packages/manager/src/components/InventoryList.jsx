@@ -26,7 +26,7 @@ class SortableColumns extends Component {
             allInventoryRecords: []
         };
     }
-    url = 'http://localhost:5000/inventory'
+    url = 'http://127.0.0.1:5000/inventory'
     getFetchInventoryRows() {
         axios.get(`${this.url}`)
             .then((response) => {
