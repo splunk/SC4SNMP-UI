@@ -6,6 +6,7 @@ import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
 import VarbindsCreator from "../VarbindsCreator";
 import Conditions from "../Conditions";
+import PatternsCreator from "../PatternsCreator";
 import axios from "axios";
 
 
@@ -14,9 +15,11 @@ function ProfilesModal() {
     const modalToggle = useRef(null);
     const [open, setOpen] = useState(false);
     const [profileName, setProfileName] = useState('');
-    const [frequency, setFrequency] = useState(0);
+    const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState(null);
     const [conditions, setConditions] = useState(null);
+
+    const varBindsRef = useRef(null);
 
     const handleRequestOpen = () => {
         setOpen(true);
@@ -54,10 +57,12 @@ function ProfilesModal() {
 
     const handleApply = useCallback(
     (e) => {
-        var profileObj = {profileName: profileName,
-        frequency: frequency,
-        varBinds: varBinds,
-        conditions: conditions}
+        var profileObj = {
+            profileName: profileName,
+            frequency: frequency,
+            varBinds: varBinds,
+            conditions: conditions
+        }
         postProfile(profileObj)
         setOpen(false);
         modalToggle?.current?.focus();},
@@ -70,6 +75,7 @@ function ProfilesModal() {
             <Modal onRequestClose={handleRequestClose} open={open} style={{ width: '600px' }}>
                 <Modal.Header title="Add new profile" onRequestClose={handleRequestClose} />
                 <Modal.Body>
+
                     <ControlGroup label="Profile name">
                         <Text value={profileName} onChange={handleProfileName}/>
                     </ControlGroup>
@@ -77,10 +83,13 @@ function ProfilesModal() {
                     <ControlGroup label="Frequency of polling" >
                         <Number value={frequency} onChange={handleFrequency}/>
                     </ControlGroup>
-                <Conditions onConditionsCreator={handleConditions}/>
-                <ControlGroup label="VarBinds">
-                <VarbindsCreator onVarbindsCreator={handleVarBinds}/>
-                </ControlGroup>
+
+                    <Conditions onConditionsCreator={handleConditions}/>
+
+                    <ControlGroup label="VarBinds">
+                        <VarbindsCreator onVarbindsCreator={handleVarBinds}/>
+                    </ControlGroup>
+
                 </Modal.Body>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />

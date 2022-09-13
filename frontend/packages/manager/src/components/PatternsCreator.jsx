@@ -20,11 +20,13 @@ class PatternsCreator extends Component {
         this.state = {
             items,
         };
+
+        props.onPatternsCreator(this.patterns);
     }
 
     handlePatternChange = () => {
         var patterns = this.patterns;
-        this.props.onPatternsCreator(patterns);
+        this.props.onPatternsCreator(this.patterns);
     }
 
     handleItemValue = (index, e) => {

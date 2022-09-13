@@ -13,8 +13,9 @@ class Conditions extends Component {
             field: '',
             patterns: null
         };
-    }
 
+        this.props.onConditionsCreator(this.state);
+    }
     handleChange = (e, {value}) => {
         this.setState({condition: value});
     };
@@ -56,5 +57,10 @@ class Conditions extends Component {
             </div>)
     }
 }
+
+Conditions.prototype.toString = function conditionToString () {
+    let result = `\n condition: ${this.state.condition}`;
+
+};
 
 export default Conditions;

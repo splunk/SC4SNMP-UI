@@ -20,6 +20,8 @@ class VarbindsCreator extends Component {
         this.state = {
             items,
         };
+
+        this.props.onVarbindsCreator(this.varBinds);
     }
 
     handleItemValueFamily = (index, e) => {

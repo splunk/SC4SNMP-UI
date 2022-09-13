@@ -21,11 +21,28 @@ function ProfilePanel() {
     return () => { isMounted = false }
     }, [setProfiles]);
 
+    let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
 
             { v.frequency && <P>frequency: {v.frequency}</P> }
-            { v.conditions && <P>conditions: {v.conditions.toString()}</P> }
+            { v.conditions &&
+                <Table stripeRows>
+                    <Table.Head>
+                        <Table.HeadCell>Condition</Table.HeadCell>
+                        <Table.HeadCell>Field</Table.HeadCell>
+                        <Table.HeadCell>Patterns</Table.HeadCell>
+                    </Table.Head>
+                    <Table.Body>
+                        <Table.Row key={createDOMID()}>
+                            <Table.Cell>{v.conditions.condition}</Table.Cell>
+                            <Table.Cell>{v.conditions.field}</Table.Cell>
+                            <Table.Cell>{v.conditions.patterns && v.conditions.patterns.map(value =>
+                                <P>{value.pattern}</P>)}</Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                 </Table>}
+
             { v.varBinds &&
             <Table stripeRows>
                 <Table.Head>
