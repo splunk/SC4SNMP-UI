@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback} from 'react';
+import React, {useState, useRef, useCallback, useContext} from 'react';
 import Button from '@splunk/react-ui/Button';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
@@ -8,22 +8,18 @@ import VarbindsCreator from "../VarbindsCreator";
 import Conditions from "../Conditions";
 import PatternsCreator from "../PatternsCreator";
 import axios from "axios";
+import AddProfileContext from "../../store/add-profile-contxt";
 
 
-function ProfilesModal() {
+function ProfilesModal(props) {
+    const AddProfCtx = useContext(AddProfileContext);
 
-    const modalToggle = useRef(null);
-    const [open, setOpen] = useState(false);
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState(null);
     const [conditions, setConditions] = useState(null);
 
     const varBindsRef = useRef(null);
-
-    const handleRequestOpen = () => {
-        setOpen(true);
-    };
 
     const handleProfileName = useCallback((e, { value: val }) => {
         setProfileName(val);
@@ -32,11 +28,6 @@ function ProfilesModal() {
     const handleFrequency = useCallback((e, { value: val }) => {
         setFrequency(val);
     }, []);
-
-    const handleRequestClose = () => {
-        setOpen(false);
-        modalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
-    };
 
     const handleVarBinds = (value) => {
         setVarBinds(value)
@@ -64,16 +55,14 @@ function ProfilesModal() {
             conditions: conditions
         }
         postProfile(profileObj)
-        setOpen(false);
-        modalToggle?.current?.focus();},
-        [frequency, profileName, varBinds, conditions, setOpen, modalToggle]
+        props.handleRequestClose();},
+        [frequency, profileName, varBinds, conditions, props.handleRequestClose]
     );
 
     return (
         <div>
-            <Button onClick={handleRequestOpen} ref={modalToggle} label="Add new profile" />
-            <Modal onRequestClose={handleRequestClose} open={open} style={{ width: '600px' }}>
-                <Modal.Header title="Add new profile" onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={props.handleRequestClose} open={props.open} style={{ width: '600px' }}>
+                <Modal.Header title="Add new profile" onRequestClose={props.handleRequestClose} />
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
@@ -92,7 +81,7 @@ function ProfilesModal() {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button appearance="secondary" onClick={props.handleRequestClose} label="Cancel" />
                     <Button appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>

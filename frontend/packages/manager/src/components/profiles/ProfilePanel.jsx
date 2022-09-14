@@ -1,13 +1,22 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import CollapsiblePanel from '@splunk/react-ui/CollapsiblePanel';
 import P from '@splunk/react-ui/Paragraph';
 import axios from "axios";
 import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
+import Button from '@splunk/react-ui/Button';
+import DeleteProfileContext from "../../store/delete-profile-contxt";
+import DeleteProfileModal from "./DeleteProfileModal";
 
 function ProfilePanel() {
-
     const [profiles, setProfiles] = useState([]);
+
+    const DelProfCtx = useContext(DeleteProfileContext);
+
+    const deleteProfileButtonHandler = (profileName) => {
+        DelProfCtx.setDeleteProfile(profileName);
+        DelProfCtx.setDeleteOpen(true);
+    };
 
     useEffect(() => {
     let isMounted = true;
@@ -24,8 +33,9 @@ function ProfilePanel() {
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
+            <Button onClick={() => deleteProfileButtonHandler(v.profileName)} label="Delete profile" />
 
-            { v.frequency && <P>frequency: {v.frequency}</P> }
+            { v.frequency && <P>Frequency: {v.frequency}</P> }
             { v.conditions &&
                 <Table stripeRows>
                     <Table.Head>
@@ -67,9 +77,10 @@ function ProfilePanel() {
 
 
     return (
-        <div>
-            {profilesPanels}
-        </div>
+            <div>
+                {profilesPanels}
+                <DeleteProfileModal/>
+            </div>
     );
 }
 
