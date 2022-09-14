@@ -15,7 +15,7 @@ def hello_world():
 
 
 @app.route('/inventory')
-@cross_origin()
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 def get_inventory_list():
     inventory = db.inventory.find()
     return json_util.dumps(list(inventory))
@@ -31,7 +31,7 @@ def add_inventory_record():
 
 
 @app.route('/profiles')
-@cross_origin()
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 def get_profiles_list():
     profiles = db.profiles.find()
     profiles_list = list(profiles)
@@ -40,7 +40,7 @@ def get_profiles_list():
 
 
 @app.route('/profiles/all')
-@cross_origin()
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 def get_all_profiles_list():
     profiles = db.profiles.find()
     profiles_list = list(profiles)
@@ -54,6 +54,21 @@ def add_profile_record():
     profile_obj = request.json
     print(profile_obj)
     db.profiles.insert_one(profile_obj)
+    return "success"
+
+@app.route('/profiles/delete/<profile_name>', methods=['POST'])
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
+def delete_profile_record(profile_name):
+    db.profiles.delete_one({'profileName': profile_name})
+    return "success"
+
+@app.route('/profiles/update/<profile_name>', methods=['POST'])
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
+def update_profile_record(profile_name):
+    profile_obj = request.json
+    print(f"{profile_obj}")
+    new_values = {"$set": profile_obj}
+    db.profiles.update_one({'profileName': profile_name}, new_values)
     return "success"
 
 
