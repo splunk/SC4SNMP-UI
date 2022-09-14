@@ -13,6 +13,7 @@ function DeleteProfileModal() {
 
     const handleRequestClose = () => {
         ProfCtx.setDeleteOpen(false);
+        ProfCtx.deleteModalToggle?.current?.focus();
     };
 
     const handleDeleteProfile = () => {
@@ -27,6 +28,7 @@ function DeleteProfileModal() {
           });
         ProfCtx.setDeleteOpen(false);
         ProfCtx.makeProfilesChange();
+        ProfCtx.addModalToggle?.current?.focus();
     }
 
     return (

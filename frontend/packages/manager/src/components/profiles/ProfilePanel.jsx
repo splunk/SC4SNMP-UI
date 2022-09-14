@@ -18,6 +18,10 @@ function ProfilePanel() {
         ProfCtx.setDeleteOpen(true);
     };
 
+    const editProfileButtonHandler = (profileName) => {
+        console.log("edit")
+    };
+
     useEffect(() => {
     let isMounted = true;
     console.log('use effect')
@@ -33,7 +37,8 @@ function ProfilePanel() {
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
-            <Button onClick={() => deleteProfileButtonHandler(v.profileName)} label="Delete profile" />
+            <Button onClick={() => deleteProfileButtonHandler(v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
+            <Button onClick={() => editProfileButtonHandler(v.profileName)} label="Edit profile" />
 
             { v.frequency && <P>Frequency: {v.frequency}</P> }
             { v.conditions &&

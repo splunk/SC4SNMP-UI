@@ -3,27 +3,23 @@ import ProfilePanel from "../components/profiles/ProfilePanel"
 import AddProfileModal from "../components/profiles/AddProfileModal"
 import Button from '@splunk/react-ui/Button';
 import { ProfileContxtProvider } from "../store/profile-contxt";
+import ProfileContext from "../store/profile-contxt";
 
 function ProfilesPage(){
+    const ProfCtx = useContext(ProfileContext);
     const modalToggle = useRef(null);
     const [addOpen, setAddOpen] = useState(false);
 
     const handleRequestOpen = () => {
         setAddOpen(true);
-    };
-
-    const handleRequestClose = () => {
-        setAddOpen(false);
-        modalToggle?.current?.focus();
+        ProfCtx.setAddOpen(true);
     };
 
     return (
         <div>
-            <ProfileContxtProvider>
-                <Button onClick={handleRequestOpen} ref={modalToggle} label="Add new profile" />
-                <AddProfileModal open={addOpen} handleRequestClose={handleRequestClose} modalToggle={modalToggle}/>
-                <ProfilePanel />
-            </ProfileContxtProvider>
+            <Button onClick={handleRequestOpen} ref={ProfCtx.addModalToggle} label="Add new profile" />
+            <AddProfileModal />
+            <ProfilePanel />
         </div>
     );
 }

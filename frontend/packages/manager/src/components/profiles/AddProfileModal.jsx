@@ -44,6 +44,15 @@ function AddProfileModal(props) {
         })
     }
 
+   const handleRequestClose = useCallback(
+    (e) => {
+        ProfCtx.setAddOpen(false);
+        ProfCtx.addModalToggle?.current?.focus();
+        },
+        [ProfCtx.setAddOpen, ProfCtx.addModalToggle]
+    );
+
+
     const handleApply = useCallback(
     (e) => {
         let profileObj = {
@@ -53,16 +62,17 @@ function AddProfileModal(props) {
             conditions: conditions
         };
         postProfile(profileObj);
-        props.handleRequestClose();
+        ProfCtx.setAddOpen(false);
+        ProfCtx.addModalToggle?.current?.focus();
         ProfCtx.makeProfilesChange();
         },
-        [frequency, profileName, varBinds, conditions, props.handleRequestClose, ProfCtx.makeProfilesChange]
+        [frequency, profileName, varBinds, conditions, ProfCtx.setAddOpen, ProfCtx.addModalToggle, ProfCtx.makeProfilesChange]
     );
 
     return (
         <div>
-            <Modal onRequestClose={props.handleRequestClose} open={props.open} style={{ width: '600px' }}>
-                <Modal.Header title="Add new profile" onRequestClose={props.handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
+                <Modal.Header title="Add new profile" onRequestClose={handleRequestClose} />
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
@@ -81,7 +91,7 @@ function AddProfileModal(props) {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={props.handleRequestClose} label="Cancel" />
+                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
                     <Button appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>

@@ -7,14 +7,21 @@ const ProfileContext = createContext({
     setDeleteOpen: () => {},
     deleteProfile: (profName) => {},
     profilesChange: 0,
-    setProfilesChange: (profName) => {}
+    setProfilesChange: (profName) => {},
+    addOpen: false,
+    addModalToggle: null,
+    setAddOpen: () => {}
 });
 
 export function ProfileContxtProvider(props) {
     const [deleteProfileName, setDeleteProfileName] = useState("");
     const [deleteOpen, setDeleteOpen] = useState(false);
-    const [profilesChange, setProfilesChange] = useState(true);
     const deleteModalToggle = useRef(null);
+
+    const [addOpen, setAddOpen] = useState(false);
+    const addModalToggle = useRef(null);
+
+    const [profilesChange, setProfilesChange] = useState(true);
 
     function deleteProfileHandler(profileName){
         setDeleteProfileName(profileName);
@@ -24,13 +31,17 @@ export function ProfileContxtProvider(props) {
         setProfilesChange(!profilesChange);
     }
 
-    const context = {profileName: deleteProfileName,
-            deleteOpen: deleteOpen,
-            deleteModalToggle: deleteModalToggle,
-            setDeleteOpen: setDeleteOpen,
-            setDeleteProfile: deleteProfileHandler,
-            profilesChange: profilesChange,
-            makeProfilesChange: profilesChangeHandler
+    const context = {
+        profileName: deleteProfileName,
+        deleteOpen: deleteOpen,
+        deleteModalToggle: deleteModalToggle,
+        setDeleteOpen: setDeleteOpen,
+        setDeleteProfile: deleteProfileHandler,
+        profilesChange: profilesChange,
+        makeProfilesChange: profilesChangeHandler,
+        addOpen: addOpen,
+        addModalToggle: addModalToggle,
+        setAddOpen: setAddOpen
     };
 
     return(
