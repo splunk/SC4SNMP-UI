@@ -1,34 +1,43 @@
 import React, {useState, createContext, useRef} from 'react';
 
-const DeleteProfileContext = createContext({
+const ProfileContext = createContext({
     profileName: "",
     deleteOpen: false,
     deleteModalToggle: null,
     setDeleteOpen: () => {},
-    deleteProfile: (profName) => {}
+    deleteProfile: (profName) => {},
+    profilesChange: 0,
+    setProfilesChange: (profName) => {}
 });
 
-export function DeleteProfileContxtProvider(props) {
+export function ProfileContxtProvider(props) {
     const [deleteProfileName, setDeleteProfileName] = useState("");
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [profilesChange, setProfilesChange] = useState(true);
     const deleteModalToggle = useRef(null);
 
     function deleteProfileHandler(profileName){
         setDeleteProfileName(profileName);
     }
 
+    function profilesChangeHandler() {
+        setProfilesChange(!profilesChange);
+    }
+
     const context = {profileName: deleteProfileName,
             deleteOpen: deleteOpen,
             deleteModalToggle: deleteModalToggle,
             setDeleteOpen: setDeleteOpen,
-            setDeleteProfile: deleteProfileHandler
+            setDeleteProfile: deleteProfileHandler,
+            profilesChange: profilesChange,
+            makeProfilesChange: profilesChangeHandler
     };
 
     return(
-        <DeleteProfileContext.Provider value={context}>
+        <ProfileContext.Provider value={context}>
             {props.children}
-        </DeleteProfileContext.Provider>
+        </ProfileContext.Provider>
     )
 }
 
-export default DeleteProfileContext;
+export default ProfileContext;

@@ -8,12 +8,11 @@ import VarbindsCreator from "../VarbindsCreator";
 import Conditions from "../Conditions";
 import PatternsCreator from "../PatternsCreator";
 import axios from "axios";
-import AddProfileContext from "../../store/add-profile-contxt";
+import ProfileContext from "../../store/profile-contxt";
 
 
-function ProfilesModal(props) {
-    const AddProfCtx = useContext(AddProfileContext);
-
+function AddProfileModal(props) {
+    const ProfCtx = useContext(ProfileContext);
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState(null);
@@ -42,21 +41,23 @@ function ProfilesModal(props) {
     const postProfile = (profileObj) => {
         axios.post('http://127.0.0.1:5000/profiles/add', profileObj)
             .then((response) => {
-                console.log(response)
+                console.log(response);
         })
     }
 
     const handleApply = useCallback(
     (e) => {
-        var profileObj = {
+        let profileObj = {
             profileName: profileName,
             frequency: frequency,
             varBinds: varBinds,
             conditions: conditions
-        }
-        postProfile(profileObj)
-        props.handleRequestClose();},
-        [frequency, profileName, varBinds, conditions, props.handleRequestClose]
+        };
+        postProfile(profileObj);
+        props.handleRequestClose();
+        ProfCtx.makeProfilesChange();
+        },
+        [frequency, profileName, varBinds, conditions, props.handleRequestClose, ProfCtx.makeProfilesChange]
     );
 
     return (
@@ -89,4 +90,4 @@ function ProfilesModal(props) {
     );
 }
 
-export default ProfilesModal;
+export default AddProfileModal;

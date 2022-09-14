@@ -5,17 +5,17 @@ import axios from "axios";
 import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from '@splunk/react-ui/Button';
-import DeleteProfileContext from "../../store/delete-profile-contxt";
+import ProfileContext from "../../store/profile-contxt";
 import DeleteProfileModal from "./DeleteProfileModal";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
 
-    const DelProfCtx = useContext(DeleteProfileContext);
+    const ProfCtx = useContext(ProfileContext);
 
     const deleteProfileButtonHandler = (profileName) => {
-        DelProfCtx.setDeleteProfile(profileName);
-        DelProfCtx.setDeleteOpen(true);
+        ProfCtx.setDeleteProfile(profileName);
+        ProfCtx.setDeleteOpen(true);
     };
 
     useEffect(() => {
@@ -28,7 +28,7 @@ function ProfilePanel() {
     console.log('data: ', response.data);
     })
     return () => { isMounted = false }
-    }, [setProfiles]);
+    }, [ProfCtx.profilesChange]);
 
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
