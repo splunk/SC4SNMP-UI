@@ -13,8 +13,8 @@ flask run
 ```yaml
 cd frontend
 yarn install
-yarn add react-router-dom@6
 yar run build
 cd packages/manager
+yarn add react-router-dom@6
 yarn run start:demo
 ```
