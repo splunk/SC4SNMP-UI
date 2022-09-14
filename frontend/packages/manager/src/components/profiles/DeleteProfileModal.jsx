@@ -17,7 +17,7 @@ function DeleteProfileModal() {
     };
 
     const handleDeleteProfile = () => {
-        const profileName = ProfCtx.profileName;
+        const profileName = ProfCtx.deleteProfileName;
         console.log(profileName);
         axios.post(`http://127.0.0.1:5000/profiles/delete/${profileName}`)
           .then(function (response) {
@@ -41,7 +41,7 @@ function DeleteProfileModal() {
             >
                 <Modal.Header title="Header" onRequestClose={handleRequestClose} />
                 <Modal.Body>
-                    <P>Are you sure you want to delete {ProfCtx.profileName} profile?</P>
+                    <P>Are you sure you want to delete {ProfCtx.deleteProfileName} profile?</P>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button appearance="primary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />

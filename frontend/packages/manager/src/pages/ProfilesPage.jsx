@@ -11,7 +11,10 @@ function ProfilesPage(){
     const [addOpen, setAddOpen] = useState(false);
 
     const handleRequestOpen = () => {
-        setAddOpen(true);
+        ProfCtx.setProfileName("");
+        ProfCtx.setFrequency(1);
+        ProfCtx.setVarBinds(null);
+        ProfCtx.setConditions(null);
         ProfCtx.setAddOpen(true);
     };
 

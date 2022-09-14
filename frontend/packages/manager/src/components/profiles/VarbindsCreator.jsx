@@ -6,16 +6,22 @@ import Text from '@splunk/react-ui/Text';
 class VarbindsCreator extends Component {
     constructor(props) {
         super(props);
-        this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}]
-        const items = [
-            <FormRows.Row index={0} key="0" onRequestRemove={this.handleRequestRemove}>
+
+        if(this.props.value){
+            this.varBinds = this.props.value;
+        }else{
+            this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}];
+        }
+
+        const items = this.varBinds.map(value => (
+            <FormRows.Row index={0} key={ createDOMID() } onRequestRemove={this.handleRequestRemove}>
                 <div style={{ display: 'flex' }}>
-                <Text defaultValue={this.varBinds[0].family} onChange={e => this.handleItemValueFamily(0, e)}/>
-                <Text defaultValue={this.varBinds[0].category} onChange={e => this.handleItemValueCategory(0, e)}/>
-                <Text defaultValue={this.varBinds[0].index} onChange={e => this.handleItemValueIndex(0, e)}/>
+                <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(0, e)}/>
+                <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(0, e)}/>
+                <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(0, e)}/>
                 </div>
             </FormRows.Row>
-        ];
+        ))
 
         this.state = {
             items,
@@ -70,6 +76,7 @@ class VarbindsCreator extends Component {
         this.setState((state) => ({
             items: FormRows.removeRow(index, state.items),
         }));
+        this.varBinds.splice(index, 1)
     };
 
 

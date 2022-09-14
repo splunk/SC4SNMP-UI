@@ -8,12 +8,15 @@ class Conditions extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            condition: 'base',
-            field: '',
-            patterns: null
-        };
-
+        if(this.props.value){
+            this.state = this.props.value;
+        }else{
+            this.state = {
+                condition: 'base',
+                field: '',
+                patterns: null
+            };
+        }
         this.props.onConditionsCreator(this.state);
     }
     handleChange = (e, {value}) => {

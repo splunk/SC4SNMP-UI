@@ -1,27 +1,51 @@
 import React, {useState, createContext, useRef} from 'react';
 
 const ProfileContext = createContext({
-    profileName: "",
+    deleteProfileName: "",
     deleteOpen: false,
     deleteModalToggle: null,
     setDeleteOpen: () => {},
     deleteProfile: (profName) => {},
-    profilesChange: 0,
+    profilesChange: true,
     setProfilesChange: (profName) => {},
     addOpen: false,
     addModalToggle: null,
-    setAddOpen: () => {}
+    setAddOpen: () => {},
+
+    profileName: "",
+    setProfileName: () => {},
+    profileOriginalName: "",
+    setProfileOriginalName: () => {},
+    frequency: 1,
+    setFrequency: () => {},
+    varBinds: null,
+    setVarBinds: () => {},
+    conditions: null,
+    setConditions: () => {},
+    isEdit: false,
+    setIsEdit: () => {}
 });
 
 export function ProfileContxtProvider(props) {
+    // data for DeleteProfileModal
     const [deleteProfileName, setDeleteProfileName] = useState("");
     const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteModalToggle = useRef(null);
 
+    // data for AddProfileModal
     const [addOpen, setAddOpen] = useState(false);
     const addModalToggle = useRef(null);
 
+    // data for auto refreshing profiles panel
     const [profilesChange, setProfilesChange] = useState(true);
+
+    // data for editing in AddProfileModal
+    const [profileName, setProfileName] = useState('');
+    const [frequency, setFrequency] = useState(1);
+    const [varBinds, setVarBinds] = useState(null);
+    const [conditions, setConditions] = useState(null);
+    const [isEdit, setIsEdit] = useState(false);
+    const [profileOriginalName, setProfileOriginalName] = useState("");
 
     function deleteProfileHandler(profileName){
         setDeleteProfileName(profileName);
@@ -32,7 +56,7 @@ export function ProfileContxtProvider(props) {
     }
 
     const context = {
-        profileName: deleteProfileName,
+        deleteProfileName: deleteProfileName,
         deleteOpen: deleteOpen,
         deleteModalToggle: deleteModalToggle,
         setDeleteOpen: setDeleteOpen,
@@ -41,7 +65,20 @@ export function ProfileContxtProvider(props) {
         makeProfilesChange: profilesChangeHandler,
         addOpen: addOpen,
         addModalToggle: addModalToggle,
-        setAddOpen: setAddOpen
+        setAddOpen: setAddOpen,
+
+        profileName: profileName,
+        setProfileName: setProfileName,
+        profileOriginalName: profileOriginalName,
+        setProfileOriginalName: setProfileOriginalName,
+        frequency: frequency,
+        setFrequency: setFrequency,
+        varBinds: varBinds,
+        setVarBinds: setVarBinds,
+        conditions: conditions,
+        setConditions: setConditions,
+        isEdit: isEdit,
+        setIsEdit: setIsEdit
     };
 
     return(

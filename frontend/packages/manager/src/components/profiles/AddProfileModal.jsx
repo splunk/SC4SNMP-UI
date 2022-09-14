@@ -12,33 +12,34 @@ import ProfileContext from "../../store/profile-contxt";
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
-    const [profileName, setProfileName] = useState('');
-    const [frequency, setFrequency] = useState(1);
-    const [varBinds, setVarBinds] = useState(null);
-    const [conditions, setConditions] = useState(null);
-
-    const varBindsRef = useRef(null);
 
     const handleProfileName = useCallback((e, { value: val }) => {
-        setProfileName(val);
+        ProfCtx.setProfileName(val);
     }, []);
 
     const handleFrequency = useCallback((e, { value: val }) => {
-        setFrequency(val);
+        ProfCtx.setFrequency(val);
     }, []);
 
     const handleVarBinds = (value) => {
-        setVarBinds(value)
+        ProfCtx.setVarBinds(value)
         console.log('varbindslol:   ', value);
     }
 
     const handleConditions = (value) => {
-        setConditions(value)
+        ProfCtx.setConditions(value)
         console.log('conditionsslol:   ', value);
     }
 
     const postProfile = (profileObj) => {
         axios.post('http://127.0.0.1:5000/profiles/add', profileObj)
+            .then((response) => {
+                console.log(response);
+        })
+    }
+
+    const updateProfile = (profileObj, previousName) => {
+        axios.post(`http://127.0.0.1:5000/profiles/update/${previousName}`, profileObj)
             .then((response) => {
                 console.log(response);
         })
@@ -56,17 +57,24 @@ function AddProfileModal(props) {
     const handleApply = useCallback(
     (e) => {
         let profileObj = {
-            profileName: profileName,
-            frequency: frequency,
-            varBinds: varBinds,
-            conditions: conditions
+            profileName: ProfCtx.profileName,
+            frequency: ProfCtx.frequency,
+            varBinds: ProfCtx.varBinds,
+            conditions: ProfCtx.conditions
         };
-        postProfile(profileObj);
+
+        if (ProfCtx.isEdit){
+            updateProfile(profileObj, ProfCtx.profileOriginalName);
+        }else{
+            postProfile(profileObj);
+        }
+
         ProfCtx.setAddOpen(false);
         ProfCtx.addModalToggle?.current?.focus();
         ProfCtx.makeProfilesChange();
         },
-        [frequency, profileName, varBinds, conditions, ProfCtx.setAddOpen, ProfCtx.addModalToggle, ProfCtx.makeProfilesChange]
+        [ProfCtx.frequency, ProfCtx.profileName, ProfCtx.varBinds, ProfCtx.conditions, ProfCtx.setAddOpen,
+            ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileOriginalName]
     );
 
     return (
@@ -76,17 +84,17 @@ function AddProfileModal(props) {
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
-                        <Text value={profileName} onChange={handleProfileName}/>
+                        <Text value={ProfCtx.profileName} onChange={handleProfileName}/>
                     </ControlGroup>
 
                     <ControlGroup label="Frequency of polling" >
-                        <Number value={frequency} onChange={handleFrequency}/>
+                        <Number value={ProfCtx.frequency} onChange={handleFrequency}/>
                     </ControlGroup>
 
-                    <Conditions onConditionsCreator={handleConditions}/>
+                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions}/>
 
                     <ControlGroup label="VarBinds">
-                        <VarbindsCreator onVarbindsCreator={handleVarBinds}/>
+                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds}/>
                     </ControlGroup>
 
                 </Modal.Body>

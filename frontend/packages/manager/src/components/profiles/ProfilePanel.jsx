@@ -18,8 +18,14 @@ function ProfilePanel() {
         ProfCtx.setDeleteOpen(true);
     };
 
-    const editProfileButtonHandler = (profileName) => {
-        console.log("edit")
+    const editProfileButtonHandler = (profile) => {
+        ProfCtx.setProfileName(profile.profileName);
+        ProfCtx.setFrequency(profile.frequency);
+        ProfCtx.setVarBinds(profile.varBinds);
+        ProfCtx.setConditions(profile.conditions);
+        ProfCtx.setProfileOriginalName(profile.profileName);
+        ProfCtx.setIsEdit(true);
+        ProfCtx.setAddOpen(true);
     };
 
     useEffect(() => {
@@ -38,7 +44,7 @@ function ProfilePanel() {
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
             <Button onClick={() => deleteProfileButtonHandler(v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
-            <Button onClick={() => editProfileButtonHandler(v.profileName)} label="Edit profile" />
+            <Button onClick={() => editProfileButtonHandler(v)} label="Edit profile" />
 
             { v.frequency && <P>Frequency: {v.frequency}</P> }
             { v.conditions &&
