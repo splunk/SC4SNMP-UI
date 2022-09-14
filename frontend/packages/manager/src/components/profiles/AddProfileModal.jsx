@@ -4,9 +4,8 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
-import VarbindsCreator from "../VarbindsCreator";
-import Conditions from "../Conditions";
-import PatternsCreator from "../PatternsCreator";
+import VarbindsCreator from "./VarbindsCreator";
+import Conditions from "./Conditions";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
 

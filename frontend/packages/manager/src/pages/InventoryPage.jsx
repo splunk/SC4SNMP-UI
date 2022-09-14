@@ -1,6 +1,6 @@
 import React from 'react';
-import InventoryList from "../components/InventoryList"
-import InventoryModal from "../components/InventoryModal"
+import InventoryList from "../components/inventory/InventoryList"
+import InventoryModal from "../components/inventory/InventoryModal"
 
 function InventoryPage() {
     return (
