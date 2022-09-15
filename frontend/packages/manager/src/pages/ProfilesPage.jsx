@@ -16,6 +16,7 @@ function ProfilesPage(){
         ProfCtx.setVarBinds(null);
         ProfCtx.setConditions(null);
         ProfCtx.setAddOpen(true);
+        ProfCtx.setIsEdit(false);
     };
 
     return (
