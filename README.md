@@ -15,6 +15,5 @@ cd frontend
 yarn install
 yar run build
 cd packages/manager
-yarn add react-router-dom@6
 yarn run start:demo
 ```
