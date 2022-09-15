@@ -22,13 +22,11 @@ function AddProfileModal(props) {
     }, []);
 
     const handleVarBinds = (value) => {
-        ProfCtx.setVarBinds(value)
-        console.log('varbindslol:   ', value);
+        ProfCtx.setVarBinds(value);
     }
 
     const handleConditions = (value) => {
-        ProfCtx.setConditions(value)
-        console.log('conditionsslol:   ', value);
+        ProfCtx.setConditions(value);
     }
 
     const postProfile = (profileObj) => {

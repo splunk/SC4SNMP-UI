@@ -7,38 +7,40 @@ import PatternsCreator from "./PatternsCreator";
 class Conditions extends Component {
     constructor(props) {
         super(props);
-
+        let stateValue;
         if(this.props.value){
-            this.state = this.props.value;
+            stateValue = this.props.value;
         }else{
-            this.state = {
+            stateValue = {
                 condition: 'base',
                 field: '',
                 patterns: null
             };
         }
+        this.state = stateValue;
         this.props.onConditionsCreator(this.state);
     }
+
     handleChange = (e, {value}) => {
-        this.setState({condition: value});
+        if (value != "field"){
+            this.setState({condition: value, field: '', patterns :null},
+                () => {this.props.onConditionsCreator(this.state);});
+        }else{
+           this.setState({condition: value}, () => {this.props.onConditionsCreator(this.state);});
+        };
     };
 
     handleFieldChange = (e, {value}) => {
-        this.setState({field: value});
+        this.setState({field: value}, () => {this.props.onConditionsCreator(this.state);});
     };
 
     handlePatterns = (value) => {
-        this.setState({patterns: value});
-    }
-
-    handleConditionChange = (value) => {
-        var state = this.state;
-        this.props.onConditionsCreator(state);
+        this.setState({patterns: value}, () => {this.props.onConditionsCreator(this.state);});
     }
 
     render() {
         return (
-            <div onChange={this.handleConditionChange}>
+            <div>
                 <ControlGroup label="Condition"
                     labelFor="customized-select-after">
                 <Select value={this.state.condition} onChange={this.handleChange} filter>
@@ -60,10 +62,5 @@ class Conditions extends Component {
             </div>)
     }
 }
-
-Conditions.prototype.toString = function conditionToString () {
-    let result = `\n condition: ${this.state.condition}`;
-
-};
 
 export default Conditions;

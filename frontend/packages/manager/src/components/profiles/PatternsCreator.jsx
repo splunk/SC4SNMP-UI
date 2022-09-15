@@ -41,7 +41,6 @@ class PatternsCreator extends Component {
     }
 
     handleItemValue = (index, e) => {
-        console.log(`old patter: ${this.patterns[index].pattern}, new pattern: ${e.target.value}, index: ${index}`)
         this.patterns[index].pattern = e.target.value
     }
 
