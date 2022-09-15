@@ -44,7 +44,7 @@ function ProfilePanel() {
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
             <Button onClick={() => deleteProfileButtonHandler(v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
-            <Button onClick={() => editProfileButtonHandler(v)} label="Edit profile" />
+            <Button onClick={() => editProfileButtonHandler(JSON.parse(JSON.stringify(v)))} label="Edit profile" />
 
             { v.frequency && <P>Frequency: {v.frequency}</P> }
             { v.conditions &&
