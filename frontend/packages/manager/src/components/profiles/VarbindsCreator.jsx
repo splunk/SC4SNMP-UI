@@ -13,15 +13,19 @@ class VarbindsCreator extends Component {
             this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}];
         }
 
-        const items = this.varBinds.map(value => (
-            <FormRows.Row index={0} key={ createDOMID() } onRequestRemove={this.handleRequestRemove}>
+        let item_id = -1;
+        const items = this.varBinds.map(value => {
+            item_id +=1;
+            let internal_id = item_id;
+            return (
+            <FormRows.Row index={internal_id} key={ createDOMID() } onRequestRemove={this.handleRequestRemove}>
                 <div style={{ display: 'flex' }}>
-                <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(0, e)}/>
-                <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(0, e)}/>
-                <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(0, e)}/>
+                <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(internal_id, e)}/>
+                <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(internal_id, e)}/>
+                <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(internal_id, e)}/>
                 </div>
             </FormRows.Row>
-        ))
+        );});
 
         this.state = {
             items,

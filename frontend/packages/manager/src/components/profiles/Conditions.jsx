@@ -53,7 +53,7 @@ class Conditions extends Component {
                         <Text value={this.state.field} onChange={this.handleFieldChange}/>
                     </ControlGroup>
                     <ControlGroup label="patterns">
-                        <PatternsCreator onPatternsCreator={this.handlePatterns}/>
+                        <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns}/>
                     </ControlGroup>
                 </div>
                 ) : <div/>}
