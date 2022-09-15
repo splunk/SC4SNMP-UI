@@ -78,7 +78,8 @@ function AddProfileModal(props) {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
-                <Modal.Header title="Add new profile" onRequestClose={handleRequestClose} />
+                <Modal.Header title={((ProfCtx.isEdit) ? `Edit profile` : "Add new profile")}
+                              onRequestClose={handleRequestClose} />
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
