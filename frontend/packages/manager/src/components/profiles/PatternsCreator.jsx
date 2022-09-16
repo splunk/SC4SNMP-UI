@@ -12,7 +12,7 @@ class PatternsCreator extends Component {
             this.patterns = this.props.value
         }else{
             this.patterns = [
-                {pattern: "*.SNMP.*"}
+                {pattern: ".*SNMP.*"}
             ]
         }
 
@@ -20,7 +20,6 @@ class PatternsCreator extends Component {
         const items = this.patterns.map(value => {
             item_id += 1;
             let internal_id = item_id;
-            console.log(`${item_id}, ${value.pattern}`)
             return(
                 <FormRows.Row index={internal_id} key={createDOMID()} onRequestRemove={this.handleRequestRemove}>
                     <Text defaultValue={value.pattern} onChange={e => this.handleItemValue(internal_id, e)}/>
@@ -41,6 +40,7 @@ class PatternsCreator extends Component {
     }
 
     handleItemValue = (index, e) => {
+        console.log(`hndling pattern index: ${index}`);
         this.patterns[index].pattern = e.target.value
     }
 
@@ -67,7 +67,7 @@ class PatternsCreator extends Component {
     };
 
     handleRequestRemove = (e, { index }) => {
-         console.log(`patter: ${this.patterns[index].pattern}, index: ${index}`)
+         console.log(`pattern: ${this.patterns[index].pattern}, index: ${index}`)
         this.setState((state) => ({
             items: FormRows.removeRow(index, state.items),
         }));

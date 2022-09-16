@@ -4,10 +4,12 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
+import P from '@splunk/react-ui/Paragraph';
 import VarbindsCreator from "./VarbindsCreator";
 import Conditions from "./Conditions";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
+import validateProfiles from "./ValidateProfiles";
 
 
 function AddProfileModal(props) {
@@ -54,22 +56,36 @@ function AddProfileModal(props) {
 
     const handleApply = useCallback(
     (e) => {
-        let profileObj = {
+        console.log(ProfCtx.conditions);
+        console.log(ProfCtx.varBinds);
+        const validation = validateProfiles(ProfCtx.profileName, ProfCtx.frequency, ProfCtx.conditions,
+            ProfCtx.varBinds);
+        if (validation[0]){
+            let profileObj = {
             profileName: ProfCtx.profileName,
             frequency: ProfCtx.frequency,
             varBinds: ProfCtx.varBinds,
             conditions: ProfCtx.conditions
+            };
+
+            if (ProfCtx.isEdit){
+                updateProfile(profileObj, ProfCtx.profileId);
+            }else{
+                postProfile(profileObj);
+            }
+
+            ProfCtx.setAddOpen(false);
+            ProfCtx.addModalToggle?.current?.focus();
+            ProfCtx.makeProfilesChange();
+        }else{
+            const errors = validation[1];
+            for (const property in errors) {
+                if (errors[property].length > 0){
+                    console.log(`${property}:`,errors[property]);
+                };
+            };
         };
 
-        if (ProfCtx.isEdit){
-            updateProfile(profileObj, ProfCtx.profileId);
-        }else{
-            postProfile(profileObj);
-        }
-
-        ProfCtx.setAddOpen(false);
-        ProfCtx.addModalToggle?.current?.focus();
-        ProfCtx.makeProfilesChange();
         },
         [ProfCtx.frequency, ProfCtx.profileName, ProfCtx.varBinds, ProfCtx.conditions, ProfCtx.setAddOpen,
             ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileId]
