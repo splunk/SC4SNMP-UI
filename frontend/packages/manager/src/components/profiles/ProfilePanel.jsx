@@ -13,17 +13,18 @@ function ProfilePanel() {
 
     const ProfCtx = useContext(ProfileContext);
 
-    const deleteProfileButtonHandler = (profileName) => {
-        ProfCtx.setDeleteProfile(profileName);
+    const deleteProfileButtonHandler = (id, profileName) => {
+        ProfCtx.setProfileId(id);
+        ProfCtx.setProfileName(profileName);
         ProfCtx.setDeleteOpen(true);
     };
 
     const editProfileButtonHandler = (profile) => {
+        ProfCtx.setProfileId(profile._id.$oid);
         ProfCtx.setProfileName(profile.profileName);
         ProfCtx.setFrequency(profile.frequency);
         ProfCtx.setVarBinds(profile.varBinds);
         ProfCtx.setConditions(profile.conditions);
-        ProfCtx.setProfileOriginalName(profile.profileName);
         ProfCtx.setIsEdit(true);
         ProfCtx.setAddOpen(true);
     };
@@ -43,7 +44,7 @@ function ProfilePanel() {
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName}>
-            <Button onClick={() => deleteProfileButtonHandler(v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
+            <Button onClick={() => deleteProfileButtonHandler(v._id.$oid, v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
             <Button onClick={() => editProfileButtonHandler(JSON.parse(JSON.stringify(v)))} label="Edit profile" />
 
             { v.frequency && <P>Frequency: {v.frequency}</P> }
