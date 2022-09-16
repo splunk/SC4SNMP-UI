@@ -10,6 +10,7 @@ db = client.sc4snmp
 
 
 @app.route('/')
+@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 def hello_world():
     return 'Hello World!'
 
@@ -40,14 +41,14 @@ def get_profiles_list():
 
 
 @app.route('/profiles/all')
-@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def get_all_profiles_list():
     profiles = db.profiles.find()
     profiles_list = list(profiles)
     print(profiles_list)
     return json_util.dumps(profiles_list)
 
-
+#@cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 @app.route('/profiles/add', methods=['POST'])
 @cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 def add_profile_record():
