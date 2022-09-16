@@ -1,4 +1,4 @@
-from bson import json_util
+from bson import json_util, ObjectId
 from flask import Flask, request
 from flask_cors import cross_origin
 from pymongo import MongoClient
@@ -57,19 +57,19 @@ def add_profile_record():
     db.profiles.insert_one(profile_obj)
     return "success"
 
-@app.route('/profiles/delete/<profile_name>', methods=['POST'])
+@app.route('/profiles/delete/<profile_id>', methods=['POST'])
 @cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
-def delete_profile_record(profile_name):
-    db.profiles.delete_one({'profileName': profile_name})
+def delete_profile_record(profile_id):
+    db.profiles.delete_one({'_id': ObjectId(profile_id)})
     return "success"
 
-@app.route('/profiles/update/<profile_name>', methods=['POST'])
+@app.route('/profiles/update/<profile_id>', methods=['POST'])
 @cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
-def update_profile_record(profile_name):
+def update_profile_record(profile_id):
     profile_obj = request.json
     print(f"{profile_obj}")
     new_values = {"$set": profile_obj}
-    db.profiles.update_one({'profileName': profile_name}, new_values)
+    db.profiles.update_one({'_id': ObjectId(profile_id)}, new_values)
     return "success"
 
 

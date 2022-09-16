@@ -1,21 +1,19 @@
 import React, {useState, createContext, useRef} from 'react';
 
 const ProfileContext = createContext({
-    deleteProfileName: "",
+    profileId: null,
+    setProfileId: () => {},
     deleteOpen: false,
-    deleteModalToggle: null,
     setDeleteOpen: () => {},
-    deleteProfile: (profName) => {},
+    deleteModalToggle: null,
     profilesChange: true,
     setProfilesChange: (profName) => {},
     addOpen: false,
-    addModalToggle: null,
     setAddOpen: () => {},
+    addModalToggle: null,
 
     profileName: "",
     setProfileName: () => {},
-    profileOriginalName: "",
-    setProfileOriginalName: () => {},
     frequency: 1,
     setFrequency: () => {},
     varBinds: null,
@@ -28,7 +26,7 @@ const ProfileContext = createContext({
 
 export function ProfileContxtProvider(props) {
     // data for DeleteProfileModal
-    const [deleteProfileName, setDeleteProfileName] = useState("");
+    const [profileId, setProfileId] = useState(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteModalToggle = useRef(null);
 
@@ -45,32 +43,25 @@ export function ProfileContxtProvider(props) {
     const [varBinds, setVarBinds] = useState(null);
     const [conditions, setConditions] = useState(null);
     const [isEdit, setIsEdit] = useState(false);
-    const [profileOriginalName, setProfileOriginalName] = useState("");
-
-    function deleteProfileHandler(profileName){
-        setDeleteProfileName(profileName);
-    }
 
     function profilesChangeHandler() {
         setProfilesChange(!profilesChange);
     }
 
     const context = {
-        deleteProfileName: deleteProfileName,
+        profileId: profileId,
+        setProfileId: setProfileId,
         deleteOpen: deleteOpen,
-        deleteModalToggle: deleteModalToggle,
         setDeleteOpen: setDeleteOpen,
-        setDeleteProfile: deleteProfileHandler,
+        deleteModalToggle: deleteModalToggle,
         profilesChange: profilesChange,
         makeProfilesChange: profilesChangeHandler,
         addOpen: addOpen,
-        addModalToggle: addModalToggle,
         setAddOpen: setAddOpen,
+        addModalToggle: addModalToggle,
 
         profileName: profileName,
         setProfileName: setProfileName,
-        profileOriginalName: profileOriginalName,
-        setProfileOriginalName: setProfileOriginalName,
         frequency: frequency,
         setFrequency: setFrequency,
         varBinds: varBinds,

@@ -36,8 +36,8 @@ function AddProfileModal(props) {
         })
     }
 
-    const updateProfile = (profileObj, previousName) => {
-        axios.post(`http://127.0.0.1:5000/profiles/update/${previousName}`, profileObj)
+    const updateProfile = (profileObj, profileId) => {
+        axios.post(`http://127.0.0.1:5000/profiles/update/${profileId}`, profileObj)
             .then((response) => {
                 console.log(response);
         })
@@ -62,7 +62,7 @@ function AddProfileModal(props) {
         };
 
         if (ProfCtx.isEdit){
-            updateProfile(profileObj, ProfCtx.profileOriginalName);
+            updateProfile(profileObj, ProfCtx.profileId);
         }else{
             postProfile(profileObj);
         }
@@ -72,13 +72,13 @@ function AddProfileModal(props) {
         ProfCtx.makeProfilesChange();
         },
         [ProfCtx.frequency, ProfCtx.profileName, ProfCtx.varBinds, ProfCtx.conditions, ProfCtx.setAddOpen,
-            ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileOriginalName]
+            ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileId]
     );
 
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((ProfCtx.isEdit) ? `Edit profile` : "Add new profile")}
+                <Modal.Header title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")}
                               onRequestClose={handleRequestClose} />
                 <Modal.Body>
 
