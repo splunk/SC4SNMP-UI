@@ -68,9 +68,9 @@ class VarbindsCreator extends Component {
                     onRequestRemove={this.handleRequestRemove}
                 >
                     <div style={{ display: 'flex' }}>
-                <Text onChange={e => this.handleItemValueFamily(state.items.length, e)}/>
-                <Text onChange={e => this.handleItemValueCategory(state.items.length, e)}/>
-                <Text onChange={e => this.handleItemValueIndex(state.items.length, e)}/>
+                <Text onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}/>
+                <Text onChange={e => this.handleItemValueCategory(indexes[`${keyID}`], e)}/>
+                <Text onChange={e => this.handleItemValueIndex(indexes[`${keyID}`], e)}/>
                     </div>
                 </FormRows.Row>,
                 state.items
@@ -104,7 +104,7 @@ class VarbindsCreator extends Component {
         delete indexes[`${keyToDelete}`];
         this.setState((state) => ({
             items: FormRows.removeRow(index, state.items),
-            indexes,
+            indexes: indexes,
         }));
         this.varBinds.splice(index, 1)
     };

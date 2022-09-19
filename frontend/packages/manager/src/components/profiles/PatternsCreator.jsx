@@ -16,19 +16,23 @@ class PatternsCreator extends Component {
             ]
         }
 
+        let indexes = {};
         let item_id = -1;
         const items = this.patterns.map(value => {
             item_id += 1;
             let internal_id = item_id;
+            let keyID = createDOMID();
+            indexes[`${keyID}`] = internal_id;
             return(
-                <FormRows.Row index={internal_id} key={createDOMID()} onRequestRemove={this.handleRequestRemove}>
-                    <Text defaultValue={value.pattern} onChange={e => this.handleItemValue(internal_id, e)}/>
+                <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
+                    <Text defaultValue={value.pattern} onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}/>
                 </FormRows.Row>
             );
         });
 
         this.state = {
             items,
+            indexes
         };
 
         props.onPatternsCreator(this.patterns);
@@ -45,18 +49,23 @@ class PatternsCreator extends Component {
     }
 
     handleRequestAdd = () => {
+        let indexes = this.state.indexes;
+        let internal_id = this.patterns.length;
+        let keyID = createDOMID();
+        indexes[`${keyID}`] = internal_id;
         this.patterns.push({pattern: ""});
         this.setState((state) => ({
             items: FormRows.addRow(
                 <FormRows.Row
                     index={state.items.length}
-                    key={createDOMID()}
+                    key={keyID}
                     onRequestRemove={this.handleRequestRemove}
                 >
-                    <Text onChange={e => this.handleItemValue(state.items.length, e)}/>
+                    <Text onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}/>
                 </FormRows.Row>,
                 state.items
             ),
+            indexes: indexes
         }));
     };
 
@@ -67,9 +76,20 @@ class PatternsCreator extends Component {
     };
 
     handleRequestRemove = (e, { index }) => {
-         console.log(`pattern: ${this.patterns[index].pattern}, index: ${index}`)
+        let indexes = this.state.indexes;
+        let keyToDelete;
+        for (const keyID in indexes){
+            if (indexes[`${keyID}`] > index){
+                indexes[`${keyID}`] -= 1;
+            }
+            if (indexes[`${keyID}`] == indexes){
+                keyToDelete = keyID;
+            }
+        }
+        delete indexes[`${keyToDelete}`];
         this.setState((state) => ({
             items: FormRows.removeRow(index, state.items),
+            indexes: indexes
         }));
         this.patterns.splice(index, 1);
     };
