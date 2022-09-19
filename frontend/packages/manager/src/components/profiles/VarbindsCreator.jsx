@@ -54,12 +54,17 @@ class VarbindsCreator extends Component {
         this.varBinds[index].index = e.target.value
     }
     handleRequestAdd = () => {
+        let indexes = this.state.indexes;
+        let internal_id = this.varBinds.length;
+        let keyID = createDOMID();
+        indexes[`${keyID}`] = internal_id;
+
         this.varBinds.push({family: "", category: "", index: ""});
         this.setState((state) => ({
             items: FormRows.addRow(
                 <FormRows.Row
                     index={state.items.length}
-                    key={createDOMID()}
+                    key={keyID}
                     onRequestRemove={this.handleRequestRemove}
                 >
                     <div style={{ display: 'flex' }}>
@@ -70,6 +75,7 @@ class VarbindsCreator extends Component {
                 </FormRows.Row>,
                 state.items
             ),
+            indexes: indexes
         }));
     };
 
