@@ -13,36 +13,44 @@ class VarbindsCreator extends Component {
             this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}];
         }
 
+        let indexes = {};
         let item_id = -1;
         const items = this.varBinds.map(value => {
             item_id +=1;
             let internal_id = item_id;
+            let keyID = createDOMID();
+            indexes[`${keyID}`] = internal_id;
             return (
-            <FormRows.Row index={internal_id} key={ createDOMID() } onRequestRemove={this.handleRequestRemove}>
+            <FormRows.Row index={ internal_id } key={ keyID } onRequestRemove={this.handleRequestRemove}>
                 <div style={{ display: 'flex' }}>
-                <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(internal_id, e)}/>
-                <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(internal_id, e)}/>
-                <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(internal_id, e)}/>
+                <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}/>
+                <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(indexes[`${keyID}`], e)}/>
+                <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(indexes[`${keyID}`], e)}/>
                 </div>
             </FormRows.Row>
         );});
 
+        console.log(indexes);
         this.state = {
             items,
+            indexes
         };
 
         this.props.onVarbindsCreator(this.varBinds);
     }
 
     handleItemValueFamily = (index, e) => {
+        console.log(`handling ${index}`);
         this.varBinds[index].family = e.target.value
     }
 
     handleItemValueCategory = (index, e) => {
+        console.log(`handling ${index}`);
         this.varBinds[index].category = e.target.value
     }
 
     handleItemValueIndex = (index, e) => {
+        console.log(`handling ${index}`);
         this.varBinds[index].index = e.target.value
     }
     handleRequestAdd = () => {
@@ -77,8 +85,20 @@ class VarbindsCreator extends Component {
     }
 
     handleRequestRemove = (e, { index }) => {
+        let indexes = this.state.indexes;
+        let keyToDelete;
+        for (const keyID in indexes){
+            if (indexes[`${keyID}`] > index){
+                indexes[`${keyID}`] -= 1;
+            }
+            if (indexes[`${keyID}`] == indexes){
+                keyToDelete = keyID;
+            }
+        }
+        delete indexes[`${keyToDelete}`];
         this.setState((state) => ({
             items: FormRows.removeRow(index, state.items),
+            indexes,
         }));
         this.varBinds.splice(index, 1)
     };

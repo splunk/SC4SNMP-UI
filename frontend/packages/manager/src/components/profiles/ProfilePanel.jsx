@@ -43,7 +43,7 @@ function ProfilePanel() {
 
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
-        <CollapsiblePanel title={v.profileName}>
+        <CollapsiblePanel title={v.profileName} key={createDOMID()}>
             <Button onClick={() => deleteProfileButtonHandler(v._id.$oid, v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
             <Button onClick={() => editProfileButtonHandler(JSON.parse(JSON.stringify(v)))} label="Edit profile" />
 
