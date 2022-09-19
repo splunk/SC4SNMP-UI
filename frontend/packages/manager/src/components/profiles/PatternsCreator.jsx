@@ -44,7 +44,6 @@ class PatternsCreator extends Component {
     }
 
     handleItemValue = (index, e) => {
-        console.log(`hndling pattern index: ${index}`);
         this.patterns[index].pattern = e.target.value
     }
 

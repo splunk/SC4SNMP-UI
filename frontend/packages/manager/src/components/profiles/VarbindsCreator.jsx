@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { createDOMID } from '@splunk/ui-utils/id';
 import FormRows from '@splunk/react-ui/FormRows';
 import Text from '@splunk/react-ui/Text';
+import P from '@splunk/react-ui/Paragraph';
 
 class VarbindsCreator extends Component {
     constructor(props) {
@@ -30,7 +31,6 @@ class VarbindsCreator extends Component {
             </FormRows.Row>
         );});
 
-        console.log(indexes);
         this.state = {
             items,
             indexes
@@ -40,17 +40,14 @@ class VarbindsCreator extends Component {
     }
 
     handleItemValueFamily = (index, e) => {
-        console.log(`handling ${index}`);
         this.varBinds[index].family = e.target.value
     }
 
     handleItemValueCategory = (index, e) => {
-        console.log(`handling ${index}`);
         this.varBinds[index].category = e.target.value
     }
 
     handleItemValueIndex = (index, e) => {
-        console.log(`handling ${index}`);
         this.varBinds[index].index = e.target.value
     }
     handleRequestAdd = () => {

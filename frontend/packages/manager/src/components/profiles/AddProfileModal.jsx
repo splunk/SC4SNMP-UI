@@ -4,6 +4,7 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
+import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 import VarbindsCreator from "./VarbindsCreator";
 import Conditions from "./Conditions";
@@ -14,6 +15,47 @@ import validateProfiles from "./ValidateProfiles";
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
+    const [profileNameErrors, setProfileNameErrors] = useState(null);
+    const [frequencyErrors, setFrequencyErrors] = useState(null);
+    const [varBindsErrors, setVarBindsErrors] = useState(null);
+
+    const resetAllErrors = () =>{
+        setProfileNameErrors(null);
+        setFrequencyErrors(null);
+        setVarBindsErrors(null);
+    };
+
+     const resetErrors = (category) =>{
+        switch (category){
+            case "profileName":
+                setProfileNameErrors(null);
+                break;
+            case "frequency":
+                setFrequencyErrors(null);
+                break;
+            case "varBinds":
+                setVarBindsErrors(null);
+                break;
+            default:
+                break;
+        }
+    };
+
+    const setErrors = (category, errors) => {
+        switch (category){
+            case "profileName":
+                setProfileNameErrors(errors);
+                break;
+            case "frequency":
+                setFrequencyErrors(errors);
+                break;
+            case "varBinds":
+                setVarBindsErrors(errors);
+                break;
+            default:
+                break;
+        }
+    };
 
     const handleProfileName = useCallback((e, { value: val }) => {
         ProfCtx.setProfileName(val);
@@ -47,6 +89,7 @@ function AddProfileModal(props) {
 
    const handleRequestClose = useCallback(
     (e) => {
+        resetAllErrors();
         ProfCtx.setAddOpen(false);
         ProfCtx.addModalToggle?.current?.focus();
         },
@@ -56,11 +99,11 @@ function AddProfileModal(props) {
 
     const handleApply = useCallback(
     (e) => {
-        console.log(ProfCtx.conditions);
-        console.log(ProfCtx.varBinds);
         const validation = validateProfiles(ProfCtx.profileName, ProfCtx.frequency, ProfCtx.conditions,
             ProfCtx.varBinds);
         if (validation[0]){
+            resetAllErrors();
+
             let profileObj = {
             profileName: ProfCtx.profileName,
             frequency: ProfCtx.frequency,
@@ -80,8 +123,11 @@ function AddProfileModal(props) {
         }else{
             const errors = validation[1];
             for (const property in errors) {
-                if (errors[property].length > 0){
-                    console.log(`${property}:`,errors[property]);
+                if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
+                    console.log(errors[property]);
+                    setErrors(property, errors[property]);
+                }else {
+                    resetErrors(property);
                 };
             };
         };
@@ -91,6 +137,17 @@ function AddProfileModal(props) {
             ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileId]
     );
 
+
+    const validation_group = {
+      display: "flex",
+      flexDirection: "column"
+    };
+
+    const validation_message = {
+      color: "red"
+    };
+
+
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
@@ -99,11 +156,17 @@ function AddProfileModal(props) {
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
-                        <Text value={ProfCtx.profileName} onChange={handleProfileName}/>
+                        <div style={validation_group}>
+                            <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((profileNameErrors) ? true : false)}/>
+                            {((profileNameErrors) ? profileNameErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup label="Frequency of polling" >
-                        <Number value={ProfCtx.frequency} onChange={handleFrequency}/>
+                        <div style={validation_group}>
+                            <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((frequencyErrors) ? true : false)}/>
+                            {((frequencyErrors) ? frequencyErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions}/>

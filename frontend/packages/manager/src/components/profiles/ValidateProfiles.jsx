@@ -7,7 +7,7 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         condition: [],
         field: [],
         patterns: [],
-        varBinds: []
+        varBinds: {}
     };
     let isValid = true;
 
@@ -49,19 +49,35 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
     let varBindsCategoryValid;
     for (let i = 0; i < varBinds.length; i++){
         if (varBinds[i].family.length === 0){
-            errors.varBinds.push(["MIB-Component is required",i]);
+
+            if (i in errors.varBinds){
+                errors.varBinds[i].push("MIB-Component is required");
+            }else{
+                errors.varBinds[i] = ["MIB-Component is required"];
+            };
             isValid = false;
+
         }else if (!varBinds[i].family.match(/^[a-zA-Z0-9_-]+$/)){
-            errors.varBinds.push(["MIB-Component can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'",i]);
+            if (i in errors.varBinds){
+                errors.varBinds[i].push("MIB-Component can consist only of upper and lower english letters, " +
+            "numbers and two special characters: '-' and '_'");
+            }else{
+                errors.varBinds[i] = ["MIB-Component can consist only of upper and lower english letters, " +
+            "numbers and two special characters: '-' and '_'"];
+            };
             isValid = false;
         }
 
         varBindsCategoryValid = true;
         if (varBinds[i].category.length > 0){
             if (!varBinds[i].category.match(/^[a-zA-Z0-9_-]+$/)){
-                errors.varBinds.push(["MIB object can consist only of upper and lower english letters, " +
-                "numbers and two special characters: '-' and '_'",i]);
+                if (i in errors.varBinds){
+                    errors.varBinds[i].push("MIB object can consist only of upper and lower english letters, " +
+                    "numbers and two special characters: '-' and '_'");
+                }else{
+                    errors.varBinds[i] = ["MIB object can consist only of upper and lower english letters, " +
+                    "numbers and two special characters: '-' and '_'"];
+                };
                 isValid = false;
                 varBindsCategoryValid = false;
             }
@@ -69,10 +85,18 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
 
         if (varBinds[i].index.length > 0){
             if (!(Number.isInteger(Number(varBinds[i].index)) && Number(varBinds[i].index) > 0)){
-                errors.varBinds.push(["MIB index number must be a positive integer",i]);
+                if (i in errors.varBinds){
+                    errors.varBinds[i].push("MIB index number must be a positive integer");
+                }else{
+                    errors.varBinds[i] = ["MIB index number must be a positive integer"];
+                };
                 isValid = false;
             }else if (varBinds[i].category.length == 0){
-                errors.varBinds.push(["MIB object is required when MIB index is specified",i]);
+                if (i in errors.varBinds){
+                    errors.varBinds[i].push("MIB object is required when MIB index is specified");
+                }else{
+                    errors.varBinds[i] = ["MIB object is required when MIB index is specified"];
+                };
                 isValid = false;
             }
         }
