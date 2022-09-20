@@ -4,9 +4,8 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
     let errors = {
         profileName: [],
         frequency: [],
-        condition: [],
-        field: [],
-        patterns: [],
+        conditionField: [],
+        conditionPatterns: [],
         varBinds: {}
     };
     let isValid = true;
@@ -27,10 +26,10 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
 
     if (conditions.condition === "field"){
         if (conditions.field.length === 0){
-            errors.condition.push("Field is required");
+            errors.conditionField.push("Field is required");
             isValid = false;
         }else if (!conditions.field.match(/^[.a-zA-Z0-9_-]+$/)){
-            errors.condition.push("Field can consist only of upper and lower english letters, " +
+            errors.conditionField.push("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces can be used in the name.");
             isValid = false;
         }
