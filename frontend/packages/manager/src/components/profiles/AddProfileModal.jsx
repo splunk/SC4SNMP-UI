@@ -21,14 +21,24 @@ function AddProfileModal(props) {
     const [frequencyErrors, setFrequencyErrors] = useState(null);
     const [varBindsErrors, setVarBindsErrors] = useState(null);
     const [conditionFieldErrors, setConditionFieldErrors] = useState(null);
-    const [reloadVarBinds, setReloadVarBinds] = useState(false);
+    const [conditionPatternsErrors, setConditionPatternsErrors] = useState(null);
+    const [newSubmitPatterns, setNewSubmitPatterns] = useState(false);
+    const [newSubmitVarBinds, setNewSubmitVarBinds] = useState(false);
+
+    const newSubmitPatternsHandler = () =>{
+        setNewSubmitPatterns(!newSubmitPatterns);
+    };
+
+    const newSubmitVarBindsHandler = () =>{
+        setNewSubmitVarBinds(!newSubmitVarBinds);
+    };
 
     const resetAllErrors = () =>{
         setProfileNameErrors(null);
         setFrequencyErrors(null);
-        setVarBindsErrors(null);
-        ProfValCtx.setConditionErrors(null);
         setConditionFieldErrors(null);
+        setConditionPatternsErrors(null);
+        setVarBindsErrors(null);
     };
 
      const resetErrors = (category) =>{
@@ -39,12 +49,14 @@ function AddProfileModal(props) {
             case "frequency":
                 setFrequencyErrors(null);
                 break;
+            case "conditionField":
+                setConditionFieldErrors(null);
+                break;
+            case "conditionPatterns":
+                setConditionPatternsErrors(null);
+                break;
             case "varBinds":
                 setVarBindsErrors(null);
-                break;
-            case "condition":
-                setConditionFieldErrors(null);
-                ProfValCtx.setConditionErrors(null);
                 break;
             default:
                 break;
@@ -59,12 +71,14 @@ function AddProfileModal(props) {
             case "frequency":
                 setFrequencyErrors(errors);
                 break;
+            case "conditionField":
+                setConditionFieldErrors(errors);
+                break;
+            case "conditionPatterns":
+                setConditionPatternsErrors(errors);
+                break;
             case "varBinds":
                 setVarBindsErrors(errors);
-                break;
-            case "condition":
-                setConditionFieldErrors(errors);
-                ProfValCtx.setConditionErrors(errors);
                 break;
             default:
                 break;
@@ -135,7 +149,8 @@ function AddProfileModal(props) {
             ProfCtx.addModalToggle?.current?.focus();
             ProfCtx.makeProfilesChange();
         }else{
-            setReloadVarBinds(true);
+            newSubmitPatternsHandler();
+            newSubmitVarBindsHandler();
             const errors = validation[1];
             for (const property in errors) {
                 if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
@@ -184,11 +199,13 @@ function AddProfileModal(props) {
                     </ControlGroup>
 
                     <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={conditionFieldErrors}
-                                validation_message={validation_message} validation_group={validation_group}/>
+                                errorPatterns={conditionPatternsErrors} setErrorPatterns={setConditionPatternsErrors}
+                                validation_message={validation_message} validation_group={validation_group} newSubmit={newSubmitPatterns}/>
+
                     <ControlGroup label="VarBinds">
                         <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={varBindsErrors} setError={setVarBindsErrors}
                                          validation_message={validation_message} validation_group={validation_group}
-                        reloadVarBinds={reloadVarBinds} setReloadVarBinds={setReloadVarBinds}/>
+                        newSubmit={newSubmitVarBinds}/>
                     </ControlGroup>
 
                 </Modal.Body>

@@ -18,6 +18,7 @@ class VarbindsCreator extends Component {
         let indexes = {};
         const items = [];
         this.reload = true;
+        this.newSubmit = this.props.newSubmit;
 
         this.state = {
             items,
@@ -58,7 +59,6 @@ class VarbindsCreator extends Component {
                 </FormRows.Row>
             );
         });
-        const formRowsKey = createDOMID();
         this.setState((state) => ({
             items: items
         }));
@@ -66,7 +66,6 @@ class VarbindsCreator extends Component {
 
     handleRequestAdd = () => {
         this.reload = true;
-        console.log("Adding new element", this.reload);
         let indexes = this.state.indexes;
         let internal_id = this.varBinds.length;
         let keyID = createDOMID();
@@ -117,6 +116,7 @@ class VarbindsCreator extends Component {
     };
 
     handleVarbindsChange = () => {
+        console.log("changing VarBinds Rows")
         this.reload = true;
         var varBinds = this.varBinds;
         this.props.onVarbindsCreator(varBinds);
@@ -154,8 +154,13 @@ class VarbindsCreator extends Component {
 
 
     render() {
-        console.log("reloading", this.reload)
+        console.log("rendering varbinds")
+        if (this.props.newSubmit != this.newSubmit){
+            this.newSubmit = this.props.newSubmit;
+            this.reload = true;
+        }
         if(this.reload){
+            console.log("reloading varbinds")
             this.reload = false;
             this.reloadItems();
         }

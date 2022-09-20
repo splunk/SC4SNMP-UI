@@ -62,7 +62,9 @@ class Conditions extends Component {
                         </div>
                     </ControlGroup>
                     <ControlGroup label="patterns">
-                        <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns}/>
+                        <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns} newSubmit={this.props.newSubmit}
+                                         error={this.props.errorPatterns} setError={this.props.setErrorPatterns}
+                        validation_group={this.props.validation_group} validation_message={this.props.validation_message}/>
                     </ControlGroup>
                 </div>
                 ) : <div/>}

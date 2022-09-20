@@ -5,7 +5,7 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         profileName: [],
         frequency: [],
         conditionField: [],
-        conditionPatterns: [],
+        conditionPatterns: {},
         varBinds: {}
     };
     let isValid = true;
@@ -24,6 +24,7 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         isValid = false;
     }
 
+    let message;
     if (conditions.condition === "field"){
         if (conditions.field.length === 0){
             errors.conditionField.push("Field is required");
@@ -35,11 +36,21 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         }
         for (let i = 0; i < conditions.patterns.length; i++){
             if (conditions.patterns[i].pattern.length === 0){
-                errors.condition.push(["Pattern is required", i]);
+                message = "Pattern is required";
+                if (i in errors.conditionPatterns){
+                    errors.conditionPatterns[i].push(message);
+                }else{
+                    errors.conditionPatterns[i] = [message];
+                }
                 isValid = false;
             }else if (!conditions.patterns[i].pattern.match(/^\.\*[.\sa-zA-Z0-9_-]+\.\*$/)){
-                errors.condition.push(["Pattern must match this example .*MY-PATTERN.* . MY-PATTERN can consist only " +
-                "of upper and lower english letters, numbers and three special characters: '.' '-' and '_'", i]);
+                message = "Pattern must match this example .*MY-PATTERN.* . MY-PATTERN can consist only " +
+                "of upper and lower english letters, numbers and three special characters: '.' '-' and '_'"
+                if (i in errors.conditionPatterns){
+                    errors.conditionPatterns[i].push(message);
+                }else{
+                    errors.conditionPatterns[i] = [message];
+                }
                 isValid = false;
             }
         }
@@ -83,8 +94,8 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         }
 
         if (varBinds[i].index.length > 0){
-            if (!(Number.isInteger(Number(varBinds[i].index)) && Number(varBinds[i].index) > 0)){
-                let message = "MIB index number must be a positive integer";
+            if (!(Number.isInteger(Number(varBinds[i].index)) && Number(varBinds[i].index) >= 0)){
+                let message = "MIB index number must be a integer greater or equal 0";
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
                 }else{
