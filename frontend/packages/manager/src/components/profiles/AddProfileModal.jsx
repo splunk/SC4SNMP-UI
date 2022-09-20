@@ -10,19 +10,25 @@ import VarbindsCreator from "./VarbindsCreator";
 import Conditions from "./Conditions";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
+import ProfileValidationContext from "../../store/profile-validation-contxt";
 import validateProfiles from "./ValidateProfiles";
 
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
+    const ProfValCtx = useContext(ProfileValidationContext);
     const [profileNameErrors, setProfileNameErrors] = useState(null);
     const [frequencyErrors, setFrequencyErrors] = useState(null);
     const [varBindsErrors, setVarBindsErrors] = useState(null);
+    const [conditionErrors, setConditionErrors] = useState(null);
+    const [reloadVarBinds, setReloadVarBinds] = useState(false);
 
     const resetAllErrors = () =>{
         setProfileNameErrors(null);
         setFrequencyErrors(null);
         setVarBindsErrors(null);
+        ProfValCtx.setConditionErrors(null);
+        setConditionErrors(null);
     };
 
      const resetErrors = (category) =>{
@@ -35,6 +41,10 @@ function AddProfileModal(props) {
                 break;
             case "varBinds":
                 setVarBindsErrors(null);
+                break;
+            case "condition":
+                setConditionErrors(null);
+                ProfValCtx.setConditionErrors(null);
                 break;
             default:
                 break;
@@ -51,6 +61,10 @@ function AddProfileModal(props) {
                 break;
             case "varBinds":
                 setVarBindsErrors(errors);
+                break;
+            case "condition":
+                setConditionErrors(errors);
+                ProfValCtx.setConditionErrors(errors);
                 break;
             default:
                 break;
@@ -121,10 +135,10 @@ function AddProfileModal(props) {
             ProfCtx.addModalToggle?.current?.focus();
             ProfCtx.makeProfilesChange();
         }else{
+            setReloadVarBinds(true);
             const errors = validation[1];
             for (const property in errors) {
                 if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
-                    console.log(errors[property]);
                     setErrors(property, errors[property]);
                 }else {
                     resetErrors(property);
@@ -169,10 +183,12 @@ function AddProfileModal(props) {
                         </div>
                     </ControlGroup>
 
-                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions}/>
-
+                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} error={conditionErrors}
+                                validation_message={validation_message} validation_group={validation_group}/>
                     <ControlGroup label="VarBinds">
-                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds}/>
+                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={varBindsErrors} setError={setVarBindsErrors}
+                                         validation_message={validation_message} validation_group={validation_group}
+                        reloadVarBinds={reloadVarBinds} setReloadVarBinds={setReloadVarBinds}/>
                     </ControlGroup>
 
                 </Modal.Body>

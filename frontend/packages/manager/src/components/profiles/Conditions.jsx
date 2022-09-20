@@ -3,6 +3,8 @@ import Select from '@splunk/react-ui/Select';
 import ControlGroup from "@splunk/react-ui/ControlGroup";
 import Text from "@splunk/react-ui/Text";
 import PatternsCreator from "./PatternsCreator";
+import P from '@splunk/react-ui/Paragraph';
+import { createDOMID } from '@splunk/ui-utils/id';
 
 class Conditions extends Component {
     constructor(props) {
@@ -17,6 +19,7 @@ class Conditions extends Component {
                 patterns: null
             };
         }
+        console.log(Conditions.ProfValCtx);
         this.state = stateValue;
         this.props.onConditionsCreator(this.state);
     }
@@ -52,7 +55,11 @@ class Conditions extends Component {
                 {this.state.condition === 'field' ? (
                 <div>
                     <ControlGroup label="field">
-                        <Text value={this.state.field} onChange={this.handleFieldChange}/>
+                        <div className={this.props.validation_group}>
+                            <Text value={this.state.field} onChange={this.handleFieldChange} error={((this.props.error) ? true : false)}/>
+                            {((this.props.error) ? this.props.error.map((el) =>
+                                <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
                     <ControlGroup label="patterns">
                         <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns}/>
