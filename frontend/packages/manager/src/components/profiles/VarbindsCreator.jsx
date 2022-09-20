@@ -9,9 +9,9 @@ class VarbindsCreator extends Component {
     constructor(props) {
         super(props);
 
-        if(this.props.value){
+        if (this.props.value) {
             this.varBinds = this.props.value;
-        }else{
+        } else {
             this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}];
         }
 
@@ -32,26 +32,32 @@ class VarbindsCreator extends Component {
         const indexes = this.state.indexes;
         let item_id = -1;
         const items = this.varBinds.map(value => {
-            item_id +=1;
+            item_id += 1;
             let internal_id = item_id;
             let keyID = createDOMID();
             indexes[`${keyID}`] = internal_id;
             return (
-            <FormRows.Row index={ internal_id } key={ keyID } onRequestRemove={this.handleRequestRemove}>
-                <div style={this.props.validation_group}>
-                    <div style={{ display: 'flex' }}>
-                        <Text defaultValue={value.family} onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}
-                              error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
-                        <Text defaultValue={value.category} onChange={e => this.handleItemValueCategory(indexes[`${keyID}`], e)}
-                              error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
-                        <Text defaultValue={value.index} onChange={e => this.handleItemValueIndex(indexes[`${keyID}`], e)}
-                              error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
+                <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
+                    <div style={this.props.validation_group}>
+                        <div style={{display: 'flex'}}>
+                            <Text defaultValue={value.family}
+                                  onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}
+                                  error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
+                            <Text defaultValue={value.category}
+                                  onChange={e => this.handleItemValueCategory(indexes[`${keyID}`], e)}
+                                  error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
+                            <Text defaultValue={value.index}
+                                  onChange={e => this.handleItemValueIndex(indexes[`${keyID}`], e)}
+                                  error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
+                        </div>
+                        {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
+                            this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()}
+                                                                                 style={this.props.validation_message}>{el}</P>) :
+                            <P/>)}
                     </div>
-                    {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
-                        this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
-                </div>
-            </FormRows.Row>
-        );});
+                </FormRows.Row>
+            );
+        });
         const formRowsKey = createDOMID();
         this.setState((state) => ({
             items: items
@@ -71,7 +77,7 @@ class VarbindsCreator extends Component {
             items: FormRows.addRow(
                 <FormRows.Row index={state.items.length} key={keyID} onRequestRemove={this.handleRequestRemove}>
                     <div style={this.props.validation_group}>
-                        <div style={{ display: 'flex' }}>
+                        <div style={{display: 'flex'}}>
                             <Text onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}
                                   error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
                             <Text onChange={e => this.handleItemValueCategory(indexes[`${keyID}`], e)}
@@ -80,7 +86,9 @@ class VarbindsCreator extends Component {
                                   error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
                         </div>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
-                            this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
+                            this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()}
+                                                                                 style={this.props.validation_message}>{el}</P>) :
+                            <P/>)}
                     </div>
                 </FormRows.Row>,
                 state.items
@@ -101,7 +109,7 @@ class VarbindsCreator extends Component {
         this.varBinds[index].index = e.target.value
     }
 
-    handleRequestMove = ({ fromIndex, toIndex }) => {
+    handleRequestMove = ({fromIndex, toIndex}) => {
         this.reload = true;
         this.setState((state) => ({
             items: FormRows.moveRow(fromIndex, toIndex, state.items),
@@ -114,7 +122,7 @@ class VarbindsCreator extends Component {
         this.props.onVarbindsCreator(varBinds);
     }
 
-    handleRequestRemove = (e, { index }) => {
+    handleRequestRemove = (e, {index}) => {
         this.reload = true;
         let indexes = this.state.indexes;
         let keyToDelete;
@@ -126,10 +134,14 @@ class VarbindsCreator extends Component {
 
         let error = this.props.error;
         if (error){
-            for (const errorID in error){
-                if (errorID > index) {error[errorID] -= 1;}
+            const errrorKeys = Object.keys(error);
+            for (const errorID of errrorKeys){
+                if (Number(errorID) === index){delete error[Number(errorID)];}
+                if (Number(errorID) > index) {
+                    error[Number(errorID)-1] = error[Number(errorID)];
+                    delete error[Number(errorID)]
+                }
             }
-            delete error[index];
             this.props.setError(error);
         }
 
