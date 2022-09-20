@@ -126,10 +126,13 @@ class VarbindsCreator extends Component {
 
         let error = this.props.error;
         if (error){
-            for (const errorID in error){
-                if (errorID > index) {error[errorID] -= 1;}
+            const errorKeys = Object.keys(error);
+            for (const errorID of errorKeys){
+                if (Number(errorID) === index){ delete error[errorID];}
+                else if (Number(errorID) > index) {
+                    error[errorID-1] = error[errorID];
+                    delete error[errorID];
             }
-            delete error[index];
             this.props.setError(error);
         }
 
