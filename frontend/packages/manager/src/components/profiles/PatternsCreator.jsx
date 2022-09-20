@@ -18,7 +18,7 @@ class PatternsCreator extends Component {
         }
 
         let indexes = {};
-        const items = [];
+        let items = [];
         this.reload = true;
         this.newSubmit = this.props.newSubmit;
 
@@ -56,7 +56,6 @@ class PatternsCreator extends Component {
     };
 
     handlePatternChange = () => {
-        console.log("changing Patterns Rows")
         var patterns = this.patterns;
         this.props.onPatternsCreator(this.patterns);
     }
@@ -130,16 +129,24 @@ class PatternsCreator extends Component {
         this.patterns.splice(index, 1);
     };
 
+    componentDidUpdate(){
+        if(this.reload){
+            this.reload = false;
+            this.reloadItems();
+        }
+    }
+
+    componentDidMount(){
+        if(this.reload){
+            this.reload = false;
+            this.reloadItems();
+        }
+    }
+
     render() {
-        console.log("rendering patterns")
         if (this.props.newSubmit != this.newSubmit){
             this.newSubmit = this.props.newSubmit;
             this.reload = true;
-        }
-        if(this.reload){
-            console.log("reloading patterns")
-            this.reload = false;
-            this.reloadItems();
         }
         return (
             <FormRows

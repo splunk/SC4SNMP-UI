@@ -16,7 +16,7 @@ class VarbindsCreator extends Component {
         }
 
         let indexes = {};
-        const items = [];
+        let items = [];
         this.reload = true;
         this.newSubmit = this.props.newSubmit;
 
@@ -25,7 +25,6 @@ class VarbindsCreator extends Component {
             indexes
         };
 
-        this.reloadItems();
         this.props.onVarbindsCreator(this.varBinds);
     }
 
@@ -116,7 +115,6 @@ class VarbindsCreator extends Component {
     };
 
     handleVarbindsChange = () => {
-        console.log("changing VarBinds Rows")
         this.reload = true;
         var varBinds = this.varBinds;
         this.props.onVarbindsCreator(varBinds);
@@ -152,18 +150,20 @@ class VarbindsCreator extends Component {
         this.varBinds.splice(index, 1);
     };
 
-
-    render() {
-        console.log("rendering varbinds")
-        if (this.props.newSubmit != this.newSubmit){
-            this.newSubmit = this.props.newSubmit;
-            this.reload = true;
-        }
+    componentDidUpdate(){
         if(this.reload){
-            console.log("reloading varbinds")
             this.reload = false;
             this.reloadItems();
         }
+    }
+
+    componentDidMount(){
+        if(this.reload){
+            this.reload = false;
+            this.reloadItems();
+        }
+    }
+    render() {
         return (
             <FormRows
                 onRequestAdd={this.handleRequestAdd}

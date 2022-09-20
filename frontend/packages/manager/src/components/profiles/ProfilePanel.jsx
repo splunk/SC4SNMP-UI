@@ -60,7 +60,7 @@ function ProfilePanel() {
                             <Table.Cell>{v.conditions.condition}</Table.Cell>
                             <Table.Cell>{v.conditions.field}</Table.Cell>
                             <Table.Cell>{v.conditions.patterns && v.conditions.patterns.map(value =>
-                                <P>{value.pattern}</P>)}</Table.Cell>
+                                <P key={createDOMID()}>{value.pattern}</P>)}</Table.Cell>
                         </Table.Row>
                     </Table.Body>
                  </Table>}
