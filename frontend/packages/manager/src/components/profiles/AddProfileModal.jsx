@@ -20,7 +20,7 @@ function AddProfileModal(props) {
     const [profileNameErrors, setProfileNameErrors] = useState(null);
     const [frequencyErrors, setFrequencyErrors] = useState(null);
     const [varBindsErrors, setVarBindsErrors] = useState(null);
-    const [conditionErrors, setConditionErrors] = useState(null);
+    const [conditionFieldErrors, setConditionFieldErrors] = useState(null);
     const [reloadVarBinds, setReloadVarBinds] = useState(false);
 
     const resetAllErrors = () =>{
@@ -28,7 +28,7 @@ function AddProfileModal(props) {
         setFrequencyErrors(null);
         setVarBindsErrors(null);
         ProfValCtx.setConditionErrors(null);
-        setConditionErrors(null);
+        setConditionFieldErrors(null);
     };
 
      const resetErrors = (category) =>{
@@ -43,7 +43,7 @@ function AddProfileModal(props) {
                 setVarBindsErrors(null);
                 break;
             case "condition":
-                setConditionErrors(null);
+                setConditionFieldErrors(null);
                 ProfValCtx.setConditionErrors(null);
                 break;
             default:
@@ -63,7 +63,7 @@ function AddProfileModal(props) {
                 setVarBindsErrors(errors);
                 break;
             case "condition":
-                setConditionErrors(errors);
+                setConditionFieldErrors(errors);
                 ProfValCtx.setConditionErrors(errors);
                 break;
             default:
@@ -183,7 +183,7 @@ function AddProfileModal(props) {
                         </div>
                     </ControlGroup>
 
-                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} error={conditionErrors}
+                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={conditionFieldErrors}
                                 validation_message={validation_message} validation_group={validation_group}/>
                     <ControlGroup label="VarBinds">
                         <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={varBindsErrors} setError={setVarBindsErrors}

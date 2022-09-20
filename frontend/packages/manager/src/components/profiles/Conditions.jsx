@@ -56,8 +56,8 @@ class Conditions extends Component {
                 <div>
                     <ControlGroup label="field">
                         <div className={this.props.validation_group}>
-                            <Text value={this.state.field} onChange={this.handleFieldChange} error={((this.props.error) ? true : false)}/>
-                            {((this.props.error) ? this.props.error.map((el) =>
+                            <Text value={this.state.field} onChange={this.handleFieldChange} error={((this.props.errorField) ? true : false)}/>
+                            {((this.props.errorField) ? this.props.errorField.map((el) =>
                                 <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
