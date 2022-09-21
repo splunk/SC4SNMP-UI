@@ -147,8 +147,8 @@ function AddProfileModal(props) {
             ProfCtx.makeProfilesChange();
         }else{
             // form is invalid
-            newSubmitPatternsHandler();
-            newSubmitVarBindsHandler();
+            setNewSubmitPatterns(prevNewSubmitPatterns => {return !prevNewSubmitPatterns;});
+            setNewSubmitVarBinds(prevNewSubmitVarBinds => {return !prevNewSubmitVarBinds;});
             const errors = validation[1];
             for (const property in errors) {
                 if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
@@ -157,6 +157,7 @@ function AddProfileModal(props) {
                     resetErrors(property);
                 };
             };
+            console.log(varBindsErrors);
         };
 
         },

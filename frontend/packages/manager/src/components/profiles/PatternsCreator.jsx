@@ -57,7 +57,7 @@ class PatternsCreator extends Component {
     };
 
     handlePatternChange = () => {
-        var patterns = this.patterns;
+        let patterns = this.patterns;
         this.props.onPatternsCreator(this.patterns);
     }
 
@@ -66,7 +66,6 @@ class PatternsCreator extends Component {
     }
 
     handleRequestAdd = () => {
-        this.reload = true;
         let indexes = this.state.indexes;
         let internal_id = this.patterns.length;
         let keyID = createDOMID();
@@ -76,7 +75,7 @@ class PatternsCreator extends Component {
             items: FormRows.addRow(
                 <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
                     <div style={this.props.validation_group}>
-                        <Text onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}
+                        <Text defaultValue={""} onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}
                         error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) =>
@@ -87,6 +86,7 @@ class PatternsCreator extends Component {
             ),
             indexes: indexes
         }));
+        this.props.onPatternsCreator(this.patterns);
     };
 
     handleRequestMove = ({ fromIndex, toIndex }) => {
@@ -131,6 +131,7 @@ class PatternsCreator extends Component {
             indexes: indexes
         }));
         this.patterns.splice(index, 1);
+        this.props.onPatternsCreator(this.patterns);
     };
 
     componentDidUpdate(){

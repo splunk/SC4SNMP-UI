@@ -19,7 +19,6 @@ class Conditions extends Component {
                 patterns: null
             };
         }
-        console.log(Conditions.ProfValCtx);
         this.state = stateValue;
         this.props.onConditionsCreator(this.state);
     }

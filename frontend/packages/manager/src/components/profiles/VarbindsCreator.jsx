@@ -104,7 +104,7 @@ class VarbindsCreator extends Component {
                 state.items
             ),
             indexes: indexes
-        }));
+        }), () => {this.handleVarbindsChange();});
     };
 
     handleItemValueFamily = (index, e) => {
@@ -163,6 +163,7 @@ class VarbindsCreator extends Component {
             indexes: indexes,
         }));
         this.varBinds.splice(index, 1);
+        this.props.onVarbindsCreator(this.varBinds);
     };
 
     componentDidUpdate(){
@@ -179,6 +180,10 @@ class VarbindsCreator extends Component {
         }
     }
     render() {
+        if (this.props.newSubmit != this.newSubmit){
+            this.newSubmit = this.props.newSubmit;
+            this.reload = true;
+        }
         return (
             <FormRows
                 onRequestAdd={this.handleRequestAdd}
