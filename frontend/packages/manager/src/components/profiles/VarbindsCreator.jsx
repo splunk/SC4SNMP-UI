@@ -15,9 +15,21 @@ class VarbindsCreator extends Component {
             this.varBinds = [{family: "IF-MIB", category: "ifDescr", index: "1"}];
         }
 
+        // 'indexes' is an object storing key:value pairs of key:index of each row from form.
+        // When the row with specific 'key' is deleted, other objects with 'index' greater than
+        // deleted must have their indexes updated.
         let indexes = {};
+
+        // 'items' list stores HTML rows
         let items = [];
+
+        // If this.reload=true all rows in 'items' list are reloaded. Must be set to true at begining to load items.
+        // It is later used to reload items in order to update error messages
         this.reload = true;
+
+        // Each time the submit button is pressed and there were some errors, 'newSubmit' value changes to the
+        // opposite one (boolean value). If this.props.newSubmit is different from this.newSubmit it means,
+        // that new submit has been sent, new errors arrived and 'items' must be reloaded.
         this.newSubmit = this.props.newSubmit;
 
         this.state = {
@@ -122,6 +134,8 @@ class VarbindsCreator extends Component {
 
     handleRequestRemove = (e, {index}) => {
         this.reload = true;
+
+        // Update indexes after deleting an element
         let indexes = this.state.indexes;
         let keyToDelete;
         for (const keyID in indexes){
@@ -130,6 +144,7 @@ class VarbindsCreator extends Component {
         }
         delete indexes[`${keyToDelete}`];
 
+        // Update errors indexes after deleting an element
         let error = this.props.error;
         if (error){
             const errrorKeys = Object.keys(error);

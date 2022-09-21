@@ -2,7 +2,6 @@ import React, {useRef, useState, useContext} from 'react';
 import ProfilePanel from "../components/profiles/ProfilePanel"
 import AddProfileModal from "../components/profiles/AddProfileModal"
 import Button from '@splunk/react-ui/Button';
-import { ProfileValidationContextProvider } from "../store/profile-validation-contxt";
 import ProfileContext from "../store/profile-contxt";
 
 function ProfilesPage(){
@@ -22,10 +21,8 @@ function ProfilesPage(){
     return (
         <div>
             <Button onClick={handleRequestOpen} ref={ProfCtx.addModalToggle} label="Add new profile" />
-            <ProfileValidationContextProvider>
-                <AddProfileModal />
-                <ProfilePanel />
-            </ProfileValidationContextProvider>
+            <AddProfileModal />
+            <ProfilePanel />
         </div>
     );
 }

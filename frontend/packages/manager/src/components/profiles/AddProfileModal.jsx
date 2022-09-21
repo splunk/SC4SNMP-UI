@@ -10,13 +10,11 @@ import VarbindsCreator from "./VarbindsCreator";
 import Conditions from "./Conditions";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
-import ProfileValidationContext from "../../store/profile-validation-contxt";
 import validateProfiles from "./ValidateProfiles";
 
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
-    const ProfValCtx = useContext(ProfileValidationContext);
     const [profileNameErrors, setProfileNameErrors] = useState(null);
     const [frequencyErrors, setFrequencyErrors] = useState(null);
     const [varBindsErrors, setVarBindsErrors] = useState(null);
@@ -129,26 +127,26 @@ function AddProfileModal(props) {
     (e) => {
         const validation = validateProfiles(ProfCtx.profileName, ProfCtx.frequency, ProfCtx.conditions,
             ProfCtx.varBinds);
-        if (validation[0]){
-            resetAllErrors();
 
+        if (validation[0]){
+            // form is valid
+            resetAllErrors();
             let profileObj = {
             profileName: ProfCtx.profileName,
             frequency: ProfCtx.frequency,
             varBinds: ProfCtx.varBinds,
             conditions: ProfCtx.conditions
             };
-
             if (ProfCtx.isEdit){
                 updateProfile(profileObj, ProfCtx.profileId);
             }else{
                 postProfile(profileObj);
             }
-
             ProfCtx.setAddOpen(false);
             ProfCtx.addModalToggle?.current?.focus();
             ProfCtx.makeProfilesChange();
         }else{
+            // form is invalid
             newSubmitPatternsHandler();
             newSubmitVarBindsHandler();
             const errors = validation[1];
@@ -175,7 +173,6 @@ function AddProfileModal(props) {
     const validation_message = {
       color: "red"
     };
-
 
     return (
         <div>

@@ -17,6 +17,7 @@ class PatternsCreator extends Component {
             ]
         }
 
+        // 'indexes', 'items', 'reload', 'newSubmit' have the same use as in VarbindsCreator.jsx
         let indexes = {};
         let items = [];
         this.reload = true;
@@ -97,6 +98,8 @@ class PatternsCreator extends Component {
 
     handleRequestRemove = (e, { index }) => {
         this.reload = true;
+
+        // Update indexes after deleting an element
         let indexes = this.state.indexes;
         let keyToDelete;
         for (const keyID in indexes){
@@ -109,6 +112,7 @@ class PatternsCreator extends Component {
         }
         delete indexes[`${keyToDelete}`];
 
+        // Update errors indexes after deleting an element
         let error = this.props.error;
         if (error){
             const errrorKeys = Object.keys(error);
