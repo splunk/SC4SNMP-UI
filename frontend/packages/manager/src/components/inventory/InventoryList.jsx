@@ -1,6 +1,7 @@
-import React, {Component} from 'react';
+import React, {Component, useContext} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
+import InventoryContext from "../../store/inventory-contxt";
 
 
 const columns = [
@@ -17,6 +18,8 @@ const columns = [
 
 
 class SortableColumns extends Component {
+    static contextType = InventoryContext;
+
     constructor(props) {
         super(props);
 
@@ -25,21 +28,34 @@ class SortableColumns extends Component {
             sortDir: 'asc',
             allInventoryRecords: []
         };
+
+        this.reload = true;
+        this.inventoryChange = this.props.inventoryChange;
     }
     url = 'http://127.0.0.1:5000/inventory'
     getFetchInventoryRows() {
+        let currentRecords = this.state.allInventoryRecords;
         axios.get(`${this.url}`)
             .then((response) => {
                 console.log('response.data: ', response.data);
+                if (currentRecords.length != response.data.length){
+                    this.reload = true;
+                }
                 this.setState({allInventoryRecords: response.data});
                 console.log('inventory : ', this.state);
         })
     }
 
     componentDidMount() {
-        console.log('componentDidMount');
         this.getFetchInventoryRows();
-        console.log('inventory: ', this.state);
+    }
+
+    componentDidUpdate() {
+        console.log('componentDidUpdate');
+        if (this.reload){
+            this.reload = false;
+            this.getFetchInventoryRows();
+        }
     }
 
     handleSort = (e, {sortKey}) => {
@@ -55,6 +71,11 @@ class SortableColumns extends Component {
     };
 
     render() {
+        console.log("rendering")
+        if (this.props.inventoryChange != this.inventoryChange){
+            this.inventoryChange = this.props.inventoryChange;
+            this.reload = true;
+        }
         const {sortKey, sortDir, allInventoryRecords} = this.state;
         return (
             <Table stripeRows>

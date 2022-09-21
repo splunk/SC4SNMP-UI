@@ -45,7 +45,7 @@ export function ProfileContxtProvider(props) {
     const [isEdit, setIsEdit] = useState(false);
 
     function profilesChangeHandler() {
-        setProfilesChange(!profilesChange);
+        setProfilesChange(prev => {return !prev;});
     }
 
     const context = {
