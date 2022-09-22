@@ -69,7 +69,8 @@ const validateInventory = (address, port, version, community, secret,
     // Validate securityEngine
     if (securityEngine.length > 0 && !securityEngine.match(/^([A-F0-9]{10,64}|[a-f0-9]{10,64})$/)){
         isValid = false;
-        errors.securityEngine.push("If provided, Security Engine can be consists only of 10-64 characters in hexadecimal notation");
+        errors.securityEngine.push("If provided, Security Engine can be consists only of 10-64 characters in " +
+            "hexadecimal notation. All letter must be either upper or lowe case.");
     }
 
     // Validate Walk Interval
