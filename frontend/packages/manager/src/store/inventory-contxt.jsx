@@ -8,7 +8,8 @@ export function InventoryContextProvider(props){
     // data for DeleteInventoryModal
     const [inventoryId, setInventoryId] = useState(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
-    const deleteModalToggle = useRef(null);
+
+    const rowToggle = useRef(null);
 
     // data for AddInventoryModal
     const [addOpen, setAddOpen] = useState(false);
@@ -25,22 +26,39 @@ export function InventoryContextProvider(props){
     // data for editing in AddInventoryModal
     const [isEdit, setIsEdit] = useState(false);
     const [address, setAddress] = useState('');
-    const [port, setPort] = useState(0);
+    const [port, setPort] = useState(161);
     const [version, setVersion] = useState('');
     const [community, setCommunity] = useState('');
     const [secret, setSecret] = useState('');
     const [securityEngine, setSecurityEngine] = useState('');
-    const [walkInterval, setWalkInterval] = useState(0);
+    const [walkInterval, setWalkInterval] = useState(1800);
     const [profiles, setProfiles] = useState([]);
-    const [initProfiles, setInitProfiles] = useState([]);
     const [smartProfiles, setSmartProfiles] = useState(false);
+
+    function resetFormData() {
+        setInventoryId(null);
+        setAddress('');
+        setPort(161);
+        setVersion('');
+        setCommunity('');
+        setSecret('');
+        setSecurityEngine('');
+        setWalkInterval(1800);
+        setProfiles([]);
+        setSmartProfiles(false);
+    }
+
+    const [buttonsOpen, setButtonsOpen] = useState(false);
 
     const context = {
         inventoryId: inventoryId,
         setInventoryId: setInventoryId,
         deleteOpen: deleteOpen,
         setDeleteOpen: setDeleteOpen,
-        deleteModalToggle: deleteModalToggle,
+
+        rowToggle:rowToggle,
+        buttonsOpen:buttonsOpen,
+        setButtonsOpen:setButtonsOpen,
 
         addOpen: addOpen,
         setAddOpen: setAddOpen,
@@ -67,10 +85,10 @@ export function InventoryContextProvider(props){
         setWalkInterval: setWalkInterval,
         profiles: profiles,
         setProfiles: setProfiles,
-        initProfiles: initProfiles,
-        setInitProfiles: setInitProfiles,
         smartProfiles: smartProfiles,
-        setSmartProfiles: setSmartProfiles
+        setSmartProfiles: setSmartProfiles,
+
+        resetFormData:resetFormData
     };
 
     return (

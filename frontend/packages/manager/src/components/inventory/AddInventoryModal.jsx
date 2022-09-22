@@ -13,33 +13,37 @@ import Button from '@splunk/react-ui/Button';
 
 function AddInventoryModal() {
 
+    const [initProfiles, setInitProfiles] = useState([]);
     const InvCtx = useContext(InventoryContext);
 
-    const handleRequestOpen = () => {
-        setOpen(true);
-    };
 
     const handleRequestClose = () => {
+        InvCtx.resetFormData();
         InvCtx.setAddOpen(false);
         InvCtx.addModalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
     };
 
     useEffect(() => {
         let isMounted = true;
-        console.log('use effect')
         axios.get('http://127.0.0.1:5000/profiles')
         .then((response) => {
             if (isMounted)
-                InvCtx.setInitProfiles(response.data);
-        console.log('data: ', response.data);
+                setInitProfiles(response.data);
         })
         return () => { isMounted = false }
-    }, [InvCtx.setInitProfiles]);
+    }, []);
 
     const postInventory = (inventoryObj) => {
         axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
             .then((response) => {
                 console.log(response)
+        })
+    }
+
+    const updateInventory = (inventoryObj, inventoryId) => {
+        axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
+            .then((response) => {
+                console.log(response);
         })
     }
 
@@ -57,13 +61,20 @@ function AddInventoryModal() {
         smart_profiles: InvCtx.smartProfiles,
         }
         console.log(inventoryObj);
-        postInventory(inventoryObj);
+
+        if (InvCtx.isEdit){
+            updateInventory(inventoryObj, InvCtx.inventoryId)
+        }else{
+            postInventory(inventoryObj);
+        }
+
+        InvCtx.resetFormData();
         InvCtx.setAddOpen(false);
         InvCtx.addModalToggle?.current?.focus();
         InvCtx.makeInventoryChange();
         },
-        [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine,
-            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle]
+        [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
+            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId]
     );
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
@@ -98,19 +109,17 @@ function AddInventoryModal() {
         InvCtx.setSmartProfiles(val);
     }, [InvCtx.setSmartProfiles]);
 
-    const multiselectOptions = InvCtx.initProfiles.map((v) => (
-        <Multiselect.Option key={v} label={v} value={v} />
-    ));
-
     const handleChange = (e, { values }) => {
-        console.log(values);
+        console.log("profile", values)
         InvCtx.setProfiles(values);
     }
+
+    console.log("add inv", InvCtx);
 
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '600px' }}>
-                <Modal.Header title="Add new device for polling" onRequestClose={handleRequestClose} />
+                <Modal.Header title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <ControlGroup label="IP address">
                         <Text value={InvCtx.address} onChange={handleChangeAddress}/>
@@ -149,15 +158,15 @@ function AddInventoryModal() {
                     </ControlGroup>
 
                     <ControlGroup label="Profiles">
-                        <Multiselect onChange={handleChange}>
-                            {multiselectOptions}
+                        <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles}>
+                            {initProfiles.map((v) => (<Multiselect.Option key={v} label={v} value={v} />))}
                         </Multiselect>
                     </ControlGroup>
 
                     <ControlGroup label="Smart Profiles enabled">
-                        <RadioBar defaultValue={1} value={InvCtx.smartProfiles} onChange={handleChangeSmartProfiles}>
-                            <RadioBar.Option value={1} label="yes"/>
-                            <RadioBar.Option value={2} label="no"/>
+                        <RadioBar value={InvCtx.smartProfiles} onChange={handleChangeSmartProfiles}>
+                            <RadioBar.Option value={true} label="true"/>
+                            <RadioBar.Option value={false} label="false"/>
                         </RadioBar>
                     </ControlGroup>
 

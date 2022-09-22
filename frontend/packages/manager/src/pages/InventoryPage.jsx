@@ -10,16 +10,7 @@ function InventoryPage() {
     const handleRequestOpen = () => {
         InvCtx.setAddOpen(true);
         InvCtx.setIsEdit(false);
-        InvCtx.setAddress('');
-        InvCtx.setPort(0);
-        InvCtx.setVersion('');
-        InvCtx.setCommunity('');
-        InvCtx.setSecret('');
-        InvCtx.setSecurityEngine('');
-        InvCtx.setWalkInterval(0);
-        InvCtx.setProfiles([]);
-        InvCtx.setInitProfiles([]);
-        InvCtx.setSmartProfiles(false);
+        InvCtx.resetFormData();
     };
 
     return (
