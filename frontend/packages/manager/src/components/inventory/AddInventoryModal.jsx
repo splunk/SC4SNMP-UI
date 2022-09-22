@@ -10,19 +10,87 @@ import InventoryContext from "../../store/inventory-contxt";
 import axios from "axios";
 import Button from '@splunk/react-ui/Button';
 import validateInventory from "./ValidateInventory";
+import P from '@splunk/react-ui/Paragraph';
+import { createDOMID } from '@splunk/ui-utils/id';
 
 
 function AddInventoryModal() {
 
     const [initProfiles, setInitProfiles] = useState([]);
+
+    const [addressErrors, setAddressErrors] = useState(null);
+    const [portErrors, setPortErrors] = useState(null);
+    const [communityErrors, setCommunityErrors] = useState(null);
+    const [secretErrors, setSecretErrors] = useState(null);
+    const [securityEngineErrors, setSecurityEngineErrors] = useState(null);
+    const [walkIntervalErrors, setWalkIntervalErrors] = useState(null);
+    const [profilesErrors, setProfilesErrors] = useState(null);
+
+    const resetAllErrors = () =>{
+        setAddressErrors(null);
+        setPortErrors(null);
+        setCommunityErrors(null);
+        setSecretErrors(null);
+        setSecurityEngineErrors(null);
+        setWalkIntervalErrors(null);
+        setProfilesErrors(null);
+    };
+
+    const resetErrors = (category) =>{
+        switch (category){
+            case "address":
+                setAddressErrors(null);
+                break;
+            case "port":
+                setPortErrors(null);
+                break;
+            case "community":
+                setCommunityErrors(null);
+                break;
+            case "secret":
+                setSecretErrors(null);
+                break;
+            case "securityEngine":
+                setSecurityEngineErrors(null);
+                break;
+            case "walkInterval":
+                setWalkIntervalErrors(null);
+            case "profiles":
+                setProfilesErrors(null);
+            default:
+                break;
+        }
+    };
+
+    const setErrors = (category, errors) =>{
+        switch (category){
+            case "address":
+                setAddressErrors(errors);
+                break;
+            case "port":
+                setPortErrors(errors);
+                break;
+            case "community":
+                setCommunityErrors(errors);
+                break;
+            case "secret":
+                setSecretErrors(errors);
+                break;
+            case "securityEngine":
+                setSecurityEngineErrors(errors);
+                break;
+            case "walkInterval":
+                setWalkIntervalErrors(errors);
+            case "profiles":
+                setProfilesErrors(errors);
+            default:
+                break;
+        }
+    };
+
+
     const InvCtx = useContext(InventoryContext);
 
-
-    const handleRequestClose = () => {
-        InvCtx.resetFormData();
-        InvCtx.setAddOpen(false);
-        InvCtx.addModalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
-    };
 
     useEffect(() => {
         let isMounted = true;
@@ -37,16 +105,21 @@ function AddInventoryModal() {
     const postInventory = (inventoryObj) => {
         axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
             .then((response) => {
-                console.log(response)
         })
     }
 
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
-                console.log(response);
         })
     }
+
+    const handleRequestClose = () => {
+        resetAllErrors();
+        InvCtx.resetFormData();
+        InvCtx.setAddOpen(false);
+        InvCtx.addModalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
+    };
 
     const handleApply = useCallback(
     (e) => {
@@ -55,7 +128,7 @@ function AddInventoryModal() {
 
         if (validation[0]){
             // form is valid
-            //resetAllErrors();
+            resetAllErrors();
             let inventoryObj = {
                 address: InvCtx.address,
                 port: InvCtx.port,
@@ -82,9 +155,9 @@ function AddInventoryModal() {
             const errors = validation[1];
             for (const property in errors) {
                 if (errors[property].length > 0){
-                    console.log(property, errors[property]);
+                    setErrors(property, errors[property]);
                 }else {
-                    //resetErrors(property);
+                    resetErrors(property);
                 };
             };
         }
@@ -130,16 +203,31 @@ function AddInventoryModal() {
         InvCtx.setProfiles(values);
     }
 
+    const validation_group = {
+      display: "flex",
+      flexDirection: "column"
+    };
+
+    const validation_message = {
+      color: "red"
+    };
+
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '600px' }}>
                 <Modal.Header title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <ControlGroup label="IP address">
-                        <Text value={InvCtx.address} onChange={handleChangeAddress}/>
+                        <div style={validation_group}>
+                            <Text value={InvCtx.address} onChange={handleChangeAddress}/>
+                            {((addressErrors) ? addressErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
                     <ControlGroup label="Port" >
-                        <Number value={InvCtx.port} onChange={handleChangePort}/>
+                        <div style={validation_group}>
+                            <Number value={InvCtx.port} onChange={handleChangePort}/>
+                            {((portErrors) ? portErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup
@@ -154,27 +242,42 @@ function AddInventoryModal() {
                         </Select>
                     </ControlGroup>
 
-                    <ControlGroup label="community">
-                        <Text value={InvCtx.community} onChange={handleChangeCommunity}/>
+                    <ControlGroup label="Community">
+                        <div style={validation_group}>
+                            <Text value={InvCtx.community} onChange={handleChangeCommunity}/>
+                            {((communityErrors) ? communityErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
 
                     <ControlGroup label="Secret">
-                        <Text value={InvCtx.secret} onChange={handleChangeSecret}/>
+                        <div style={validation_group}>
+                            <Text value={InvCtx.secret} onChange={handleChangeSecret}/>
+                            {((secretErrors) ? secretErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup label="Security Engine">
-                        <Text value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine}/>
+                        <div style={validation_group}>
+                            <Text value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine}/>
+                            {((securityEngineErrors) ? securityEngineErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup label="Walk Interval">
-                        <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval}/>
+                        <div style={validation_group}>
+                            <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval}/>
+                            {((walkIntervalErrors) ? walkIntervalErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup label="Profiles">
-                        <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles}>
-                            {initProfiles.map((v) => (<Multiselect.Option key={v} label={v} value={v} />))}
-                        </Multiselect>
+                        <div style={validation_group}>
+                            <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles}>
+                                {initProfiles.map((v) => (<Multiselect.Option key={createDOMID()} label={v} value={v} />))}
+                            </Multiselect>
+                            {((profilesErrors) ? profilesErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                        </div>
                     </ControlGroup>
 
                     <ControlGroup label="Smart Profiles enabled">

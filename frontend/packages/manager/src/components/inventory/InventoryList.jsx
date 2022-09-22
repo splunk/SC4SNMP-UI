@@ -4,6 +4,7 @@ import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
 import ButtonsModal from "./ButtonsModal";
 import DeleteInventoryModal from "./DeleteInventoryModal";
+import { createDOMID } from '@splunk/ui-utils/id';
 
 
 const columns = [
@@ -117,7 +118,7 @@ class SortableColumns extends Component {
                                 return 0;
                             })
                             .map((row) => (
-                                <Table.Row key={row.address + row.port} elementRef={this.context.rowToggle}
+                                <Table.Row key={createDOMID()} elementRef={this.context.rowToggle}
                                            onClick={() => this.handleRowClick(JSON.parse(JSON.stringify(row)))}>
                                     <Table.Cell>{row.address}</Table.Cell>
                                     <Table.Cell>{row.port}</Table.Cell>

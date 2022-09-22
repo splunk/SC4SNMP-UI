@@ -18,7 +18,7 @@ const validateInventory = (address, port, version, community, secret,
     if (address.length === 0){
         errors.address.push("Address is required");
         isValid = false;
-    }else{
+    }else if (Number.isInteger(Number(address.charAt(0)))){
         let doesMatch = address.match(/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/);
         let octetsValid = true;
         if (doesMatch){
@@ -33,6 +33,12 @@ const validateInventory = (address, port, version, community, secret,
         if(!doesMatch || !octetsValid){
             isValid = false;
             errors.address.push("Provided address isn't a valid IPv4 address")
+        }
+    } else{
+        if (!address.match(/^[a-zA-Z0-9_-]+$/)){
+            isValid = false;
+            errors.address.push("Group name can consist only of upper and lower english letters, " +
+            "numbers and two special characters: '-' and '_'. No spaces are allowed.");
         }
     }
 
@@ -61,7 +67,7 @@ const validateInventory = (address, port, version, community, secret,
     }
 
     // Validate securityEngine
-    if (securityEngine.length > 0 && !securityEngine.match(/^[A-F0-9]{10,64}|[a-f0-9]{10,64}$/)){
+    if (securityEngine.length > 0 && !securityEngine.match(/^([A-F0-9]{10,64}|[a-f0-9]{10,64})$/)){
         isValid = false;
         errors.securityEngine.push("If provided, Security Engine can be consists only of 10-64 characters in hexadecimal notation");
     }
@@ -69,7 +75,7 @@ const validateInventory = (address, port, version, community, secret,
     // Validate Walk Interval
     if (!(Number.isInteger(walkInterval) && walkInterval >= 1800)){
         isValid = false;
-        errors.port.push("Walk Interval number must be an integer greater than or equal 1800");
+        errors.walkInterval.push("Walk Interval number must be an integer greater than or equal 1800");
     }
 
     // Validate profiles
