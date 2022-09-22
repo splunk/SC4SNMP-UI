@@ -9,6 +9,7 @@ import RadioBar from '@splunk/react-ui/RadioBar';
 import InventoryContext from "../../store/inventory-contxt";
 import axios from "axios";
 import Button from '@splunk/react-ui/Button';
+import validateInventory from "./ValidateInventory";
 
 
 function AddInventoryModal() {
@@ -49,32 +50,48 @@ function AddInventoryModal() {
 
     const handleApply = useCallback(
     (e) => {
-        let inventoryObj = {
-        address: InvCtx.address,
-        port: InvCtx.port,
-        version: InvCtx.version,
-        community: InvCtx.community,
-        secret: InvCtx.secret,
-        security_engine: InvCtx.securityEngine,
-        walk_interval: InvCtx.walkInterval,
-        profiles: InvCtx.profiles,
-        smart_profiles: InvCtx.smartProfiles,
-        }
-        console.log(inventoryObj);
+        const validation = validateInventory(InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community,
+            InvCtx.secret, InvCtx.securityEngine, InvCtx.walkInterval, InvCtx.profiles, initProfiles)
 
-        if (InvCtx.isEdit){
+        if (validation[0]){
+            // form is valid
+            //resetAllErrors();
+            let inventoryObj = {
+                address: InvCtx.address,
+                port: InvCtx.port,
+                version: InvCtx.version,
+                community: InvCtx.community,
+                secret: InvCtx.secret,
+                security_engine: InvCtx.securityEngine,
+                walk_interval: InvCtx.walkInterval,
+                profiles: InvCtx.profiles,
+                smart_profiles: InvCtx.smartProfiles,
+            }
+
+            if (InvCtx.isEdit){
             updateInventory(inventoryObj, InvCtx.inventoryId)
+            }else{
+                postInventory(inventoryObj);
+            }
+            InvCtx.resetFormData();
+            InvCtx.setAddOpen(false);
+            InvCtx.addModalToggle?.current?.focus();
+            InvCtx.makeInventoryChange();
         }else{
-            postInventory(inventoryObj);
+            // form is invalid
+            const errors = validation[1];
+            for (const property in errors) {
+                if (errors[property].length > 0){
+                    console.log(property, errors[property]);
+                }else {
+                    //resetErrors(property);
+                };
+            };
         }
 
-        InvCtx.resetFormData();
-        InvCtx.setAddOpen(false);
-        InvCtx.addModalToggle?.current?.focus();
-        InvCtx.makeInventoryChange();
         },
         [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
-            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId]
+            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
     );
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
@@ -110,11 +127,8 @@ function AddInventoryModal() {
     }, [InvCtx.setSmartProfiles]);
 
     const handleChange = (e, { values }) => {
-        console.log("profile", values)
         InvCtx.setProfiles(values);
     }
-
-    console.log("add inv", InvCtx);
 
     return (
         <div>
@@ -133,10 +147,10 @@ function AddInventoryModal() {
                     labelFor="customized-select-after"
                     help="Clicking the label will focus/activate the Select rather than the default first Text."
                     >
-                        <Select defaultValue="1" inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
-                            <Select.Option label="v1" value="1"/>
-                            <Select.Option label="v2c" value="v2c"/>
-                            <Select.Option label="v3" value="3"/>
+                        <Select defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
+                            <Select.Option label="1" value="1"/>
+                            <Select.Option label="2c" value="2c"/>
+                            <Select.Option label="3" value="3"/>
                         </Select>
                     </ControlGroup>
 

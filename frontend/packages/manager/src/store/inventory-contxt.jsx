@@ -27,7 +27,7 @@ export function InventoryContextProvider(props){
     const [isEdit, setIsEdit] = useState(false);
     const [address, setAddress] = useState('');
     const [port, setPort] = useState(161);
-    const [version, setVersion] = useState('');
+    const [version, setVersion] = useState('2c');
     const [community, setCommunity] = useState('');
     const [secret, setSecret] = useState('');
     const [securityEngine, setSecurityEngine] = useState('');
@@ -39,7 +39,7 @@ export function InventoryContextProvider(props){
         setInventoryId(null);
         setAddress('');
         setPort(161);
-        setVersion('');
+        setVersion('2c');
         setCommunity('');
         setSecret('');
         setSecurityEngine('');
