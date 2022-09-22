@@ -16,7 +16,7 @@ const validateInventory = (address, port, version, community, secret,
 
     // Validate address
     if (address.length === 0){
-        errors.address.push("Address is required");
+        errors.address.push("Address or Group is required");
         isValid = false;
     }else if (Number.isInteger(Number(address.charAt(0)))){
         let doesMatch = address.match(/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/);

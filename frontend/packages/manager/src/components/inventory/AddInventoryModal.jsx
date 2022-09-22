@@ -217,7 +217,7 @@ function AddInventoryModal() {
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '600px' }}>
                 <Modal.Header title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
                 <Modal.Body>
-                    <ControlGroup label="IP address">
+                    <ControlGroup label="IP address/Group">
                         <div style={validation_group}>
                             <Text value={InvCtx.address} onChange={handleChangeAddress}/>
                             {((addressErrors) ? addressErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
