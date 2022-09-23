@@ -3,30 +3,32 @@ import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import axios from "axios";
 import P from '@splunk/react-ui/Paragraph';
-import ProfileContext from "../../store/profile-contxt";
+import InventoryContext from "../../store/inventory-contxt";
 
-function DeleteProfileModal() {
-    const ProfCtx = useContext(ProfileContext);
+function DeleteInventoryModal() {
+    const InvCtx = useContext(InventoryContext);
 
     const [cancelButton, setCancelButon] = useState();
     const cancelButtonRef = useCallback((el) => setCancelButon(el), []);
 
     const handleRequestClose = () => {
-        ProfCtx.setDeleteOpen(false);
-        ProfCtx.deleteModalToggle?.current?.focus();
+        InvCtx.setDeleteOpen(false);
+        InvCtx.resetFormData();
+        InvCtx.deleteModalToggle?.current?.focus();
     };
 
     const handleDeleteProfile = () => {
-        axios.post(`http://127.0.0.1:5000/profiles/delete/${ProfCtx.profileId}`)
+        axios.post(`http://127.0.0.1:5000/inventory/delete/${InvCtx.inventoryId}`)
           .then(function (response) {
             console.log(response);
           })
           .catch(function (error) {
             console.log(error);
           });
-        ProfCtx.setDeleteOpen(false);
-        ProfCtx.makeProfilesChange();
-        ProfCtx.addModalToggle?.current?.focus();
+        InvCtx.setDeleteOpen(false);
+        InvCtx.resetFormData();
+        InvCtx.makeInventoryChange();
+        InvCtx.addModalToggle?.current?.focus();
     }
 
     return (
@@ -34,12 +36,12 @@ function DeleteProfileModal() {
             <Modal
                 initialFocus={cancelButton}
                 onRequestClose={handleRequestClose}
-                open={ProfCtx.deleteOpen}
+                open={InvCtx.deleteOpen}
                 style={{ width: '600px' }}
             >
-                <Modal.Header title={`Delete ${ProfCtx.profileName}`} onRequestClose={handleRequestClose} />
+                <Modal.Header title={`Delete ${InvCtx.address}:${InvCtx.port}`} onRequestClose={handleRequestClose} />
                 <Modal.Body>
-                    <P>Are you sure you want to delete {ProfCtx.profileName} profile?</P>
+                    <P>Are you sure you want to delete inventory for device {InvCtx.address}:{InvCtx.port}?</P>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button appearance="primary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
@@ -50,4 +52,4 @@ function DeleteProfileModal() {
     );
 }
 
-export default DeleteProfileModal;
+export default DeleteInventoryModal;

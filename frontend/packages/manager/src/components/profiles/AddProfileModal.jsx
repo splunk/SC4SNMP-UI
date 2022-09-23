@@ -157,7 +157,6 @@ function AddProfileModal(props) {
                     resetErrors(property);
                 };
             };
-            console.log(varBindsErrors);
         };
 
         },

@@ -1,6 +1,10 @@
-import React, {Component} from 'react';
+import React, {Component, useContext} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
+import InventoryContext from "../../store/inventory-contxt";
+import ButtonsModal from "./ButtonsModal";
+import DeleteInventoryModal from "./DeleteInventoryModal";
+import { createDOMID } from '@splunk/ui-utils/id';
 
 
 const columns = [
@@ -17,6 +21,8 @@ const columns = [
 
 
 class SortableColumns extends Component {
+    static contextType = InventoryContext;
+
     constructor(props) {
         super(props);
 
@@ -25,21 +31,31 @@ class SortableColumns extends Component {
             sortDir: 'asc',
             allInventoryRecords: []
         };
+
+        this.reload = true;
+        this.inventoryChange = this.props.inventoryChange;
     }
     url = 'http://127.0.0.1:5000/inventory'
     getFetchInventoryRows() {
+        let currentRecords = this.state.allInventoryRecords;
         axios.get(`${this.url}`)
             .then((response) => {
-                console.log('response.data: ', response.data);
+                if (currentRecords.length != response.data.length){
+                    this.reload = true;
+                }
                 this.setState({allInventoryRecords: response.data});
-                console.log('inventory : ', this.state);
         })
     }
 
     componentDidMount() {
-        console.log('componentDidMount');
         this.getFetchInventoryRows();
-        console.log('inventory: ', this.state);
+    }
+
+    componentDidUpdate() {
+        if (this.reload){
+            this.reload = false;
+            this.getFetchInventoryRows();
+        }
     }
 
     handleSort = (e, {sortKey}) => {
@@ -54,49 +70,72 @@ class SortableColumns extends Component {
         });
     };
 
+    handleRowClick = (row) => {
+        this.context.setButtonsOpen(true);
+        this.context.setInventoryId(row._id.$oid);
+        this.context.setAddress(row.address);
+        this.context.setPort(row.port);
+        this.context.setVersion(row.version);
+        this.context.setCommunity(row.community);
+        this.context.setSecret(row.secret);
+        this.context.setSecurityEngine(row.security_engine);
+        this.context.setWalkInterval(row.walk_interval);
+        this.context.setProfiles(row.profiles);
+        this.context.setSmartProfiles(row.smart_profiles);
+    };
+
     render() {
+        if (this.props.inventoryChange != this.inventoryChange){
+            this.inventoryChange = this.props.inventoryChange;
+            this.reload = true;
+        }
         const {sortKey, sortDir, allInventoryRecords} = this.state;
         return (
-            <Table stripeRows>
-                <Table.Head>
-                    {columns.map((headData) => (
-                        <Table.HeadCell
-                            key={headData.sortKey}
-                            onSort={this.handleSort}
-                            sortKey={headData.sortKey}
-                            sortDir={headData.sortKey === sortKey ? sortDir : 'none'}
-                        >
-                            {headData.label}
-                        </Table.HeadCell>
-                    ))}
-                </Table.Head>
-                <Table.Body>
-                    {allInventoryRecords
-                        .sort((rowA, rowB) => {
-                            if (sortDir === 'asc') {
-                                return rowA[sortKey] > rowB[sortKey] ? 1 : -1;
-                            }
-                            if (sortDir === 'desc') {
-                                return rowB[sortKey] > rowA[sortKey] ? 1 : -1;
-                            }
-
-                            return 0;
-                        })
-                        .map((row) => (
-                            <Table.Row key={row.address + row.port}>
-                                <Table.Cell>{row.address}</Table.Cell>
-                                <Table.Cell>{row.port}</Table.Cell>
-                                <Table.Cell>{row.version}</Table.Cell>
-                                <Table.Cell>{row.community}</Table.Cell>
-                                <Table.Cell>{row.secret}</Table.Cell>
-                                <Table.Cell>{row.securityEngine}</Table.Cell>
-                                <Table.Cell>{row.walk_interval}</Table.Cell>
-                                <Table.Cell>{row.profiles.toString()}</Table.Cell>
-                                <Table.Cell>{row.smart_profiles.toString()}</Table.Cell>
-                            </Table.Row>
+            <div>
+                <Table stripeRows>
+                    <Table.Head>
+                        {columns.map((headData) => (
+                            <Table.HeadCell
+                                key={headData.sortKey}
+                                onSort={this.handleSort}
+                                sortKey={headData.sortKey}
+                                sortDir={headData.sortKey === sortKey ? sortDir : 'none'}
+                            >
+                                {headData.label}
+                            </Table.HeadCell>
                         ))}
-                </Table.Body>
-            </Table>
+                    </Table.Head>
+                    <Table.Body>
+                        {allInventoryRecords
+                            .sort((rowA, rowB) => {
+                                if (sortDir === 'asc') {
+                                    return rowA[sortKey] > rowB[sortKey] ? 1 : -1;
+                                }
+                                if (sortDir === 'desc') {
+                                    return rowB[sortKey] > rowA[sortKey] ? 1 : -1;
+                                }
+
+                                return 0;
+                            })
+                            .map((row) => (
+                                <Table.Row key={createDOMID()} elementRef={this.context.rowToggle}
+                                           onClick={() => this.handleRowClick(JSON.parse(JSON.stringify(row)))}>
+                                    <Table.Cell>{row.address}</Table.Cell>
+                                    <Table.Cell>{row.port}</Table.Cell>
+                                    <Table.Cell>{row.version}</Table.Cell>
+                                    <Table.Cell>{row.community}</Table.Cell>
+                                    <Table.Cell>{row.secret}</Table.Cell>
+                                    <Table.Cell>{row.security_engine}</Table.Cell>
+                                    <Table.Cell>{row.walk_interval}</Table.Cell>
+                                    <Table.Cell>{row.profiles.toString()}</Table.Cell>
+                                    <Table.Cell>{row.smart_profiles.toString()}</Table.Cell>
+                                </Table.Row>
+                            ))}
+                    </Table.Body>
+                </Table>
+                <ButtonsModal/>
+                <DeleteInventoryModal/>
+            </div>
         );
     }
 }

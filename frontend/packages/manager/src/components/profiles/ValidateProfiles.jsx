@@ -1,4 +1,4 @@
-import React, {useState, createContext, useRef} from 'react';
+import React from 'react';
 
 const validateProfiles = (profileName, frequency, conditions, varBinds) => {
     /*
@@ -25,7 +25,7 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
         isValid = false;
     }else if (!profileName.match(/^[a-zA-Z0-9_-]+$/)){
         errors.profileName.push("Profile Name can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'. No spaces can be used in the name.");
+            "numbers and two special characters: '-' and '_'. No spaces are allowed.");
         isValid = false;
     }
 
@@ -44,7 +44,7 @@ const validateProfiles = (profileName, frequency, conditions, varBinds) => {
             isValid = false;
         }else if (!conditions.field.match(/^[.a-zA-Z0-9_-]+$/)){
             errors.conditionField.push("Field can consist only of upper and lower english letters, " +
-            "numbers and three special characters: '.' '-' and '_'. No spaces can be used in the name.");
+            "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.");
             isValid = false;
         }
         // Validate each pattern
