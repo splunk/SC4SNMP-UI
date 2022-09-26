@@ -94,7 +94,7 @@ function AddInventoryModal() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://127.0.0.1:5000/profiles')
+        axios.get('http://127.0.0.1:5000/profiles/names')
         .then((response) => {
             if (isMounted)
                 setInitProfiles(response.data);

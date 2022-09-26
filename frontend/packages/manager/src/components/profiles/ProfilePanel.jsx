@@ -6,7 +6,7 @@ import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from '@splunk/react-ui/Button';
 import ProfileContext from "../../store/profile-contxt";
-import DeleteProfileModal from "./DeleteProfileModal";
+import DeleteModal from "../DeleteModal";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
@@ -29,10 +29,23 @@ function ProfilePanel() {
         ProfCtx.setAddOpen(true);
     };
 
+    const deleteModalRequest = (context) => {
+        axios.post(`http://127.0.0.1:5000/profiles/delete/${context.profileId}`)
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        context.setDeleteOpen(false);
+        context.makeProfilesChange();
+        context.addModalToggle?.current?.focus();
+    };
+
     useEffect(() => {
     let isMounted = true;
     console.log('use effect')
-    axios.get('http://127.0.0.1:5000/profiles/all')
+    axios.get('http://127.0.0.1:5000/profiles')
     .then((response) => {
         if (isMounted)
             setProfiles(response.data);
@@ -91,7 +104,8 @@ function ProfilePanel() {
     return (
             <div>
                 {profilesPanels}
-                <DeleteProfileModal/>
+                <DeleteModal deleteName={`${ProfCtx.profileName}`}
+                             handleDelete={() => (deleteModalRequest(ProfCtx))}/>
             </div>
     );
 }

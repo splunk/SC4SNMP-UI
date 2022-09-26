@@ -1,13 +1,13 @@
-import React, {useState, createContext, useRef} from 'react';
+import React, {useState, createContext, useRef, useContext} from 'react';
+import ButtonsContext from "./buttons-contx";
 
-const InventoryContext = createContext({
-
-});
+const InventoryContext = createContext();
 
 export function InventoryContextProvider(props){
+    const BtnCtx = useContext(ButtonsContext);
+
     // data for DeleteInventoryModal
     const [inventoryId, setInventoryId] = useState(null);
-    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const rowToggle = useRef(null);
 
@@ -48,17 +48,14 @@ export function InventoryContextProvider(props){
         setSmartProfiles(false);
     }
 
-    const [buttonsOpen, setButtonsOpen] = useState(false);
-
     const context = {
         inventoryId: inventoryId,
         setInventoryId: setInventoryId,
-        deleteOpen: deleteOpen,
-        setDeleteOpen: setDeleteOpen,
+        deleteOpen: BtnCtx.deleteOpen,
+        setDeleteOpen: BtnCtx.setDeleteOpen,
 
-        rowToggle:rowToggle,
-        buttonsOpen:buttonsOpen,
-        setButtonsOpen:setButtonsOpen,
+        buttonsOpen: BtnCtx.buttonsOpen,
+        setButtonsOpen: BtnCtx.setButtonsOpen,
 
         addOpen: addOpen,
         setAddOpen: setAddOpen,

@@ -2,8 +2,8 @@ import React, {Component, useContext} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
-import ButtonsModal from "./ButtonsModal";
-import DeleteInventoryModal from "./DeleteInventoryModal";
+import ButtonsModal from "../ButtonsModal"
+import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 
 
@@ -46,6 +46,31 @@ class SortableColumns extends Component {
                 this.setState({allInventoryRecords: response.data});
         })
     }
+
+    buttonsRequestEdit(context) {
+       context.setButtonsOpen(false);
+       context.setIsEdit(true);
+       context.setAddOpen(true);
+    };
+
+    buttonsRequestDelete(context) {
+        context.setButtonsOpen(false);
+        context.setDeleteOpen(true);
+    }
+
+    deleteModalRequest(context) {
+        axios.post(`http://127.0.0.1:5000/inventory/delete/${context.inventoryId}`)
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        context.setDeleteOpen(false);
+        context.resetFormData();
+        context.makeInventoryChange();
+        context.addModalToggle?.current?.focus();
+    };
 
     componentDidMount() {
         this.getFetchInventoryRows();
@@ -133,8 +158,11 @@ class SortableColumns extends Component {
                             ))}
                     </Table.Body>
                 </Table>
-                <ButtonsModal/>
-                <DeleteInventoryModal/>
+                <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
+                              handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
+                              context={this.context}/>
+                <DeleteModal deleteName={`${this.context.address}:${this.context.port}`}
+                             handleDelete={() => (this.deleteModalRequest(this.context))}/>
             </div>
         );
     }
