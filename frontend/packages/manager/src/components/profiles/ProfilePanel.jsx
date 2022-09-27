@@ -98,7 +98,7 @@ function ProfilePanel() {
         </CollapsiblePanel>
     ));
 
-
+    console.log(ProfCtx.profilesChange);
     return (
             <div>
                 {profilesPanels}

@@ -53,8 +53,8 @@ function AddDeviceModal(){
         })
     };
 
-    const updateDevice = (deviceObj, deviceID) => {
-        axios.post(`http://127.0.0.1:5000/devices/update/${deviceID}`, deviceObj)
+    const updateDevice = (deviceObj, deviceId) => {
+        axios.post(`http://127.0.0.1:5000/devices/update/${deviceId}`, deviceObj)
             .then((response) => {
         })
     };
@@ -77,7 +77,7 @@ function AddDeviceModal(){
             // form is valid
             ValCtx.resetAllErrors();
             if (GrCtx.isDeviceEdit){
-                updateDevice(deviceObj, GrCtx.deviceID)
+                updateDevice(deviceObj, GrCtx.deviceId)
             }else{
                 postDevice(deviceObj);
             }
@@ -98,7 +98,7 @@ function AddDeviceModal(){
         };
         },
         [GrCtx.address, GrCtx.port, GrCtx.version, GrCtx.community, GrCtx.secret, GrCtx.securityEngine, GrCtx.isEdit,
-            GrCtx.deviceID, GrCtx.setAddDeviceOpen, GrCtx.groupId]
+            GrCtx.deviceId, GrCtx.setAddDeviceOpen, GrCtx.groupId]
     );
 
     const validationGroup = {

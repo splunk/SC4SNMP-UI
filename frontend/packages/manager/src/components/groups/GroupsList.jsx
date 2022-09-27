@@ -83,7 +83,7 @@ function GroupsList() {
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupId(groupId);
-        GrCtx.setDeviceID(row._id.$oid);
+        GrCtx.setDeviceId(row._id.$oid);
         GrCtx.setAddress(row.address);
         GrCtx.setPort(row.port);
         GrCtx.setVersion(row.version);
@@ -94,7 +94,7 @@ function GroupsList() {
 
     const buttonsRequestDeleteDevice = (context) => {
         context.setButtonsOpen(false);
-        context.setDeleteUrl(`http://127.0.0.1:5000/devices/delete/${GrCtx.deviceID}`)
+        context.setDeleteUrl(`http://127.0.0.1:5000/devices/delete/${GrCtx.deviceId}`)
         context.setDeleteOpen(true);
     };
 
