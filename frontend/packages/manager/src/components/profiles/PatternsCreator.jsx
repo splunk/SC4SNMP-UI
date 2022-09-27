@@ -41,12 +41,12 @@ class PatternsCreator extends Component {
             indexes[`${keyID}`] = internal_id;
             return(
                 <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
-                    <div style={this.props.validation_group}>
+                    <div style={this.props.validationGroup}>
                         <Text defaultValue={value.pattern} onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}
                         error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) =>
-                                <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
+                                <P key={createDOMID()} style={this.props.validationMessage}>{el}</P>) : <P/>)}
                     </div>
                 </FormRows.Row>
             );
@@ -74,12 +74,12 @@ class PatternsCreator extends Component {
         this.setState((state) => ({
             items: FormRows.addRow(
                 <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
-                    <div style={this.props.validation_group}>
+                    <div style={this.props.validationGroup}>
                         <Text defaultValue={""} onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}
                         error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) =>
-                                <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
+                                <P key={createDOMID()} style={this.props.validationMessage}>{el}</P>) : <P/>)}
                     </div>
                 </FormRows.Row>,
                 state.items

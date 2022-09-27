@@ -1,4 +1,5 @@
-import React, {useState, createContext, useRef} from 'react';
+import React, {useState, createContext, useRef, useContext} from 'react';
+import ButtonsContext from "./buttons-contx";
 
 const ProfileContext = createContext({
     profileId: null,
@@ -25,6 +26,8 @@ const ProfileContext = createContext({
 });
 
 export function ProfileContxtProvider(props) {
+    const BtnCtx = useContext(ButtonsContext);
+
     // data for DeleteProfileModal
     const [profileId, setProfileId] = useState(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -51,8 +54,8 @@ export function ProfileContxtProvider(props) {
     const context = {
         profileId: profileId,
         setProfileId: setProfileId,
-        deleteOpen: deleteOpen,
-        setDeleteOpen: setDeleteOpen,
+        deleteOpen: BtnCtx.deleteOpen,
+        setDeleteOpen: BtnCtx.setDeleteOpen,
         deleteModalToggle: deleteModalToggle,
         profilesChange: profilesChange,
         makeProfilesChange: profilesChangeHandler,

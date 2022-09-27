@@ -50,7 +50,7 @@ class VarbindsCreator extends Component {
             indexes[`${keyID}`] = internal_id;
             return (
                 <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
-                    <div style={this.props.validation_group}>
+                    <div style={this.props.validationGroup}>
                         <div style={{display: 'flex'}}>
                             <Text defaultValue={value.family}
                                   onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}
@@ -64,7 +64,7 @@ class VarbindsCreator extends Component {
                         </div>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()}
-                                                                                 style={this.props.validation_message}>{el}</P>) :
+                                                                                 style={this.props.validationMessage}>{el}</P>) :
                             <P/>)}
                     </div>
                 </FormRows.Row>
@@ -86,7 +86,7 @@ class VarbindsCreator extends Component {
         this.setState((state) => ({
             items: FormRows.addRow(
                 <FormRows.Row index={state.items.length} key={keyID} onRequestRemove={this.handleRequestRemove}>
-                    <div style={this.props.validation_group}>
+                    <div style={this.props.validationGroup}>
                         <div style={{display: 'flex'}}>
                             <Text onChange={e => this.handleItemValueFamily(indexes[`${keyID}`], e)}
                                   error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
@@ -97,7 +97,7 @@ class VarbindsCreator extends Component {
                         </div>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) => <P key={createDOMID()}
-                                                                                 style={this.props.validation_message}>{el}</P>) :
+                                                                                 style={this.props.validationMessage}>{el}</P>) :
                             <P/>)}
                     </div>
                 </FormRows.Row>,

@@ -2,8 +2,8 @@ import React, {Component, useContext} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
-import ButtonsModal from "./ButtonsModal";
-import DeleteInventoryModal from "./DeleteInventoryModal";
+import ButtonsModal from "../ButtonsModal"
+import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 
 
@@ -14,9 +14,9 @@ const columns = [
     {sortKey: 'community', label: 'Community'},
     {sortKey: 'secret', label: 'Secret'},
     {sortKey: 'securityEngine', label: 'Security Engine'},
-    {sortKey: 'walk_interval', label: 'Walk Interval'},
+    {sortKey: 'walkInterval', label: 'Walk Interval'},
     {sortKey: 'profiles', label: 'Profiles'},
-    {sortKey: 'smart_profiles', label: 'Smart Profiles'},
+    {sortKey: 'smartProfiles', label: 'Smart Profiles'},
 ];
 
 
@@ -46,6 +46,31 @@ class SortableColumns extends Component {
                 this.setState({allInventoryRecords: response.data});
         })
     }
+
+    buttonsRequestEdit(context) {
+       context.setButtonsOpen(false);
+       context.setIsEdit(true);
+       context.setAddOpen(true);
+    };
+
+    buttonsRequestDelete(context) {
+        context.setButtonsOpen(false);
+        context.setDeleteOpen(true);
+    }
+
+    deleteModalRequest(context) {
+        axios.post(`http://127.0.0.1:5000/inventory/delete/${context.inventoryId}`)
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        context.setDeleteOpen(false);
+        context.resetFormData();
+        context.makeInventoryChange();
+        context.addModalToggle?.current?.focus();
+    };
 
     componentDidMount() {
         this.getFetchInventoryRows();
@@ -78,10 +103,10 @@ class SortableColumns extends Component {
         this.context.setVersion(row.version);
         this.context.setCommunity(row.community);
         this.context.setSecret(row.secret);
-        this.context.setSecurityEngine(row.security_engine);
-        this.context.setWalkInterval(row.walk_interval);
+        this.context.setSecurityEngine(row.securityEngine);
+        this.context.setWalkInterval(row.walkInterval);
         this.context.setProfiles(row.profiles);
-        this.context.setSmartProfiles(row.smart_profiles);
+        this.context.setSmartProfiles(row.smartProfiles);
     };
 
     render() {
@@ -125,16 +150,19 @@ class SortableColumns extends Component {
                                     <Table.Cell>{row.version}</Table.Cell>
                                     <Table.Cell>{row.community}</Table.Cell>
                                     <Table.Cell>{row.secret}</Table.Cell>
-                                    <Table.Cell>{row.security_engine}</Table.Cell>
-                                    <Table.Cell>{row.walk_interval}</Table.Cell>
+                                    <Table.Cell>{row.securityEngine}</Table.Cell>
+                                    <Table.Cell>{row.walkInterval}</Table.Cell>
                                     <Table.Cell>{row.profiles.toString()}</Table.Cell>
-                                    <Table.Cell>{row.smart_profiles.toString()}</Table.Cell>
+                                    <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
                                 </Table.Row>
                             ))}
                     </Table.Body>
                 </Table>
-                <ButtonsModal/>
-                <DeleteInventoryModal/>
+                <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
+                              handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
+                              context={this.context}/>
+                <DeleteModal deleteName={`${this.context.address}:${this.context.port}`}
+                             handleDelete={() => (this.deleteModalRequest(this.context))}/>
             </div>
         );
     }
