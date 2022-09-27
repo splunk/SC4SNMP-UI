@@ -92,7 +92,7 @@ function GroupsList() {
         GrCtx.setVersion(row.version);
         GrCtx.setCommunity(row.community);
         GrCtx.setSecret(row.secret);
-        GrCtx.setSecurityEngine(row.security_engine);
+        GrCtx.setSecurityEngine(row.securityEngine);
     };
 
     const buttonsRequestDeleteDevice = (context) => {
@@ -129,11 +129,11 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <CollapsiblePanel title={group.group_name} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid)}}
+        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid)}}
           onRequestClose={() => {closeCollapsible(group._id.$oid)}}>
-            <Button onClick={() => (newDeviceButtonHandler(group._id.$oid, group.group_name))} label="Add new device"/>
-            <Button onClick={() => (editGroupButtonHandler(group._id.$oid, group.group_name))} label="Edit group name"/>
-            <Button onClick={() => (deleteGroupButtonHandler(group._id.$oid, group.group_name))} label="Delete group"/>
+            <Button onClick={() => (newDeviceButtonHandler(group._id.$oid, group.groupName))} label="Add new device"/>
+            <Button onClick={() => (editGroupButtonHandler(group._id.$oid, group.groupName))} label="Edit group name"/>
+            <Button onClick={() => (deleteGroupButtonHandler(group._id.$oid, group.groupName))} label="Delete group"/>
             <Table stripeRows>
                 <Table.Head>
                     <Table.HeadCell>Address</Table.HeadCell>
@@ -151,7 +151,7 @@ function GroupsList() {
                             <Table.Cell>{row.community}</Table.Cell>
                             <Table.Cell>{row.secret}</Table.Cell>
                             <Table.Cell>{row.version}</Table.Cell>
-                            <Table.Cell>{row.security_engine}</Table.Cell>
+                            <Table.Cell>{row.securityEngine}</Table.Cell>
                         </Table.Row>
                     ))}
                 </Table.Body>

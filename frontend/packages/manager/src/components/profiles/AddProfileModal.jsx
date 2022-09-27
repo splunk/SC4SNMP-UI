@@ -165,12 +165,12 @@ function AddProfileModal(props) {
     );
 
 
-    const validation_group = {
+    const validationGroup = {
       display: "flex",
       flexDirection: "column"
     };
 
-    const validation_message = {
+    const validationMessage = {
       color: "red"
     };
 
@@ -182,26 +182,26 @@ function AddProfileModal(props) {
                 <Modal.Body>
 
                     <ControlGroup label="Profile name">
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((profileNameErrors) ? true : false)}/>
-                            {((profileNameErrors) ? profileNameErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                            {((profileNameErrors) ? profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <ControlGroup label="Frequency of polling" >
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((frequencyErrors) ? true : false)}/>
-                            {((frequencyErrors) ? frequencyErrors.map((el) => <P key={createDOMID()} style={validation_message}>{el}</P>) : <P/>)}
+                            {((frequencyErrors) ? frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={conditionFieldErrors}
                                 errorPatterns={conditionPatternsErrors} setErrorPatterns={setConditionPatternsErrors}
-                                validation_message={validation_message} validation_group={validation_group} newSubmit={newSubmitPatterns}/>
+                                validationMessage={validationMessage} validationGroup={validationGroup} newSubmit={newSubmitPatterns}/>
 
                     <ControlGroup label="VarBinds">
                         <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={varBindsErrors} setError={setVarBindsErrors}
-                                         validation_message={validation_message} validation_group={validation_group}
+                                         validationMessage={validationMessage} validationGroup={validationGroup}
                         newSubmit={newSubmitVarBinds}/>
                     </ControlGroup>
 

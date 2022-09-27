@@ -54,16 +54,16 @@ class Conditions extends Component {
                 {this.state.condition === 'field' ? (
                 <div>
                     <ControlGroup label="field">
-                        <div className={this.props.validation_group}>
+                        <div className={this.props.validationGroup}>
                             <Text value={this.state.field} onChange={this.handleFieldChange} error={((this.props.errorField) ? true : false)}/>
                             {((this.props.errorField) ? this.props.errorField.map((el) =>
-                                <P key={createDOMID()} style={this.props.validation_message}>{el}</P>) : <P/>)}
+                                <P key={createDOMID()} style={this.props.validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
                     <ControlGroup label="patterns">
                         <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns} newSubmit={this.props.newSubmit}
                                          error={this.props.errorPatterns} setError={this.props.setErrorPatterns}
-                        validation_group={this.props.validation_group} validation_message={this.props.validation_message}/>
+                        validationGroup={this.props.validationGroup} validationMessage={this.props.validationMessage}/>
                     </ControlGroup>
                 </div>
                 ) : <div/>}

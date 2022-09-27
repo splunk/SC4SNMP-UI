@@ -7,12 +7,18 @@ import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
 import axios from "axios";
+import validateInventoryAndGroup from "../ValidateInventoryAndGroup";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-contxt";
+import { createDOMID } from '@splunk/ui-utils/id';
+import P from '@splunk/react-ui/Paragraph';
 
 
 function AddDeviceModal(){
     const GrCtx = useContext(GroupContext);
+    const ValCtx = useContext(InventoryDevicesValidationContxt);
 
     const handleRequestClose = () => {
+        ValCtx.resetAllErrors();
         GrCtx.resetDevice();
         GrCtx.setAddDeviceOpen(false);
     }
@@ -53,19 +59,25 @@ function AddDeviceModal(){
         })
     };
 
-    const handleApply = useCallback(
-    (e) => {
-            // form is valid
-            let deviceObj = {
-                address: GrCtx.address,
-                port: GrCtx.port,
-                version: GrCtx.version,
-                community: GrCtx.community,
-                secret: GrCtx.secret,
-                security_engine: GrCtx.securityEngine,
-                group_id: GrCtx.groupID
-            }
+    const handleApply = useCallback((e) => {
+        console.log("aplying")
+        const deviceObj = {
+            address: GrCtx.address,
+            port: GrCtx.port,
+            version: GrCtx.version,
+            community: GrCtx.community,
+            secret: GrCtx.secret,
+            securityEngine: GrCtx.securityEngine,
+            groupId: GrCtx.groupID,
+            onlyAdress: true,
+        };
+        console.log(deviceObj);
+        const validation = validateInventoryAndGroup(deviceObj)
+        delete deviceObj.onlyAdress;
 
+        if (validation[0]){
+            // form is valid
+            ValCtx.resetAllErrors();
             if (GrCtx.isDeviceEdit){
                 console.log("updating device")
                 updateDevice(deviceObj, GrCtx.deviceID)
@@ -73,22 +85,32 @@ function AddDeviceModal(){
                 console.log("posting new device")
                 postDevice(deviceObj);
             }
-
             GrCtx.setEditedGroupID(GrCtx.groupID);
             GrCtx.resetDevice();
             GrCtx.setAddDeviceOpen(false);
             GrCtx.makeGroupsChange();
+        }else{
+            // form is invalid
+            const errors = validation[1];
+            for (const property in errors) {
+                if (errors[property].length > 0){
+                    ValCtx.setErrors(property, errors[property]);
+                }else {
+                    ValCtx.resetErrors(property);
+                };
+            };
+        };
         },
         [GrCtx.address, GrCtx.port, GrCtx.version, GrCtx.community, GrCtx.secret, GrCtx.securityEngine, GrCtx.isEdit,
             GrCtx.deviceID, GrCtx.setAddDeviceOpen, GrCtx.groupID]
     );
 
-    const validation_group = {
+    const validationGroup = {
       display: "flex",
       flexDirection: "column"
     };
 
-    const validation_message = {
+    const validationMessage = {
       color: "red"
     };
 
@@ -98,13 +120,15 @@ function AddDeviceModal(){
                 <Modal.Header title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add new device to group ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <ControlGroup label="IP address/Group">
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Text value={GrCtx.address} onChange={handleChangeAddress}/>
+                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
                     <ControlGroup label="Port" >
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Number value={GrCtx.port} onChange={handleChangePort}/>
+                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
@@ -121,21 +145,23 @@ function AddDeviceModal(){
                     </ControlGroup>
 
                     <ControlGroup label="Community">
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Text value={GrCtx.community} onChange={handleChangeCommunity}/>
+                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
-
                     <ControlGroup label="Secret">
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Text value={GrCtx.secret} onChange={handleChangeSecret}/>
+                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <ControlGroup label="Security Engine">
-                        <div style={validation_group}>
+                        <div style={validationGroup}>
                             <Text value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine}/>
+                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 

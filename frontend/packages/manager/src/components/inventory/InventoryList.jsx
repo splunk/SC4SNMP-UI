@@ -14,9 +14,9 @@ const columns = [
     {sortKey: 'community', label: 'Community'},
     {sortKey: 'secret', label: 'Secret'},
     {sortKey: 'securityEngine', label: 'Security Engine'},
-    {sortKey: 'walk_interval', label: 'Walk Interval'},
+    {sortKey: 'walkInterval', label: 'Walk Interval'},
     {sortKey: 'profiles', label: 'Profiles'},
-    {sortKey: 'smart_profiles', label: 'Smart Profiles'},
+    {sortKey: 'smartProfiles', label: 'Smart Profiles'},
 ];
 
 
@@ -103,10 +103,10 @@ class SortableColumns extends Component {
         this.context.setVersion(row.version);
         this.context.setCommunity(row.community);
         this.context.setSecret(row.secret);
-        this.context.setSecurityEngine(row.security_engine);
-        this.context.setWalkInterval(row.walk_interval);
+        this.context.setSecurityEngine(row.securityEngine);
+        this.context.setWalkInterval(row.walkInterval);
         this.context.setProfiles(row.profiles);
-        this.context.setSmartProfiles(row.smart_profiles);
+        this.context.setSmartProfiles(row.smartProfiles);
     };
 
     render() {
@@ -150,10 +150,10 @@ class SortableColumns extends Component {
                                     <Table.Cell>{row.version}</Table.Cell>
                                     <Table.Cell>{row.community}</Table.Cell>
                                     <Table.Cell>{row.secret}</Table.Cell>
-                                    <Table.Cell>{row.security_engine}</Table.Cell>
-                                    <Table.Cell>{row.walk_interval}</Table.Cell>
+                                    <Table.Cell>{row.securityEngine}</Table.Cell>
+                                    <Table.Cell>{row.walkInterval}</Table.Cell>
                                     <Table.Cell>{row.profiles.toString()}</Table.Cell>
-                                    <Table.Cell>{row.smart_profiles.toString()}</Table.Cell>
+                                    <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
                                 </Table.Row>
                             ))}
                     </Table.Body>

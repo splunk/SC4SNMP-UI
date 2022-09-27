@@ -7,6 +7,7 @@ import { ProfileContxtProvider } from "./store/profile-contxt";
 import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
 import { ButtonsContextProvider } from "./store/buttons-contx";
+import { InventoryDevicesValidationContxtProvider } from "./store/inventory-devices-contxt";
 
 function Uncontrolled() {
     return (
@@ -21,14 +22,18 @@ function Uncontrolled() {
             <TabLayout.Panel label="Inventory" panelId="two">
                 <ButtonsContextProvider>
                     <InventoryContextProvider>
-                        <InventoryPage />
+                        <InventoryDevicesValidationContxtProvider>
+                            <InventoryPage />
+                        </InventoryDevicesValidationContxtProvider>
                     </InventoryContextProvider>
                 </ButtonsContextProvider>
             </TabLayout.Panel>
             <TabLayout.Panel label="Groups" panelId="three">
                 <ButtonsContextProvider>
                     <GroupContextProvider>
-                        <GroupsPage />
+                        <InventoryDevicesValidationContxtProvider>
+                            <GroupsPage />
+                        </InventoryDevicesValidationContxtProvider>
                     </GroupContextProvider>
                 </ButtonsContextProvider>
             </TabLayout.Panel>
