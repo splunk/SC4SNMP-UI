@@ -20,7 +20,6 @@ function GroupsList() {
 
     useEffect(() => {
         let isMounted = true;
-        console.log('use effect')
         axios.get('http://127.0.0.1:5000/groups')
         .then((response) => {
             if (isMounted){
@@ -37,7 +36,6 @@ function GroupsList() {
                     setOpenedGroups(opened);
                 }
             }
-            console.log('data: ', response.data);
         });
         GrCtx.setEditedGroupID(null);
         return () => { isMounted = false }
@@ -70,7 +68,6 @@ function GroupsList() {
         axios.get(`http://127.0.0.1:5000/group/${groupID}/devices`)
         .then((response) => {
             GrCtx.setDevices(response.data);
-            console.log(`devices for groupID ${groupID}:`, response.data);
         })
     }
 

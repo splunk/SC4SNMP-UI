@@ -13,7 +13,6 @@ const validateInventoryAndGroup = (validationObj) => {
         profiles: []
     };
     let isValid = true;
-    console.log(validationObj);
 
     // Validate group name
     if (validationObj.hasOwnProperty("groupName")){
@@ -107,7 +106,6 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate profiles
     if (validationObj.hasOwnProperty("profiles") && validationObj.hasOwnProperty("initProfiles")){
-        console.log(validationObj.initProfiles);
         for (const prof of validationObj.profiles){
             if (!validationObj.initProfiles.includes(prof)){
                 isValid = false;

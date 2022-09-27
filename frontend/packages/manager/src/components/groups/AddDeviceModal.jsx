@@ -60,7 +60,6 @@ function AddDeviceModal(){
     };
 
     const handleApply = useCallback((e) => {
-        console.log("aplying")
         const deviceObj = {
             address: GrCtx.address,
             port: GrCtx.port,
@@ -71,7 +70,6 @@ function AddDeviceModal(){
             groupId: GrCtx.groupID,
             onlyAdress: true,
         };
-        console.log(deviceObj);
         const validation = validateInventoryAndGroup(deviceObj)
         delete deviceObj.onlyAdress;
 
@@ -79,10 +77,8 @@ function AddDeviceModal(){
             // form is valid
             ValCtx.resetAllErrors();
             if (GrCtx.isDeviceEdit){
-                console.log("updating device")
                 updateDevice(deviceObj, GrCtx.deviceID)
             }else{
-                console.log("posting new device")
                 postDevice(deviceObj);
             }
             GrCtx.setEditedGroupID(GrCtx.groupID);

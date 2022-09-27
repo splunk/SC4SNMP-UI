@@ -44,12 +44,10 @@ function ProfilePanel() {
 
     useEffect(() => {
     let isMounted = true;
-    console.log('use effect')
     axios.get('http://127.0.0.1:5000/profiles')
     .then((response) => {
         if (isMounted)
             setProfiles(response.data);
-    console.log('data: ', response.data);
     })
     return () => { isMounted = false }
     }, [ProfCtx.profilesChange]);

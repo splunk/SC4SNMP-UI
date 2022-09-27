@@ -65,8 +65,6 @@ function AddInventoryModal() {
                 smartProfiles: InvCtx.smartProfiles,
                 initProfiles: initProfiles
             }
-            console.log("Aplying inventory")
-         console.log(inventoryObj)
         const validation = validateInventoryAndGroup(inventoryObj)
         delete inventoryObj.initProfiles;
 
