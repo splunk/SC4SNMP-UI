@@ -83,6 +83,7 @@ function GroupsList() {
 
     const handleRowClick = (row, groupID) => {
         BtnCtx.setButtonsOpen(true);
+        GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupID(groupID);
         GrCtx.setDeviceID(row._id.$oid);
@@ -101,9 +102,8 @@ function GroupsList() {
     };
 
     const buttonsRequestEditDevice = (context) => {
-       context.setButtonsOpen(false);
-       context.setIsDeviceEdit(true);
-       context.setAddDeviceOpen(true);
+        context.setButtonsOpen(false);
+        context.setAddDeviceOpen(true);
     };
 
     const deleteGroupButtonHandler = (groupID, groupName) => {

@@ -67,8 +67,10 @@ function AddDeviceModal(){
             }
 
             if (GrCtx.isDeviceEdit){
+                console.log("updating device")
                 updateDevice(deviceObj, GrCtx.deviceID)
             }else{
+                console.log("posting new device")
                 postDevice(deviceObj);
             }
 
