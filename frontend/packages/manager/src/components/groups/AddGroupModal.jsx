@@ -8,6 +8,7 @@ import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
 import axios from "axios";
+import validateInventory from "../inventory/ValidateInventory";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
@@ -41,7 +42,6 @@ function AddGroupModal() {
         };
         GrCtx.makeGroupsChange();
         GrCtx.setAddGroupOpen(false);
-
         GrCtx.addGroupModalToggle?.current?.focus();
     };
 

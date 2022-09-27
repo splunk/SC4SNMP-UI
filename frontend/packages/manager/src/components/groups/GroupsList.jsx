@@ -19,21 +19,28 @@ function GroupsList() {
     const BtnCtx = useContext(ButtonsContext);
 
     useEffect(() => {
-    let isMounted = true;
-    console.log('use effect')
-    axios.get('http://127.0.0.1:5000/groups')
-    .then((response) => {
-        if (isMounted){
-            setGroups(response.data);
-            let opened = {};
-            for (let group of response.data){
-                opened[group._id.$oid] = false;
+        let isMounted = true;
+        console.log('use effect')
+        axios.get('http://127.0.0.1:5000/groups')
+        .then((response) => {
+            if (isMounted){
+                setGroups(response.data);
+                let existingGroups = [];
+                let opened = {};
+                for (let group of response.data){
+                    opened[group._id.$oid] = false;
+                    existingGroups.push(group._id.$oid);
+                }
+                if (GrCtx.editedGroupID && existingGroups.includes(GrCtx.editedGroupID)){
+                    openCollapsible(GrCtx.editedGroupID);
+                }else{
+                    setOpenedGroups(opened);
+                }
             }
-            setOpenedGroups(opened);
-        }
-        console.log('data: ', response.data);
-    })
-    return () => { isMounted = false }
+            console.log('data: ', response.data);
+        });
+        GrCtx.setEditedGroupID(null);
+        return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
 
     const newDeviceButtonHandler = (groupID, groupName) => {
@@ -116,6 +123,7 @@ function GroupsList() {
         context.setDeleteOpen(false);
         context.resetDevice();
         context.setDeleteUrl('');
+        context.setEditedGroupID(GrCtx.groupID)
         context.makeGroupsChange();
         context.addGroupModalToggle?.current?.focus();
     };

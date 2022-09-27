@@ -44,6 +44,7 @@ export function GroupContextProvider(props){
 
     // Data for auto refreshing groups panel
     const [groupsChange, setGroupsChange] = useState(true);
+    const [editedGroupID, setEditedGroupID] = useState(null);
 
     function groupsChangeHandler() {
         setGroupsChange(prev => {return !prev;});
@@ -99,8 +100,9 @@ export function GroupContextProvider(props){
 
         // Data for auto refreshing groups panel
         groupsChange: groupsChange,
-        makeGroupsChange: groupsChangeHandler
-
+        makeGroupsChange: groupsChangeHandler,
+        editedGroupID: editedGroupID,
+        setEditedGroupID: setEditedGroupID
     };
 
     return (

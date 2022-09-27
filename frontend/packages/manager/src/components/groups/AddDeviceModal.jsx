@@ -72,6 +72,7 @@ function AddDeviceModal(){
                 postDevice(deviceObj);
             }
 
+            GrCtx.setEditedGroupID(GrCtx.groupID);
             GrCtx.resetDevice();
             GrCtx.setAddDeviceOpen(false);
             GrCtx.makeGroupsChange();
