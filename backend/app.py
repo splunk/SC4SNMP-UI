@@ -124,14 +124,14 @@ def update_group(group_id):
 @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 def delete_group_and_devices(group_id):
     db.groups.delete_one({'_id': ObjectId(group_id)})
-    db.devices.delete_many({"group_id": group_id})
+    db.devices.delete_many({"groupId": group_id})
     return "success"
 
 
 @app.route('/group/<group_id>/devices')
 @cross_origin()
 def get_devices_of_groups_list(group_id):
-    devices = db.devices.find({"group_id": group_id})
+    devices = db.devices.find({"groupId": group_id})
     devices_list = list(devices)
     return json_util.dumps(devices_list)
 
