@@ -1,8 +1,8 @@
 import React from 'react';
 import TabLayout from '@splunk/react-ui/TabLayout';
 import ProfilesPage from "./pages/ProfilesPage";
-import InventoryPage from "./pages/InventoryPage"
-import GroupsPage from "./pages/GroupsPage"
+import InventoryPage from "./pages/InventoryPage";
+import GroupsPage from "./pages/GroupsPage";
 import { ProfileContxtProvider } from "./store/profile-contxt";
 import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
