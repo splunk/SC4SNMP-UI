@@ -30,59 +30,59 @@ function GroupsList() {
                     opened[group._id.$oid] = false;
                     existingGroups.push(group._id.$oid);
                 }
-                if (GrCtx.editedGroupID && existingGroups.includes(GrCtx.editedGroupID)){
-                    openCollapsible(GrCtx.editedGroupID);
+                if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
+                    openCollapsible(GrCtx.editedGroupId);
                 }else{
                     setOpenedGroups(opened);
                 }
             }
         });
-        GrCtx.setEditedGroupID(null);
+        GrCtx.setEditedGroupId(null);
         return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
 
-    const newDeviceButtonHandler = (groupID, groupName) => {
-        GrCtx.setGroupID(groupID);
+    const newDeviceButtonHandler = (groupId, groupName) => {
+        GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
         GrCtx.setIsDeviceEdit(false);
         GrCtx.setAddDeviceOpen(true);
         GrCtx.resetDevice();
     };
 
-    const editGroupButtonHandler = (groupID, groupName) => {
-        GrCtx.setGroupID(groupID);
+    const editGroupButtonHandler = (groupId, groupName) => {
+        GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
         GrCtx.setIsGroupEdit(true);
         GrCtx.setAddGroupOpen(true);
     };
 
-    const openCollapsible = (groupID) => {
+    const openCollapsible = (groupId) => {
         const opened = {};
-        opened[groupID] = true;
+        opened[groupId] = true;
         setOpenedGroups(prev => {
             for (const prop in prev){
                 prev[prop] = false;
             }
             return {...prev, ...opened}}
         );
-        axios.get(`http://127.0.0.1:5000/group/${groupID}/devices`)
+        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices`)
         .then((response) => {
             GrCtx.setDevices(response.data);
         })
     }
 
-    const closeCollapsible = (groupID) => {
+    const closeCollapsible = (groupId) => {
         const opened = {};
-        opened[groupID] = false;
+        opened[groupId] = false;
         setOpenedGroups(prev => {return {...prev, ...opened}});
         GrCtx.setDevices([]);
     }
 
-    const handleRowClick = (row, groupID) => {
+    const handleRowClick = (row, groupId) => {
         BtnCtx.setButtonsOpen(true);
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
-        GrCtx.setGroupID(groupID);
+        GrCtx.setGroupId(groupId);
         GrCtx.setDeviceID(row._id.$oid);
         GrCtx.setAddress(row.address);
         GrCtx.setPort(row.port);
@@ -103,10 +103,10 @@ function GroupsList() {
         context.setAddDeviceOpen(true);
     };
 
-    const deleteGroupButtonHandler = (groupID, groupName) => {
+    const deleteGroupButtonHandler = (groupId, groupName) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
-        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupID}`);
+        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
     };
 
     const deleteModalRequest = (context) => {
@@ -120,7 +120,7 @@ function GroupsList() {
         context.setDeleteOpen(false);
         context.resetDevice();
         context.setDeleteUrl('');
-        context.setEditedGroupID(GrCtx.groupID)
+        context.setEditedGroupId(GrCtx.groupId)
         context.makeGroupsChange();
         context.addGroupModalToggle?.current?.focus();
     };

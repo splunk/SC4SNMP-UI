@@ -67,7 +67,7 @@ function AddDeviceModal(){
             community: GrCtx.community,
             secret: GrCtx.secret,
             securityEngine: GrCtx.securityEngine,
-            groupId: GrCtx.groupID,
+            groupId: GrCtx.groupId,
             onlyAdress: true,
         };
         const validation = validateInventoryAndGroup(deviceObj)
@@ -81,7 +81,7 @@ function AddDeviceModal(){
             }else{
                 postDevice(deviceObj);
             }
-            GrCtx.setEditedGroupID(GrCtx.groupID);
+            GrCtx.setEditedGroupId(GrCtx.groupId);
             GrCtx.resetDevice();
             GrCtx.setAddDeviceOpen(false);
             GrCtx.makeGroupsChange();
@@ -98,7 +98,7 @@ function AddDeviceModal(){
         };
         },
         [GrCtx.address, GrCtx.port, GrCtx.version, GrCtx.community, GrCtx.secret, GrCtx.securityEngine, GrCtx.isEdit,
-            GrCtx.deviceID, GrCtx.setAddDeviceOpen, GrCtx.groupID]
+            GrCtx.deviceID, GrCtx.setAddDeviceOpen, GrCtx.groupId]
     );
 
     const validationGroup = {

@@ -22,8 +22,8 @@ function AddGroupModal() {
         })
     };
 
-    const updateGroup = (groupObj, groupID) => {
-        axios.post(`http://127.0.0.1:5000/groups/update/${groupID}`, groupObj)
+    const updateGroup = (groupObj, groupId) => {
+        axios.post(`http://127.0.0.1:5000/groups/update/${groupId}`, groupObj)
             .then((response) => {
         })
     };
@@ -44,7 +44,7 @@ function AddGroupModal() {
             // form is valid
             ValCtx.resetAllErrors();
             if (GrCtx.isGroupEdit){
-                updateGroup(groupObj, GrCtx.groupID);
+                updateGroup(groupObj, GrCtx.groupId);
             }else {
                 postGroup(groupObj);
             };

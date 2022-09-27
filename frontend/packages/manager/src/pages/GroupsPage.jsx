@@ -11,7 +11,7 @@ function GroupsPage() {
         GrCtx.setAddGroupOpen(true);
         GrCtx.setIsGroupEdit(false);
         GrCtx.setGroupName('');
-        GrCtx.setGroupID(null);
+        GrCtx.setGroupId(null);
     };
 
 

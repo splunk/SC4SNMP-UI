@@ -11,7 +11,7 @@ import { InventoryDevicesValidationContxtProvider } from "./store/inventory-devi
 
 function Uncontrolled() {
     return (
-        <TabLayout defaultActivePanelId="three">
+        <TabLayout defaultActivePanelId="one">
             <TabLayout.Panel label="Profiles" panelId="one">
                 <ButtonsContextProvider>
                     <ProfileContxtProvider>

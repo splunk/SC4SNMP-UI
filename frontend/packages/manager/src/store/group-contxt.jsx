@@ -21,7 +21,7 @@ export function GroupContextProvider(props){
     // Variables for group
     const [groupName, setGroupName] = useState('');
     const [devices, setDevices] = useState([]);
-    const [groupID, setGroupID] = useState(null);
+    const [groupId, setGroupId] = useState(null);
 
     // Variables for device
     const [deviceID, setDeviceID] = useState(null);
@@ -44,7 +44,7 @@ export function GroupContextProvider(props){
 
     // Data for auto refreshing groups panel
     const [groupsChange, setGroupsChange] = useState(true);
-    const [editedGroupID, setEditedGroupID] = useState(null);
+    const [editedGroupId, setEditedGroupId] = useState(null);
 
     function groupsChangeHandler() {
         setGroupsChange(prev => {return !prev;});
@@ -72,8 +72,8 @@ export function GroupContextProvider(props){
         setIsGroupEdit: setIsGroupEdit,
         isDeviceEdit: isDeviceEdit,
         setIsDeviceEdit: setIsDeviceEdit,
-        groupID: groupID,
-        setGroupID: setGroupID,
+        groupId: groupId,
+        setGroupId: setGroupId,
 
         // Variables for group
         groupName: groupName,
@@ -101,8 +101,8 @@ export function GroupContextProvider(props){
         // Data for auto refreshing groups panel
         groupsChange: groupsChange,
         makeGroupsChange: groupsChangeHandler,
-        editedGroupID: editedGroupID,
-        setEditedGroupID: setEditedGroupID
+        editedGroupId: editedGroupId,
+        setEditedGroupId: setEditedGroupId
     };
 
     return (
