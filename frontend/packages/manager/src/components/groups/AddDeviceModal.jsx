@@ -11,6 +11,7 @@ import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
+import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 
 
 function AddDeviceModal(){
@@ -102,15 +103,6 @@ function AddDeviceModal(){
         [GrCtx.address, GrCtx.port, GrCtx.version, GrCtx.community, GrCtx.secret, GrCtx.securityEngine, GrCtx.isEdit,
             GrCtx.deviceId, GrCtx.setAddDeviceOpen, GrCtx.groupId]
     );
-
-    const validationGroup = {
-      display: "flex",
-      flexDirection: "column"
-    };
-
-    const validationMessage = {
-      color: "red"
-    };
 
     return (
         <div>

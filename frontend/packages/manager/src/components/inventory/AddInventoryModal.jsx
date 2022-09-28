@@ -13,6 +13,7 @@ import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
+import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 
 
 function AddInventoryModal() {
@@ -131,15 +132,6 @@ function AddInventoryModal() {
         [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
             InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
     );
-
-    const validationGroup = {
-      display: "flex",
-      flexDirection: "column"
-    };
-
-    const validationMessage = {
-      color: "red"
-    };
 
     return (
         <div>

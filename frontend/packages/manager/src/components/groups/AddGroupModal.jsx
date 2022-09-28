@@ -11,6 +11,7 @@ import axios from "axios";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
+import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
@@ -67,15 +68,6 @@ function AddGroupModal() {
                 };
             };
         }
-    };
-
-    const validationGroup = {
-      display: "flex",
-      flexDirection: "column"
-    };
-
-    const validationMessage = {
-      color: "red"
     };
 
     return (

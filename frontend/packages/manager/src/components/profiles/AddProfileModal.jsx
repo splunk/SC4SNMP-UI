@@ -12,6 +12,7 @@ import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 
 
 function AddProfileModal(props) {
@@ -111,16 +112,6 @@ function AddProfileModal(props) {
         [ProfCtx.frequency, ProfCtx.profileName, ProfCtx.varBinds, ProfCtx.conditions, ProfCtx.setAddOpen,
             ProfCtx.addModalToggle, ProfCtx.makeProfilesChange, ProfCtx.profileId]
     );
-
-
-    const validationGroup = {
-      display: "flex",
-      flexDirection: "column"
-    };
-
-    const validationMessage = {
-      color: "red"
-    };
 
     return (
         <div>
