@@ -85,7 +85,7 @@ function AddGroupModal() {
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange}/>
+                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange} error={((ValCtx.groupNameErrors) ? true : false)}/>
                             {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>

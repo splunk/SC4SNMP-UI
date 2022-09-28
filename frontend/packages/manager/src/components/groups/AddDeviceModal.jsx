@@ -119,13 +119,13 @@ function AddDeviceModal(){
                 <Modal.Body>
                     <ControlGroup label="IP address/Group">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.address} onChange={handleChangeAddress}/>
+                            <Text value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
                     <ControlGroup label="Port" >
                         <div style={validationGroup}>
-                            <Number value={GrCtx.port} onChange={handleChangePort}/>
+                            <Number value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
@@ -144,21 +144,21 @@ function AddDeviceModal(){
 
                     <ControlGroup label="Community">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.community} onChange={handleChangeCommunity}/>
+                            <Text value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
                             {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <ControlGroup label="Secret">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.secret} onChange={handleChangeSecret}/>
+                            <Text value={GrCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
                             {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <ControlGroup label="Security Engine">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine}/>
+                            <Text value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
                             {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
