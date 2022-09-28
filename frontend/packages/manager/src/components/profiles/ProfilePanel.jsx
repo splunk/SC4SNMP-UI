@@ -10,14 +10,17 @@ import DeleteModal from "../DeleteModal";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
-
     const ProfCtx = useContext(ProfileContext);
 
-    const deleteProfileButtonHandler = (id, profileName) => {
-        ProfCtx.setProfileId(id);
-        ProfCtx.setProfileName(profileName);
-        ProfCtx.setDeleteOpen(true);
-    };
+    useEffect(() => {
+    let isMounted = true;
+    axios.get('http://127.0.0.1:5000/profiles')
+    .then((response) => {
+        if (isMounted)
+            setProfiles(response.data);
+    })
+    return () => { isMounted = false }
+    }, [ProfCtx.profilesChange]);
 
     const editProfileButtonHandler = (profile) => {
         ProfCtx.setProfileId(profile._id.$oid);
@@ -27,6 +30,12 @@ function ProfilePanel() {
         ProfCtx.setConditions(profile.conditions);
         ProfCtx.setIsEdit(true);
         ProfCtx.setAddOpen(true);
+    };
+
+    const deleteProfileButtonHandler = (id, profileName) => {
+        ProfCtx.setProfileId(id);
+        ProfCtx.setProfileName(profileName);
+        ProfCtx.setDeleteOpen(true);
     };
 
     const deleteModalRequest = (context) => {
@@ -42,16 +51,6 @@ function ProfilePanel() {
         context.setDeleteOpen(false);
         context.addModalToggle?.current?.focus();
     };
-
-    useEffect(() => {
-    let isMounted = true;
-    axios.get('http://127.0.0.1:5000/profiles')
-    .then((response) => {
-        if (isMounted)
-            setProfiles(response.data);
-    })
-    return () => { isMounted = false }
-    }, [ProfCtx.profilesChange]);
 
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
@@ -99,7 +98,6 @@ function ProfilePanel() {
         </CollapsiblePanel>
     ));
 
-    console.log(ProfCtx.profilesChange);
     return (
             <div>
                 {profilesPanels}

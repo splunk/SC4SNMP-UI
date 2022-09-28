@@ -9,94 +9,16 @@ import RadioBar from '@splunk/react-ui/RadioBar';
 import InventoryContext from "../../store/inventory-contxt";
 import axios from "axios";
 import Button from '@splunk/react-ui/Button';
-import validateInventoryAndGroup from "../ValidateInventoryAndGroup";
+import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-contxt";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 
 
 function AddInventoryModal() {
-
     const [initProfiles, setInitProfiles] = useState([]);
-
     const InvCtx = useContext(InventoryContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
-
-    useEffect(() => {
-        let isMounted = true;
-        axios.get('http://127.0.0.1:5000/profiles/names')
-        .then((response) => {
-            if (isMounted)
-                setInitProfiles(response.data);
-        })
-        return () => { isMounted = false }
-    }, []);
-
-    const postInventory = (inventoryObj) => {
-        axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
-            .then((response) => {
-                InvCtx.makeInventoryChange();
-        })
-    }
-
-    const updateInventory = (inventoryObj, inventoryId) => {
-        axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
-            .then((response) => {
-                InvCtx.makeInventoryChange();
-        })
-    }
-
-    const handleRequestClose = () => {
-        ValCtx.resetAllErrors();
-        InvCtx.resetFormData();
-        InvCtx.setAddOpen(false);
-        InvCtx.addModalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
-    };
-
-    const handleApply = useCallback(
-    (e) => {
-        const inventoryObj = {
-                address: InvCtx.address,
-                port: InvCtx.port,
-                version: InvCtx.version,
-                community: InvCtx.community,
-                secret: InvCtx.secret,
-                securityEngine: InvCtx.securityEngine,
-                walkInterval: InvCtx.walkInterval,
-                profiles: InvCtx.profiles,
-                smartProfiles: InvCtx.smartProfiles,
-                initProfiles: initProfiles
-            }
-        const validation = validateInventoryAndGroup(inventoryObj)
-        delete inventoryObj.initProfiles;
-
-        if (validation[0]){
-            // form is valid
-            ValCtx.resetAllErrors();
-            if (InvCtx.isEdit){
-            updateInventory(inventoryObj, InvCtx.inventoryId)
-            }else{
-                postInventory(inventoryObj);
-            }
-            InvCtx.resetFormData();
-            InvCtx.setAddOpen(false);
-            InvCtx.addModalToggle?.current?.focus();
-        }else{
-            // form is invalid
-            const errors = validation[1];
-            for (const property in errors) {
-                if (errors[property].length > 0){
-                    ValCtx.setErrors(property, errors[property]);
-                }else {
-                    ValCtx.resetErrors(property);
-                };
-            };
-        }
-
-        },
-        [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
-            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
-    );
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         InvCtx.setAddress(val);
@@ -132,7 +54,83 @@ function AddInventoryModal() {
 
     const handleChange = (e, { values }) => {
         InvCtx.setProfiles(values);
-    }
+    };
+
+    useEffect(() => {
+        let isMounted = true;
+        axios.get('http://127.0.0.1:5000/profiles/names')
+        .then((response) => {
+            if (isMounted)
+                setInitProfiles(response.data);
+        })
+        return () => { isMounted = false }
+    }, []);
+
+    const postInventory = (inventoryObj) => {
+        axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
+            .then((response) => {
+                InvCtx.makeInventoryChange();
+        })
+    };
+
+    const updateInventory = (inventoryObj, inventoryId) => {
+        axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
+            .then((response) => {
+                InvCtx.makeInventoryChange();
+        })
+    };
+
+    const handleRequestClose = () => {
+        ValCtx.resetAllErrors();
+        InvCtx.resetFormData();
+        InvCtx.setAddOpen(false);
+        InvCtx.addModalToggle?.current?.focus(); // Must return focus to the invoking element when the modal closes
+    };
+
+    const handleApply = useCallback(
+    (e) => {
+        const inventoryObj = {
+                address: InvCtx.address,
+                port: InvCtx.port,
+                version: InvCtx.version,
+                community: InvCtx.community,
+                secret: InvCtx.secret,
+                securityEngine: InvCtx.securityEngine,
+                walkInterval: InvCtx.walkInterval,
+                profiles: InvCtx.profiles,
+                smartProfiles: InvCtx.smartProfiles,
+                initProfiles: initProfiles
+            }
+        const validation = validateInventoryAndGroup(inventoryObj)
+        delete inventoryObj.initProfiles;
+
+        if (validation[0]){
+            // form is valid
+            ValCtx.resetAllErrors();
+            if (InvCtx.isEdit){
+                updateInventory(inventoryObj, InvCtx.inventoryId)
+            }else{
+                postInventory(inventoryObj);
+            }
+            InvCtx.resetFormData();
+            InvCtx.setAddOpen(false);
+            InvCtx.addModalToggle?.current?.focus();
+        }else{
+            // form is invalid
+            const errors = validation[1];
+            for (const property in errors) {
+                if (errors[property].length > 0){
+                    ValCtx.setErrors(property, errors[property]);
+                }else {
+                    ValCtx.resetErrors(property);
+                };
+            };
+        }
+
+        },
+        [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
+            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
+    );
 
     const validationGroup = {
       display: "flex",

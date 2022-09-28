@@ -45,7 +45,21 @@ class SortableColumns extends Component {
                 }
                 this.setState({allInventoryRecords: response.data});
         })
-    }
+    };
+
+    handleRowClick = (row) => {
+        this.context.setButtonsOpen(true);
+        this.context.setInventoryId(row._id.$oid);
+        this.context.setAddress(row.address);
+        this.context.setPort(row.port);
+        this.context.setVersion(row.version);
+        this.context.setCommunity(row.community);
+        this.context.setSecret(row.secret);
+        this.context.setSecurityEngine(row.securityEngine);
+        this.context.setWalkInterval(row.walkInterval);
+        this.context.setProfiles(row.profiles);
+        this.context.setSmartProfiles(row.smartProfiles);
+    };
 
     buttonsRequestEdit(context) {
        context.setButtonsOpen(false);
@@ -73,17 +87,6 @@ class SortableColumns extends Component {
         context.addModalToggle?.current?.focus();
     };
 
-    componentDidMount() {
-        this.getFetchInventoryRows();
-    }
-
-    componentDidUpdate() {
-        if (this.reload){
-            this.reload = false;
-            this.getFetchInventoryRows();
-        }
-    }
-
     handleSort = (e, {sortKey}) => {
         this.setState((state) => {
             const prevSortKey = state.sortKey;
@@ -96,19 +99,16 @@ class SortableColumns extends Component {
         });
     };
 
-    handleRowClick = (row) => {
-        this.context.setButtonsOpen(true);
-        this.context.setInventoryId(row._id.$oid);
-        this.context.setAddress(row.address);
-        this.context.setPort(row.port);
-        this.context.setVersion(row.version);
-        this.context.setCommunity(row.community);
-        this.context.setSecret(row.secret);
-        this.context.setSecurityEngine(row.securityEngine);
-        this.context.setWalkInterval(row.walkInterval);
-        this.context.setProfiles(row.profiles);
-        this.context.setSmartProfiles(row.smartProfiles);
-    };
+    componentDidMount() {
+        this.getFetchInventoryRows();
+    }
+
+    componentDidUpdate() {
+        if (this.reload){
+            this.reload = false;
+            this.getFetchInventoryRows();
+        }
+    }
 
     render() {
         if (this.props.inventoryChange != this.inventoryChange){

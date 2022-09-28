@@ -7,8 +7,8 @@ import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
 import axios from "axios";
-import validateInventoryAndGroup from "../ValidateInventoryAndGroup";
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-contxt";
+import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 
@@ -16,12 +16,6 @@ import P from '@splunk/react-ui/Paragraph';
 function AddDeviceModal(){
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
-
-    const handleRequestClose = () => {
-        ValCtx.resetAllErrors();
-        GrCtx.resetDevice();
-        GrCtx.setAddDeviceOpen(false);
-    }
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         GrCtx.setAddress(val);
@@ -50,14 +44,24 @@ function AddDeviceModal(){
     const postDevice = (deviceObj) => {
         axios.post('http://127.0.0.1:5000/devices/add', deviceObj)
             .then((response) => {
+                GrCtx.setEditedGroupId(GrCtx.groupId);
+                GrCtx.makeGroupsChange();
         })
     };
 
     const updateDevice = (deviceObj, deviceId) => {
         axios.post(`http://127.0.0.1:5000/devices/update/${deviceId}`, deviceObj)
             .then((response) => {
+                GrCtx.setEditedGroupId(GrCtx.groupId);
+                GrCtx.makeGroupsChange();
         })
     };
+
+    const handleRequestClose = () => {
+        ValCtx.resetAllErrors();
+        GrCtx.resetDevice();
+        GrCtx.setAddDeviceOpen(false);
+    }
 
     const handleApply = useCallback((e) => {
         const deviceObj = {
@@ -81,10 +85,8 @@ function AddDeviceModal(){
             }else{
                 postDevice(deviceObj);
             }
-            GrCtx.setEditedGroupId(GrCtx.groupId);
             GrCtx.resetDevice();
             GrCtx.setAddDeviceOpen(false);
-            GrCtx.makeGroupsChange();
         }else{
             // form is invalid
             const errors = validation[1];

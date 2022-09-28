@@ -30,6 +30,7 @@ function GroupsList() {
                     opened[group._id.$oid] = false;
                     existingGroups.push(group._id.$oid);
                 }
+                // If page was reloaded after updating one of devices, open tab of that group
                 if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
                     openCollapsible(GrCtx.editedGroupId);
                 }else{
@@ -41,6 +42,13 @@ function GroupsList() {
         return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
 
+    const editGroupButtonHandler = (groupId, groupName) => {
+        GrCtx.setGroupId(groupId);
+        GrCtx.setGroupName(groupName);
+        GrCtx.setIsGroupEdit(true);
+        GrCtx.setAddGroupOpen(true);
+    };
+
     const newDeviceButtonHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
@@ -49,11 +57,10 @@ function GroupsList() {
         GrCtx.resetDevice();
     };
 
-    const editGroupButtonHandler = (groupId, groupName) => {
-        GrCtx.setGroupId(groupId);
-        GrCtx.setGroupName(groupName);
-        GrCtx.setIsGroupEdit(true);
-        GrCtx.setAddGroupOpen(true);
+    const deleteGroupButtonHandler = (groupId, groupName) => {
+        BtnCtx.setDeleteOpen(true);
+        GrCtx.setDeleteName(groupName);
+        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
     };
 
     const openCollapsible = (groupId) => {
@@ -79,7 +86,7 @@ function GroupsList() {
     }
 
     const handleRowClick = (row, groupId) => {
-        BtnCtx.setButtonsOpen(true);
+        GrCtx.setButtonsOpen(true);
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupId(groupId);
@@ -101,12 +108,6 @@ function GroupsList() {
     const buttonsRequestEditDevice = (context) => {
         context.setButtonsOpen(false);
         context.setAddDeviceOpen(true);
-    };
-
-    const deleteGroupButtonHandler = (groupId, groupName) => {
-        BtnCtx.setDeleteOpen(true);
-        GrCtx.setDeleteName(groupName);
-        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
     };
 
     const deleteModalRequest = (context) => {

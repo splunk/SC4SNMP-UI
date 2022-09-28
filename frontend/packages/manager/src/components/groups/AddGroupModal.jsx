@@ -8,13 +8,17 @@ import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
 import axios from "axios";
-import validateInventoryAndGroup from "../ValidateInventoryAndGroup";
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-contxt";
+import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+
+    const handleGroupNameChange = useCallback((e, { value: val }) => {
+        GrCtx.setGroupName(val);
+    }, [GrCtx.setGroupName]);
 
     const postGroup = (groupObj) => {
         axios.post('http://127.0.0.1:5000/groups/add', groupObj)
@@ -64,10 +68,6 @@ function AddGroupModal() {
             };
         }
     };
-
-    const handleGroupNameChange = useCallback((e, { value: val }) => {
-        GrCtx.setGroupName(val);
-    }, [GrCtx.setGroupName]);
 
     const validationGroup = {
       display: "flex",

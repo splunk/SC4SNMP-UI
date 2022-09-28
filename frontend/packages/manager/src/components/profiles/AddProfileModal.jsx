@@ -10,16 +10,13 @@ import VarbindsCreator from "./VarbindsCreator";
 import Conditions from "./Conditions";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
-import validateProfiles from "./ValidateProfiles";
+import validateProfiles from "../validation/ValidateProfiles";
+import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
-    const [profileNameErrors, setProfileNameErrors] = useState(null);
-    const [frequencyErrors, setFrequencyErrors] = useState(null);
-    const [varBindsErrors, setVarBindsErrors] = useState(null);
-    const [conditionFieldErrors, setConditionFieldErrors] = useState(null);
-    const [conditionPatternsErrors, setConditionPatternsErrors] = useState(null);
+    const ValCtx = useContext(ProfilesValidationContxt);
     const [newSubmitPatterns, setNewSubmitPatterns] = useState(false);
     const [newSubmitVarBinds, setNewSubmitVarBinds] = useState(false);
 
@@ -31,57 +28,6 @@ function AddProfileModal(props) {
         setNewSubmitVarBinds(!newSubmitVarBinds);
     };
 
-    const resetAllErrors = () =>{
-        setProfileNameErrors(null);
-        setFrequencyErrors(null);
-        setConditionFieldErrors(null);
-        setConditionPatternsErrors(null);
-        setVarBindsErrors(null);
-    };
-
-     const resetErrors = (category) =>{
-        switch (category){
-            case "profileName":
-                setProfileNameErrors(null);
-                break;
-            case "frequency":
-                setFrequencyErrors(null);
-                break;
-            case "conditionField":
-                setConditionFieldErrors(null);
-                break;
-            case "conditionPatterns":
-                setConditionPatternsErrors(null);
-                break;
-            case "varBinds":
-                setVarBindsErrors(null);
-                break;
-            default:
-                break;
-        }
-    };
-
-    const setErrors = (category, errors) => {
-        switch (category){
-            case "profileName":
-                setProfileNameErrors(errors);
-                break;
-            case "frequency":
-                setFrequencyErrors(errors);
-                break;
-            case "conditionField":
-                setConditionFieldErrors(errors);
-                break;
-            case "conditionPatterns":
-                setConditionPatternsErrors(errors);
-                break;
-            case "varBinds":
-                setVarBindsErrors(errors);
-                break;
-            default:
-                break;
-        }
-    };
 
     const handleProfileName = useCallback((e, { value: val }) => {
         ProfCtx.setProfileName(val);
@@ -117,7 +63,7 @@ function AddProfileModal(props) {
 
    const handleRequestClose = useCallback(
     (e) => {
-        resetAllErrors();
+        ValCtx.resetAllErrors();
         ProfCtx.setAddOpen(false);
         ProfCtx.addModalToggle?.current?.focus();
         },
@@ -127,18 +73,19 @@ function AddProfileModal(props) {
 
     const handleApply = useCallback(
     (e) => {
-        const validation = validateProfiles(ProfCtx.profileName, ProfCtx.frequency, ProfCtx.conditions,
-            ProfCtx.varBinds);
 
-        if (validation[0]){
-            // form is valid
-            resetAllErrors();
-            let profileObj = {
+        let profileObj = {
             profileName: ProfCtx.profileName,
             frequency: ProfCtx.frequency,
             varBinds: ProfCtx.varBinds,
             conditions: ProfCtx.conditions
-            };
+        };
+
+        const validation = validateProfiles(profileObj);
+
+        if (validation[0]){
+            // form is valid
+            ValCtx.resetAllErrors();
             if (ProfCtx.isEdit){
                 updateProfile(profileObj, ProfCtx.profileId);
             }else{
@@ -153,9 +100,9 @@ function AddProfileModal(props) {
             const errors = validation[1];
             for (const property in errors) {
                 if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
-                    setErrors(property, errors[property]);
+                    ValCtx.setErrors(property, errors[property]);
                 }else {
-                    resetErrors(property);
+                    ValCtx.resetErrors(property);
                 };
             };
         };
@@ -184,24 +131,24 @@ function AddProfileModal(props) {
 
                     <ControlGroup label="Profile name">
                         <div style={validationGroup}>
-                            <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((profileNameErrors) ? true : false)}/>
-                            {((profileNameErrors) ? profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
+                            {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
                     <ControlGroup label="Frequency of polling" >
                         <div style={validationGroup}>
-                            <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((frequencyErrors) ? true : false)}/>
-                            {((frequencyErrors) ? frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
+                            {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
 
-                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={conditionFieldErrors}
-                                errorPatterns={conditionPatternsErrors} setErrorPatterns={setConditionPatternsErrors}
+                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={ValCtx.conditionFieldErrors}
+                                errorPatterns={ValCtx.conditionPatternsErrors} setErrorPatterns={ValCtx.setConditionPatternsErrors}
                                 validationMessage={validationMessage} validationGroup={validationGroup} newSubmit={newSubmitPatterns}/>
 
                     <ControlGroup label="VarBinds">
-                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={varBindsErrors} setError={setVarBindsErrors}
+                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={ValCtx.varBindsErrors} setError={ValCtx.setVarBindsErrors}
                                          validationMessage={validationMessage} validationGroup={validationGroup}
                         newSubmit={newSubmitVarBinds}/>
                     </ControlGroup>
