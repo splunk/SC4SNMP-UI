@@ -72,6 +72,10 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate community
     if (validationObj.hasOwnProperty("community")){
+        if ((validationObj.version === "1" || validationObj.version === "2c") && validationObj.community.length === 0){
+            isValid = false;
+            errors.community.push("When using SNMP version 1 or 2c, community string must be specified");
+        }
         if (validationObj.community.length > 0 && !validationObj.community.match(/^[.a-zA-Z0-9_-]+$/)){
             isValid = false;
             errors.community.push("Community can consist only of upper and lower english letters, " +
