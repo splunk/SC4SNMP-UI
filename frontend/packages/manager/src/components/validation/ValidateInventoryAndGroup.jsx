@@ -2,6 +2,11 @@ import React from 'react';
 
 const validateInventoryAndGroup = (validationObj) => {
 
+    /*
+     'errors' is an object storing error messages for each field.
+     Each property is a list of errors for the respective field.
+     */
+
     let errors = {
         groupName: [],
         address: [],
@@ -33,7 +38,7 @@ const validateInventoryAndGroup = (validationObj) => {
             errors.address.push(err);
             isValid = false;
         }else if (Number.isInteger(Number(validationObj.address.charAt(0))) || validationObj.hasOwnProperty("onlyAdress")){
-            let doesMatch = validationObj.address.match(/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/);
+            let doesMatch = validationObj.address.match(/^(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))$/);
             let octetsValid = true;
             if (doesMatch){
                 let octets = validationObj.address.split(".");
