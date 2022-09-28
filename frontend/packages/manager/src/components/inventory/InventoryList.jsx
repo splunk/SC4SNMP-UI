@@ -62,13 +62,14 @@ class SortableColumns extends Component {
         axios.post(`http://127.0.0.1:5000/inventory/delete/${context.inventoryId}`)
           .then(function (response) {
             console.log(response);
+            context.makeInventoryChange();
           })
           .catch(function (error) {
             console.log(error);
+            context.makeInventoryChange();
           });
         context.setDeleteOpen(false);
         context.resetFormData();
-        context.makeInventoryChange();
         context.addModalToggle?.current?.focus();
     };
 

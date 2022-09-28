@@ -113,15 +113,16 @@ function GroupsList() {
         axios.post(context.deleteUrl)
           .then(function (response) {
             console.log(response);
+            context.makeGroupsChange();
           })
           .catch(function (error) {
             console.log(error);
+            context.makeGroupsChange();
           });
         context.setDeleteOpen(false);
         context.resetDevice();
         context.setDeleteUrl('');
         context.setEditedGroupId(GrCtx.groupId)
-        context.makeGroupsChange();
         context.addGroupModalToggle?.current?.focus();
     };
 

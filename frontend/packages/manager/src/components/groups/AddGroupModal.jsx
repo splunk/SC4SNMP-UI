@@ -19,12 +19,14 @@ function AddGroupModal() {
     const postGroup = (groupObj) => {
         axios.post('http://127.0.0.1:5000/groups/add', groupObj)
             .then((response) => {
+                GrCtx.makeGroupsChange();
         })
     };
 
     const updateGroup = (groupObj, groupId) => {
         axios.post(`http://127.0.0.1:5000/groups/update/${groupId}`, groupObj)
             .then((response) => {
+                GrCtx.makeGroupsChange();
         })
     };
 
@@ -48,7 +50,6 @@ function AddGroupModal() {
             }else {
                 postGroup(groupObj);
             };
-            GrCtx.makeGroupsChange();
             GrCtx.setAddGroupOpen(false);
             GrCtx.addGroupModalToggle?.current?.focus();
         }else{

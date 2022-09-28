@@ -35,12 +35,14 @@ function AddInventoryModal() {
     const postInventory = (inventoryObj) => {
         axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
             .then((response) => {
+                InvCtx.makeInventoryChange();
         })
     }
 
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
+                InvCtx.makeInventoryChange();
         })
     }
 
@@ -79,7 +81,6 @@ function AddInventoryModal() {
             InvCtx.resetFormData();
             InvCtx.setAddOpen(false);
             InvCtx.addModalToggle?.current?.focus();
-            InvCtx.makeInventoryChange();
         }else{
             // form is invalid
             const errors = validation[1];

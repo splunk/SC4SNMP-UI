@@ -1,29 +1,7 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
 import ButtonsContext from "./buttons-contx";
 
-const ProfileContext = createContext({
-    profileId: null,
-    setProfileId: () => {},
-    deleteOpen: false,
-    setDeleteOpen: () => {},
-    deleteModalToggle: null,
-    profilesChange: true,
-    setProfilesChange: (profName) => {},
-    addOpen: false,
-    setAddOpen: () => {},
-    addModalToggle: null,
-
-    profileName: "",
-    setProfileName: () => {},
-    frequency: 1,
-    setFrequency: () => {},
-    varBinds: null,
-    setVarBinds: () => {},
-    conditions: null,
-    setConditions: () => {},
-    isEdit: false,
-    setIsEdit: () => {}
-});
+const ProfileContext = createContext();
 
 export function ProfileContxtProvider(props) {
     const BtnCtx = useContext(ButtonsContext);

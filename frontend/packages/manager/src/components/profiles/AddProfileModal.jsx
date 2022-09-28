@@ -103,6 +103,7 @@ function AddProfileModal(props) {
         axios.post('http://127.0.0.1:5000/profiles/add', profileObj)
             .then((response) => {
                 console.log(response);
+                ProfCtx.makeProfilesChange();
         })
     }
 
@@ -110,6 +111,7 @@ function AddProfileModal(props) {
         axios.post(`http://127.0.0.1:5000/profiles/update/${profileId}`, profileObj)
             .then((response) => {
                 console.log(response);
+                ProfCtx.makeProfilesChange();
         })
     }
 
@@ -144,7 +146,6 @@ function AddProfileModal(props) {
             }
             ProfCtx.setAddOpen(false);
             ProfCtx.addModalToggle?.current?.focus();
-            ProfCtx.makeProfilesChange();
         }else{
             // form is invalid
             setNewSubmitPatterns(prevNewSubmitPatterns => {return !prevNewSubmitPatterns;});
