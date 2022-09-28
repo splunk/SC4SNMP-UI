@@ -33,12 +33,13 @@ function ProfilePanel() {
         axios.post(`http://127.0.0.1:5000/profiles/delete/${context.profileId}`)
           .then(function (response) {
             console.log(response);
+            context.makeProfilesChange();
           })
           .catch(function (error) {
             console.log(error);
+            context.makeProfilesChange();
           });
         context.setDeleteOpen(false);
-        context.makeProfilesChange();
         context.addModalToggle?.current?.focus();
     };
 
@@ -98,7 +99,7 @@ function ProfilePanel() {
         </CollapsiblePanel>
     ));
 
-
+    console.log(ProfCtx.profilesChange);
     return (
             <div>
                 {profilesPanels}

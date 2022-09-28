@@ -24,7 +24,7 @@ export function GroupContextProvider(props){
     const [groupId, setGroupId] = useState(null);
 
     // Variables for device
-    const [deviceID, setDeviceID] = useState(null);
+    const [deviceId, setDeviceId] = useState(null);
     const [address, setAddress] = useState('');
     const [port, setPort] = useState(161);
     const [version, setVersion] = useState('2c');
@@ -33,7 +33,7 @@ export function GroupContextProvider(props){
     const [securityEngine, setSecurityEngine] = useState('');
 
     function resetDevice() {
-        setDeviceID(null);
+        setDeviceId(null);
         setAddress('');
         setPort(161);
         setVersion('2c');
@@ -82,8 +82,8 @@ export function GroupContextProvider(props){
         setDevices: setDevices,
 
         // Variables for device
-        deviceID: deviceID,
-        setDeviceID: setDeviceID,
+        deviceId: deviceId,
+        setDeviceId: setDeviceId,
         address: address,
         setAddress: setAddress,
         port: port,
