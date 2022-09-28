@@ -109,7 +109,7 @@ function AddDeviceModal(){
             <Modal onRequestClose={handleRequestClose} open={GrCtx.addDeviceOpen} style={{ width: '600px' }}>
                 <Modal.Header title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add new device to group ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
                 <Modal.Body>
-                    <ControlGroup label="IP address/Group">
+                    <ControlGroup label="IP address">
                         <div style={validationGroup}>
                             <Text value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}

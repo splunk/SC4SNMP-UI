@@ -21,19 +21,19 @@ function Uncontrolled() {
                         </ProfilesValidationContxtProvider>
                     </ProfileContxtProvider>
                 </TabLayout.Panel>
-                <TabLayout.Panel label="Inventory" panelId="two">
-                    <InventoryContextProvider>
-                        <InventoryDevicesValidationContxtProvider>
-                            <InventoryPage />
-                        </InventoryDevicesValidationContxtProvider>
-                    </InventoryContextProvider>
-                </TabLayout.Panel>
-                <TabLayout.Panel label="Groups" panelId="three">
+                <TabLayout.Panel label="Groups" panelId="two">
                     <GroupContextProvider>
                         <InventoryDevicesValidationContxtProvider>
                             <GroupsPage />
                         </InventoryDevicesValidationContxtProvider>
                     </GroupContextProvider>
+                </TabLayout.Panel>
+                <TabLayout.Panel label="Inventory" panelId="three">
+                    <InventoryContextProvider>
+                        <InventoryDevicesValidationContxtProvider>
+                            <InventoryPage />
+                        </InventoryDevicesValidationContxtProvider>
+                    </InventoryContextProvider>
                 </TabLayout.Panel>
             </TabLayout>
         </ButtonsContextProvider>
