@@ -6,6 +6,8 @@ import ButtonsModal from "../ButtonsModal"
 import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
+import Select from '@splunk/react-ui/Select';
+import ControlGroup from '@splunk/react-ui/ControlGroup';
 
 
 const columns = [
@@ -32,11 +34,11 @@ class SortableColumns extends Component {
             sortDir: 'asc',
             allInventoryRecords: [],
             pageNum: 1,
-            totalPages: 1
+            totalPages: 1,
+            devicesPerPage: "3",
         };
 
         this.reload = true;
-        this.DEVICES_PER_PAGE = 3;
         this.BASE_URL_GET_ALL = 'http://127.0.0.1:5000/inventory/'
         this.BASE_URL_DELETE = 'http://127.0.0.1:5000/inventory/delete/'
         this.inventoryChange = this.props.inventoryChange;
@@ -44,14 +46,14 @@ class SortableColumns extends Component {
 
     getFetchInventoryRows(page) {
         let currentRecords = this.state.allInventoryRecords;
-        let url = this.BASE_URL_GET_ALL+page.toString()+"/"+this.DEVICES_PER_PAGE.toString()
+        let url = this.BASE_URL_GET_ALL+page.toString()+"/"+this.state.devicesPerPage.toString()
         axios.get(`${url}`)
             .then((response) => {
                 if (currentRecords.length != response.data.inventory.length){
                     this.reload = true;
                 }
                 this.setState({allInventoryRecords: response.data.inventory,
-                    pageNum: page, totalPages: Math.ceil(response.data.count/this.DEVICES_PER_PAGE)});
+                    pageNum: page, totalPages: Math.ceil(response.data.count/Number(this.state.devicesPerPage))});
         })
     };
 
@@ -100,6 +102,11 @@ class SortableColumns extends Component {
         this.getFetchInventoryRows(page);
     };
 
+    handleDevicesPerPage = (e, { value }) => {
+        this.setState({ devicesPerPage: `${value}`, pageNum: 1 });
+        this.reload = true;
+    };
+
     handleSort = (e, {sortKey}) => {
         this.setState((state) => {
             const prevSortKey = state.sortKey;
@@ -128,9 +135,22 @@ class SortableColumns extends Component {
             this.inventoryChange = this.props.inventoryChange;
             this.reload = true;
         }
-        const {sortKey, sortDir, allInventoryRecords} = this.state;
+        const sortKey = this.state.sortKey;
+        const sortDir = this.state.sortDir;
+        const allInventoryRecords = this.state.allInventoryRecords;
+
+        console.log(this.state)
         return (
             <div>
+                <ControlGroup label={"Number of inventory items per page"} labelPosition="top">
+                    <Select value={this.state.devicesPerPage} onChange={this.handleDevicesPerPage} defaultValue={"3"}>
+                        <Select.Option label="3" value="3" />
+                        <Select.Option label="10" value="10" />
+                        <Select.Option label="50" value="50" />
+                        <Select.Option label="100" value="100" />
+                        <Select.Option label="200" value="200" />
+                    </Select>
+                </ControlGroup>
                 <Table stripeRows>
                     <Table.Head>
                         {columns.map((headData) => (

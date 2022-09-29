@@ -11,6 +11,8 @@ import AddDeviceModal from "./AddDeviceModal";
 import ButtonsModal from "../ButtonsModal";
 import DeleteModal from "../DeleteModal";
 import Paginator from '@splunk/react-ui/Paginator';
+import Select from '@splunk/react-ui/Select';
+import ControlGroup from '@splunk/react-ui/ControlGroup';
 
 
 function GroupsList() {
@@ -21,6 +23,7 @@ function GroupsList() {
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
+    const [devicesPerPage, setDevicesPerPage] = useState('3');
     const DEVICES_PER_PAGE = 3;
 
     useEffect(() => {
@@ -84,10 +87,10 @@ function GroupsList() {
             }
             return {...prev, ...opened}}
         );
-        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${DEVICES_PER_PAGE}`)
+        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
         .then((response) => {
             GrCtx.setDevices(response.data.devices);
-            setTotalPages(Math.ceil(response.data.count/DEVICES_PER_PAGE))
+            setTotalPages(Math.ceil(response.data.count/Number(devicesPerPage)));
         })
     }
 
@@ -115,6 +118,12 @@ function GroupsList() {
     const handlePagination = (page, groupId) => {
         setPageNum(page);
         openCollapsible(groupId, page);
+    };
+
+    const handleDevicesPerPage = (e, { value }) => {
+        setDevicesPerPage(value);
+        GrCtx.makeGroupsChange();
+        setPageNum(1);
     };
 
     const buttonsRequestDeleteDevice = (context) => {
@@ -185,6 +194,15 @@ function GroupsList() {
 
     return (
         <div>
+            <ControlGroup label={"Number of devices per page"} labelPosition="top">
+                <Select value={devicesPerPage} onChange={handleDevicesPerPage} defaultValue={"3"}>
+                    <Select.Option label="3" value="3" />
+                    <Select.Option label="10" value="10" />
+                    <Select.Option label="50" value="50" />
+                    <Select.Option label="100" value="100" />
+                    <Select.Option label="200" value="200" />
+                </Select>
+            </ControlGroup>
             {groupsList}
             <AddDeviceModal />
             <ButtonsModal handleRequestDelete={() => (buttonsRequestDeleteDevice(GrCtx))}
