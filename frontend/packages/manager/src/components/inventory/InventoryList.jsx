@@ -1,10 +1,11 @@
-import React, {Component, useContext} from 'react';
+import React, {Component, useContext, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
 import ButtonsModal from "../ButtonsModal"
 import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
+import Paginator from '@splunk/react-ui/Paginator';
 
 
 const columns = [
@@ -29,21 +30,28 @@ class SortableColumns extends Component {
         this.state = {
             sortKey: 'address',
             sortDir: 'asc',
-            allInventoryRecords: []
+            allInventoryRecords: [],
+            pageNum: 1,
+            totalPages: 1
         };
 
         this.reload = true;
+        this.DEVICES_PER_PAGE = 3;
+        this.BASE_URL_GET_ALL = 'http://127.0.0.1:5000/inventory/'
+        this.BASE_URL_DELETE = 'http://127.0.0.1:5000/inventory/delete/'
         this.inventoryChange = this.props.inventoryChange;
     }
-    url = 'http://127.0.0.1:5000/inventory'
-    getFetchInventoryRows() {
+
+    getFetchInventoryRows(page) {
         let currentRecords = this.state.allInventoryRecords;
-        axios.get(`${this.url}`)
+        let url = this.BASE_URL_GET_ALL+page.toString()+"/"+this.DEVICES_PER_PAGE.toString()
+        axios.get(`${url}`)
             .then((response) => {
                 if (currentRecords.length != response.data.length){
                     this.reload = true;
                 }
-                this.setState({allInventoryRecords: response.data});
+                this.setState({allInventoryRecords: response.data.inventory,
+                    pageNum: page, totalPages: Math.ceil(response.data.count/this.DEVICES_PER_PAGE)});
         })
     };
 
@@ -73,7 +81,8 @@ class SortableColumns extends Component {
     }
 
     deleteModalRequest(context) {
-        axios.post(`http://127.0.0.1:5000/inventory/delete/${context.inventoryId}`)
+        let url = this.BASE_URL_DELETE+context.inventoryId.toString();
+        axios.post(url)
           .then(function (response) {
             console.log(response);
             context.makeInventoryChange();
@@ -85,6 +94,10 @@ class SortableColumns extends Component {
         context.setDeleteOpen(false);
         context.resetFormData();
         context.addModalToggle?.current?.focus();
+    };
+
+    handlePagination = (event, { page }) => {
+        getFetchInventoryRows(page);
     };
 
     handleSort = (e, {sortKey}) => {
@@ -100,13 +113,13 @@ class SortableColumns extends Component {
     };
 
     componentDidMount() {
-        this.getFetchInventoryRows();
+        this.getFetchInventoryRows(1);
     }
 
     componentDidUpdate() {
         if (this.reload){
             this.reload = false;
-            this.getFetchInventoryRows();
+            this.getFetchInventoryRows(this.state.pageNum);
         }
     }
 
@@ -157,6 +170,12 @@ class SortableColumns extends Component {
                                     <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
                                 </Table.Row>
                             ))}
+                        <Paginator
+                            onChange={this.handlePagination}
+                            current={this.state.pageNum}
+                            alwaysShowLastPageLink
+                            totalPages={this.state.totalPages}
+                        />
                     </Table.Body>
                 </Table>
                 <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
