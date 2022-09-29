@@ -10,20 +10,29 @@ db = client.sc4snmp
 
 
 @app.route('/')
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 def hello_world():
     return 'Hello World!'
 
 
-@app.route('/inventory')
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
-def get_inventory_list():
-    inventory = db.inventory.find()
-    return json_util.dumps(list(inventory))
+@app.route('/inventory/<page_num>/<dev_per_page>')
+@cross_origin()
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+def get_inventory_list(page_num, dev_per_page):
+    page_num = int(page_num)
+    dev_per_page = int(dev_per_page)
+    skips = dev_per_page * (page_num - 1)
+    inventory = db.inventory.find().skip(skips).limit(dev_per_page)
+    inventory_list = list(inventory)
+    total_count = db.inventory.count_documents()
+    result = {"inventory": inventory_list, "count": total_count}
+    return json_util.dumps(result)
 
 
 @app.route('/inventory/add', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def add_inventory_record():
     inventory_obj = request.json
     print(inventory_obj)
@@ -32,14 +41,16 @@ def add_inventory_record():
 
 
 @app.route('/inventory/delete/<inventory_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def delete_inventory_record(inventory_id):
     db.inventory.delete_one({'_id': ObjectId(inventory_id)})
     return "success"
 
 
 @app.route('/inventory/update/<inventory_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def update_inventory_record(inventory_id):
     inventory_obj = request.json
     print(f"{inventory_obj}")
@@ -49,7 +60,8 @@ def update_inventory_record(inventory_id):
 
 
 @app.route('/profiles/names')
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def get_profiles_list():
     profiles = db.profiles.find()
     profiles_list = list(profiles)
@@ -58,7 +70,7 @@ def get_profiles_list():
 
 
 @app.route('/profiles')
-@cross_origin()
+@cross_origin(origins="*", headers=['access-control-allow-origin', 'Content-Type'])
 def get_all_profiles_list():
     profiles = db.profiles.find()
     profiles_list = list(profiles)
@@ -68,7 +80,8 @@ def get_all_profiles_list():
 
 # @cross_origin(origin='*', headers=['access-control-allow-origin', 'Content-Type'])
 @app.route('/profiles/add', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def add_profile_record():
     profile_obj = request.json
     print(profile_obj)
@@ -77,14 +90,16 @@ def add_profile_record():
 
 
 @app.route('/profiles/delete/<profile_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def delete_profile_record(profile_id):
     db.profiles.delete_one({'_id': ObjectId(profile_id)})
     return "success"
 
 
 @app.route('/profiles/update/<profile_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def update_profile_record(profile_id):
     profile_obj = request.json
     print(f"{profile_obj}")
@@ -102,7 +117,8 @@ def get_groups_list():
 
 
 @app.route('/groups/add', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def add_group_record():
     group_obj = request.json
     print(group_obj)
@@ -111,7 +127,8 @@ def add_group_record():
 
 
 @app.route('/groups/update/<group_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def update_group(group_id):
     group_obj = request.json
     print(f"{group_obj}")
@@ -121,23 +138,30 @@ def update_group(group_id):
 
 
 @app.route('/groups/delete/<group_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def delete_group_and_devices(group_id):
     db.groups.delete_one({'_id': ObjectId(group_id)})
     db.devices.delete_many({"groupId": group_id})
     return "success"
 
 
-@app.route('/group/<group_id>/devices')
+@app.route('/group/<group_id>/devices/<page_num>/<dev_per_page>')
 @cross_origin()
-def get_devices_of_groups_list(group_id):
-    devices = db.devices.find({"groupId": group_id})
+def get_devices_of_groups_list(group_id, page_num, dev_per_page):
+    page_num = int(page_num)
+    dev_per_page = int(dev_per_page)
+    skips = dev_per_page * (page_num - 1)
+    devices = db.devices.find({"groupId": group_id}).skip(skips).limit(dev_per_page)
     devices_list = list(devices)
-    return json_util.dumps(devices_list)
+    total_count = db.devices.count_documents({"groupId": group_id})
+    result = {"devices": devices_list, "count": total_count}
+    return json_util.dumps(result)
 
 
 @app.route('/devices/add', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def add_device_to_group_record():
     device_obj = request.json
     print(device_obj)
@@ -146,7 +170,8 @@ def add_device_to_group_record():
 
 
 @app.route('/devices/update/<device_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
 def update_device_from_group(device_id):
     device_obj = request.json
     print(f"{device_obj}")
@@ -156,7 +181,8 @@ def update_device_from_group(device_id):
 
 
 @app.route('/devices/delete/<device_id>', methods=['POST'])
-@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin()
+#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 def delete_device_from_group_record(device_id):
     db.devices.delete_one({'_id': ObjectId(device_id)})
     return "success"
