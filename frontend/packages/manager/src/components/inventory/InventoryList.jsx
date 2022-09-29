@@ -47,7 +47,7 @@ class SortableColumns extends Component {
         let url = this.BASE_URL_GET_ALL+page.toString()+"/"+this.DEVICES_PER_PAGE.toString()
         axios.get(`${url}`)
             .then((response) => {
-                if (currentRecords.length != response.data.length){
+                if (currentRecords.length != response.data.inventory.length){
                     this.reload = true;
                 }
                 this.setState({allInventoryRecords: response.data.inventory,
@@ -97,7 +97,7 @@ class SortableColumns extends Component {
     };
 
     handlePagination = (event, { page }) => {
-        getFetchInventoryRows(page);
+        this.getFetchInventoryRows(page);
     };
 
     handleSort = (e, {sortKey}) => {
@@ -170,14 +170,14 @@ class SortableColumns extends Component {
                                     <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
                                 </Table.Row>
                             ))}
-                        <Paginator
-                            onChange={this.handlePagination}
-                            current={this.state.pageNum}
-                            alwaysShowLastPageLink
-                            totalPages={this.state.totalPages}
-                        />
                     </Table.Body>
                 </Table>
+                <Paginator
+                    onChange={this.handlePagination}
+                    current={this.state.pageNum}
+                    alwaysShowLastPageLink
+                    totalPages={this.state.totalPages}
+                />
                 <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
                               handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
                               context={this.context}/>

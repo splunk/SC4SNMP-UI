@@ -26,7 +26,7 @@ export function InventoryContextProvider(props){
     // data for editing in AddInventoryModal
     const [isEdit, setIsEdit] = useState(false);
     const [address, setAddress] = useState('');
-    const [port, setPort] = useState(161);
+    const [port, setPort] = useState('161');
     const [version, setVersion] = useState('2c');
     const [community, setCommunity] = useState('');
     const [secret, setSecret] = useState('');
@@ -38,7 +38,7 @@ export function InventoryContextProvider(props){
     function resetFormData() {
         setInventoryId(null);
         setAddress('');
-        setPort(161);
+        setPort('161');
         setVersion('2c');
         setCommunity('');
         setSecret('');

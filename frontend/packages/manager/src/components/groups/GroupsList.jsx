@@ -21,7 +21,7 @@ function GroupsList() {
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
-    const DEVICES_PER_PAGE = 10;
+    const DEVICES_PER_PAGE = 3;
 
     useEffect(() => {
         let isMounted = true;
@@ -171,14 +171,15 @@ function GroupsList() {
                             <Table.Cell>{row.securityEngine}</Table.Cell>
                         </Table.Row>
                     ))}
-                    <Paginator
-                        onChange={(event, { page }) => (handlePagination(page, group._id.$oid))}
-                        current={pageNum}
-                        alwaysShowLastPageLink
-                        totalPages={totalPages}
-                    />
+
                 </Table.Body>
             </Table>
+            <Paginator
+                onChange={(event, { page }) => (handlePagination(page, group._id.$oid))}
+                current={pageNum}
+                alwaysShowLastPageLink
+                totalPages={totalPages}
+            />
         </CollapsiblePanel>
     ))
 
