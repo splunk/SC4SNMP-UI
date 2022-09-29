@@ -87,11 +87,23 @@ function GroupsList() {
             }
             return {...prev, ...opened}}
         );
-        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
-        .then((response) => {
-            GrCtx.setDevices(response.data.devices);
-            setTotalPages(Math.ceil(response.data.count/Number(devicesPerPage)));
-        })
+
+        // If last item from from current page was deleted, page variable
+        // must be decreased. To do this first we calculate current number
+        // of pages and then we load devices for this page.
+        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/count`)
+            .then((response) => {
+                const maxPages = Math.ceil(response.data/Number(devicesPerPage));
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
+                    .then((response2) => {
+                        GrCtx.setDevices(response2.data);
+                        setPageNum(page);
+                        setTotalPages(maxPages);
+                    })
+            });
     }
 
     const closeCollapsible = (groupId) => {
@@ -116,14 +128,13 @@ function GroupsList() {
     };
 
     const handlePagination = (page, groupId) => {
-        setPageNum(page);
         openCollapsible(groupId, page);
     };
 
     const handleDevicesPerPage = (e, { value }) => {
         setDevicesPerPage(value);
-        GrCtx.makeGroupsChange();
         setPageNum(1);
+        GrCtx.makeGroupsChange();
     };
 
     const buttonsRequestDeleteDevice = (context) => {
