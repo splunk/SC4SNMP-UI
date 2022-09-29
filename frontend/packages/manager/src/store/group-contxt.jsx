@@ -102,7 +102,7 @@ export function GroupContextProvider(props){
         groupsChange: groupsChange,
         makeGroupsChange: groupsChangeHandler,
         editedGroupId: editedGroupId,
-        setEditedGroupId: setEditedGroupId
+        setEditedGroupId: setEditedGroupId,
     };
 
     return (
