@@ -34,7 +34,7 @@ const validateInventoryAndGroup = (validationObj) => {
     // Validate address
     if (validationObj.hasOwnProperty("address")){
         if (validationObj.address.length === 0){
-            let err = ((validationObj.hasOwnProperty("onlyAdress")) ? "Address is required" : "Address or Group is required")
+            let err = ((validationObj.hasOwnProperty("inGroupConfig")) ? "Address is required" : "Address or Group is required")
             errors.address.push(err);
             isValid = false;
         }else if (Number.isInteger(Number(validationObj.address.charAt(0))) || validationObj.hasOwnProperty("onlyAdress")){
@@ -64,9 +64,14 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate port
     if (validationObj.hasOwnProperty("port")){
-        if (!(Number.isInteger(validationObj.port) && validationObj.port > 0 && validationObj.port < 65535)){
+        if (!validationObj.hasOwnProperty("inGroupConfig") && validationObj.port.length === 0){
             isValid = false;
-            errors.port.push("Port number must be an integer in range 1-65535");
+            errors.port.push("Port number must be specified");
+        }else if (validationObj.port.length > 0){
+            if (!(Number.isInteger(Number(validationObj.port)) && Number(validationObj.port) > 0 && Number(validationObj.port) < 65535)){
+                isValid = false;
+                errors.port.push("Port number must be an integer in range 1-65535");
+            }
         }
     }
 

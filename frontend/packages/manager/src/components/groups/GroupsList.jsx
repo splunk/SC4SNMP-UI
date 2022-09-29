@@ -52,6 +52,8 @@ function GroupsList() {
     const newDeviceButtonHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
+        GrCtx.setVersion("");
+        GrCtx.setPort(0);
         GrCtx.setIsDeviceEdit(false);
         GrCtx.setAddDeviceOpen(true);
         GrCtx.resetDevice();

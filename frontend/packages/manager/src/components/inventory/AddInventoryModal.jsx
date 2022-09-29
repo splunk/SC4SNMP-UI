@@ -146,7 +146,7 @@ function AddInventoryModal() {
                     </ControlGroup>
                     <ControlGroup label="Port" >
                         <div style={validationGroup}>
-                            <Number value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                            <Text value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>

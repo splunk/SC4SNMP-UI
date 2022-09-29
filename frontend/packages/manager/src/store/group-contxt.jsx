@@ -26,8 +26,8 @@ export function GroupContextProvider(props){
     // Variables for device
     const [deviceId, setDeviceId] = useState(null);
     const [address, setAddress] = useState('');
-    const [port, setPort] = useState(161);
-    const [version, setVersion] = useState('2c');
+    const [port, setPort] = useState("");
+    const [version, setVersion] = useState('');
     const [community, setCommunity] = useState('');
     const [secret, setSecret] = useState('');
     const [securityEngine, setSecurityEngine] = useState('');
@@ -35,8 +35,8 @@ export function GroupContextProvider(props){
     function resetDevice() {
         setDeviceId(null);
         setAddress('');
-        setPort(161);
-        setVersion('2c');
+        setPort('');
+        setVersion('');
         setCommunity('');
         setSecret('');
         setSecurityEngine('');

@@ -2,7 +2,6 @@ import React, {useCallback, useContext, useState} from 'react';
 import Button from '@splunk/react-ui/Button';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
-import Number from '@splunk/react-ui/Number';
 import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
@@ -73,10 +72,10 @@ function AddDeviceModal(){
             secret: GrCtx.secret,
             securityEngine: GrCtx.securityEngine,
             groupId: GrCtx.groupId,
-            onlyAdress: true,
+            inGroupConfig: true,
         };
         const validation = validateInventoryAndGroup(deviceObj)
-        delete deviceObj.onlyAdress;
+        delete deviceObj.inGroupConfig;
 
         if (validation[0]){
             // form is valid
@@ -117,7 +116,7 @@ function AddDeviceModal(){
                     </ControlGroup>
                     <ControlGroup label="Port" >
                         <div style={validationGroup}>
-                            <Number value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                            <Text value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>
@@ -128,6 +127,7 @@ function AddDeviceModal(){
                     help="Clicking the label will focus/activate the Select rather than the default first Text."
                     >
                         <Select defaultValue={GrCtx.version} inputId="customized-select-after" value={GrCtx.version} onChange={handleChangeVersion}>
+                            <Select.Option label="From inventory" value=""/>
                             <Select.Option label="1" value="1"/>
                             <Select.Option label="2c" value="2c"/>
                             <Select.Option label="3" value="3"/>
