@@ -25,9 +25,13 @@ def get_inventory_list(page_num, dev_per_page):
     skips = dev_per_page * (page_num - 1)
     inventory = db.inventory.find().skip(skips).limit(dev_per_page)
     inventory_list = list(inventory)
-    total_count = db.inventory.count_documents()
-    result = {"inventory": inventory_list, "count": total_count}
-    return json_util.dumps(result)
+    return json_util.dumps(inventory_list)
+
+@app.route('/inventory/count')
+@cross_origin()
+def get_inventory_count():
+    total_count = db.inventory.count_documents({})
+    return json_util.dumps(total_count)
 
 
 @app.route('/inventory/add', methods=['POST'])
@@ -146,6 +150,13 @@ def delete_group_and_devices(group_id):
     return "success"
 
 
+@app.route('/group/<group_id>/devices/count')
+@cross_origin()
+def get_devices_count_for_group(group_id):
+    total_count = db.devices.count_documents({"groupId": group_id})
+    return json_util.dumps(total_count)
+
+
 @app.route('/group/<group_id>/devices/<page_num>/<dev_per_page>')
 @cross_origin()
 def get_devices_of_groups_list(group_id, page_num, dev_per_page):
@@ -154,9 +165,7 @@ def get_devices_of_groups_list(group_id, page_num, dev_per_page):
     skips = dev_per_page * (page_num - 1)
     devices = db.devices.find({"groupId": group_id}).skip(skips).limit(dev_per_page)
     devices_list = list(devices)
-    total_count = db.devices.count_documents({"groupId": group_id})
-    result = {"devices": devices_list, "count": total_count}
-    return json_util.dumps(result)
+    return json_util.dumps(devices_list)
 
 
 @app.route('/devices/add', methods=['POST'])
