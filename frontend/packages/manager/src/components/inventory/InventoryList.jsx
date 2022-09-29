@@ -30,8 +30,6 @@ class SortableColumns extends Component {
         super(props);
 
         this.state = {
-            sortKey: 'address',
-            sortDir: 'asc',
             allInventoryRecords: [],
             pageNum: 1,
             totalPages: 1,
@@ -46,15 +44,19 @@ class SortableColumns extends Component {
 
     getFetchInventoryRows(page) {
         let currentRecords = this.state.allInventoryRecords;
-        let url = this.BASE_URL_GET_ALL+page.toString()+"/"+this.state.devicesPerPage.toString()
-        axios.get(`${url}`)
+        const urlCount = this.BASE_URL_GET_ALL+"count"
+        axios.get(urlCount)
             .then((response) => {
-                if (currentRecords.length != response.data.inventory.length){
-                    this.reload = true;
-                }
-                this.setState({allInventoryRecords: response.data.inventory,
-                    pageNum: page, totalPages: Math.ceil(response.data.count/Number(this.state.devicesPerPage))});
-        })
+                const maxPages = Math.ceil(response.data/Number(this.state.devicesPerPage));
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                const urlGet = this.BASE_URL_GET_ALL+page.toString()+"/"+this.state.devicesPerPage.toString()
+                axios.get(urlGet)
+                    .then((response2) => {
+                        this.setState({allInventoryRecords: response2.data, pageNum: page, totalPages: maxPages})
+                    })
+            });
     };
 
     handleRowClick = (row) => {
@@ -107,18 +109,6 @@ class SortableColumns extends Component {
         this.reload = true;
     };
 
-    handleSort = (e, {sortKey}) => {
-        this.setState((state) => {
-            const prevSortKey = state.sortKey;
-            const prevSortDir = prevSortKey === sortKey ? state.sortDir : 'none';
-            const nextSortDir = prevSortDir === 'asc' ? 'desc' : 'asc';
-            return {
-                sortKey: sortKey,
-                sortDir: nextSortDir,
-            };
-        });
-    };
-
     componentDidMount() {
         this.getFetchInventoryRows(1);
     }
@@ -154,12 +144,7 @@ class SortableColumns extends Component {
                 <Table stripeRows>
                     <Table.Head>
                         {columns.map((headData) => (
-                            <Table.HeadCell
-                                key={headData.sortKey}
-                                onSort={this.handleSort}
-                                sortKey={headData.sortKey}
-                                sortDir={headData.sortKey === sortKey ? sortDir : 'none'}
-                            >
+                            <Table.HeadCell>
                                 {headData.label}
                             </Table.HeadCell>
                         ))}
