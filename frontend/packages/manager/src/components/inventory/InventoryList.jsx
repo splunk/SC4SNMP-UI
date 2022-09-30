@@ -1,10 +1,13 @@
-import React, {Component, useContext} from 'react';
+import React, {Component, useContext, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
 import ButtonsModal from "../ButtonsModal"
 import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
+import Paginator from '@splunk/react-ui/Paginator';
+import Select from '@splunk/react-ui/Select';
+import ControlGroup from '@splunk/react-ui/ControlGroup';
 
 
 const columns = [
@@ -27,73 +30,34 @@ class SortableColumns extends Component {
         super(props);
 
         this.state = {
-            sortKey: 'address',
-            sortDir: 'asc',
-            allInventoryRecords: []
+            allInventoryRecords: [],
+            pageNum: 1,
+            totalPages: 1,
+            devicesPerPage: "3",
         };
 
         this.reload = true;
+        this.BASE_URL_GET_ALL = 'http://127.0.0.1:5000/inventory/'
+        this.BASE_URL_DELETE = 'http://127.0.0.1:5000/inventory/delete/'
         this.inventoryChange = this.props.inventoryChange;
     }
-    url = 'http://127.0.0.1:5000/inventory'
-    getFetchInventoryRows() {
+
+    getFetchInventoryRows(page) {
         let currentRecords = this.state.allInventoryRecords;
-        axios.get(`${this.url}`)
+        const urlCount = this.BASE_URL_GET_ALL+"count"
+        axios.get(urlCount)
             .then((response) => {
-                if (currentRecords.length != response.data.length){
-                    this.reload = true;
-                }
-                this.setState({allInventoryRecords: response.data});
-        })
-    }
-
-    buttonsRequestEdit(context) {
-       context.setButtonsOpen(false);
-       context.setIsEdit(true);
-       context.setAddOpen(true);
-    };
-
-    buttonsRequestDelete(context) {
-        context.setButtonsOpen(false);
-        context.setDeleteOpen(true);
-    }
-
-    deleteModalRequest(context) {
-        axios.post(`http://127.0.0.1:5000/inventory/delete/${context.inventoryId}`)
-          .then(function (response) {
-            console.log(response);
-            context.makeInventoryChange();
-          })
-          .catch(function (error) {
-            console.log(error);
-            context.makeInventoryChange();
-          });
-        context.setDeleteOpen(false);
-        context.resetFormData();
-        context.addModalToggle?.current?.focus();
-    };
-
-    componentDidMount() {
-        this.getFetchInventoryRows();
-    }
-
-    componentDidUpdate() {
-        if (this.reload){
-            this.reload = false;
-            this.getFetchInventoryRows();
-        }
-    }
-
-    handleSort = (e, {sortKey}) => {
-        this.setState((state) => {
-            const prevSortKey = state.sortKey;
-            const prevSortDir = prevSortKey === sortKey ? state.sortDir : 'none';
-            const nextSortDir = prevSortDir === 'asc' ? 'desc' : 'asc';
-            return {
-                sortKey: sortKey,
-                sortDir: nextSortDir,
-            };
-        });
+                let maxPages = Math.ceil(response.data/Number(this.state.devicesPerPage));
+                if (maxPages === 0) maxPages = 1;
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                const urlGet = this.BASE_URL_GET_ALL+page.toString()+"/"+this.state.devicesPerPage.toString()
+                axios.get(urlGet)
+                    .then((response2) => {
+                        this.setState({allInventoryRecords: response2.data, pageNum: page, totalPages: maxPages})
+                    })
+            });
     };
 
     handleRowClick = (row) => {
@@ -110,23 +74,78 @@ class SortableColumns extends Component {
         this.context.setSmartProfiles(row.smartProfiles);
     };
 
+    buttonsRequestEdit(context) {
+       context.setButtonsOpen(false);
+       context.setIsEdit(true);
+       context.setAddOpen(true);
+    };
+
+    buttonsRequestDelete(context) {
+        context.setButtonsOpen(false);
+        context.setDeleteOpen(true);
+    }
+
+    deleteModalRequest(context) {
+        let url = this.BASE_URL_DELETE+context.inventoryId.toString();
+        axios.post(url)
+          .then(function (response) {
+            console.log(response);
+            context.makeInventoryChange();
+          })
+          .catch(function (error) {
+            console.log(error);
+            context.makeInventoryChange();
+          });
+        context.setDeleteOpen(false);
+        context.resetFormData();
+        context.addModalToggle?.current?.focus();
+    };
+
+    handlePagination = (event, { page }) => {
+        this.getFetchInventoryRows(page);
+    };
+
+    handleDevicesPerPage = (e, { value }) => {
+        this.setState({ devicesPerPage: `${value}`, pageNum: 1 });
+        this.reload = true;
+    };
+
+    componentDidMount() {
+        this.getFetchInventoryRows(1);
+    }
+
+    componentDidUpdate() {
+        if (this.reload){
+            this.reload = false;
+            this.getFetchInventoryRows(this.state.pageNum);
+        }
+    }
+
     render() {
         if (this.props.inventoryChange != this.inventoryChange){
             this.inventoryChange = this.props.inventoryChange;
             this.reload = true;
         }
-        const {sortKey, sortDir, allInventoryRecords} = this.state;
+        const sortKey = this.state.sortKey;
+        const sortDir = this.state.sortDir;
+        const allInventoryRecords = this.state.allInventoryRecords;
+
+        console.log(this.state)
         return (
             <div>
+                <ControlGroup label={"Number of inventory items per page"} labelPosition="top">
+                    <Select value={this.state.devicesPerPage} onChange={this.handleDevicesPerPage} defaultValue={"3"}>
+                        <Select.Option label="3" value="3" />
+                        <Select.Option label="10" value="10" />
+                        <Select.Option label="50" value="50" />
+                        <Select.Option label="100" value="100" />
+                        <Select.Option label="200" value="200" />
+                    </Select>
+                </ControlGroup>
                 <Table stripeRows>
                     <Table.Head>
                         {columns.map((headData) => (
-                            <Table.HeadCell
-                                key={headData.sortKey}
-                                onSort={this.handleSort}
-                                sortKey={headData.sortKey}
-                                sortDir={headData.sortKey === sortKey ? sortDir : 'none'}
-                            >
+                            <Table.HeadCell key={createDOMID()}>
                                 {headData.label}
                             </Table.HeadCell>
                         ))}
@@ -159,6 +178,12 @@ class SortableColumns extends Component {
                             ))}
                     </Table.Body>
                 </Table>
+                <Paginator
+                    onChange={this.handlePagination}
+                    current={this.state.pageNum}
+                    alwaysShowLastPageLink
+                    totalPages={this.state.totalPages}
+                />
                 <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
                               handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
                               context={this.context}/>

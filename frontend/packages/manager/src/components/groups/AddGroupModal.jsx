@@ -8,13 +8,18 @@ import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import GroupContext from "../../store/group-contxt";
 import axios from "axios";
-import validateInventoryAndGroup from "../ValidateInventoryAndGroup";
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-contxt";
+import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
+import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+
+    const handleGroupNameChange = useCallback((e, { value: val }) => {
+        GrCtx.setGroupName(val);
+    }, [GrCtx.setGroupName]);
 
     const postGroup = (groupObj) => {
         axios.post('http://127.0.0.1:5000/groups/add', groupObj)
@@ -65,19 +70,6 @@ function AddGroupModal() {
         }
     };
 
-    const handleGroupNameChange = useCallback((e, { value: val }) => {
-        GrCtx.setGroupName(val);
-    }, [GrCtx.setGroupName]);
-
-    const validationGroup = {
-      display: "flex",
-      flexDirection: "column"
-    };
-
-    const validationMessage = {
-      color: "red"
-    };
-
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} style={{ width: '600px' }}>
@@ -85,7 +77,7 @@ function AddGroupModal() {
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <div style={validationGroup}>
-                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange}/>
+                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange} error={((ValCtx.groupNameErrors) ? true : false)}/>
                             {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
                     </ControlGroup>

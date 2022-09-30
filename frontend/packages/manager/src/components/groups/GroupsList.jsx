@@ -10,6 +10,9 @@ import Button from '@splunk/react-ui/Button';
 import AddDeviceModal from "./AddDeviceModal";
 import ButtonsModal from "../ButtonsModal";
 import DeleteModal from "../DeleteModal";
+import Paginator from '@splunk/react-ui/Paginator';
+import Select from '@splunk/react-ui/Select';
+import ControlGroup from '@splunk/react-ui/ControlGroup';
 
 
 function GroupsList() {
@@ -17,6 +20,11 @@ function GroupsList() {
     const [openedGroups, setOpenedGroups] = useState({});
     const GrCtx = useContext(GroupContext);
     const BtnCtx = useContext(ButtonsContext);
+    const [totalPages, setTotalPages] = useState(1);
+    const [openedGroupId, setOpenedGroupId] = useState(null);
+    const [pageNum, setPageNum] = useState(1);
+    const [devicesPerPage, setDevicesPerPage] = useState('3');
+    const DEVICES_PER_PAGE = 3;
 
     useEffect(() => {
         let isMounted = true;
@@ -30,8 +38,9 @@ function GroupsList() {
                     opened[group._id.$oid] = false;
                     existingGroups.push(group._id.$oid);
                 }
+                // If page was reloaded after updating one of devices, open tab of that group
                 if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
-                    openCollapsible(GrCtx.editedGroupId);
+                    openCollapsible(GrCtx.editedGroupId, pageNum);
                 }else{
                     setOpenedGroups(opened);
                 }
@@ -41,13 +50,9 @@ function GroupsList() {
         return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
 
-    const newDeviceButtonHandler = (groupId, groupName) => {
-        GrCtx.setGroupId(groupId);
-        GrCtx.setGroupName(groupName);
-        GrCtx.setIsDeviceEdit(false);
-        GrCtx.setAddDeviceOpen(true);
-        GrCtx.resetDevice();
-    };
+    useEffect(() => {
+        setPageNum(1);
+    }, [openedGroupId]);
 
     const editGroupButtonHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
@@ -56,7 +61,24 @@ function GroupsList() {
         GrCtx.setAddGroupOpen(true);
     };
 
-    const openCollapsible = (groupId) => {
+    const newDeviceButtonHandler = (groupId, groupName) => {
+        GrCtx.setGroupId(groupId);
+        GrCtx.setGroupName(groupName);
+        GrCtx.setVersion("");
+        GrCtx.setPort(0);
+        GrCtx.setIsDeviceEdit(false);
+        GrCtx.setAddDeviceOpen(true);
+        GrCtx.resetDevice();
+    };
+
+    const deleteGroupButtonHandler = (groupId, groupName) => {
+        BtnCtx.setDeleteOpen(true);
+        GrCtx.setDeleteName(groupName);
+        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
+    };
+
+    const openCollapsible = (groupId, page) => {
+        setOpenedGroupId(groupId)
         const opened = {};
         opened[groupId] = true;
         setOpenedGroups(prev => {
@@ -65,10 +87,24 @@ function GroupsList() {
             }
             return {...prev, ...opened}}
         );
-        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices`)
-        .then((response) => {
-            GrCtx.setDevices(response.data);
-        })
+
+        // If last item from from current page was deleted, page variable
+        // must be decreased. To do this first we calculate current number
+        // of pages and then we load devices for this page.
+        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/count`)
+            .then((response) => {
+                let maxPages = Math.ceil(response.data/Number(devicesPerPage));
+                if (maxPages === 0) maxPages = 1;
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
+                    .then((response2) => {
+                        GrCtx.setDevices(response2.data);
+                        setPageNum(page);
+                        setTotalPages(maxPages);
+                    })
+            });
     }
 
     const closeCollapsible = (groupId) => {
@@ -79,7 +115,7 @@ function GroupsList() {
     }
 
     const handleRowClick = (row, groupId) => {
-        BtnCtx.setButtonsOpen(true);
+        GrCtx.setButtonsOpen(true);
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupId(groupId);
@@ -92,6 +128,16 @@ function GroupsList() {
         GrCtx.setSecurityEngine(row.securityEngine);
     };
 
+    const handlePagination = (page, groupId) => {
+        openCollapsible(groupId, page);
+    };
+
+    const handleDevicesPerPage = (e, { value }) => {
+        setDevicesPerPage(value);
+        setPageNum(1);
+        GrCtx.makeGroupsChange();
+    };
+
     const buttonsRequestDeleteDevice = (context) => {
         context.setButtonsOpen(false);
         context.setDeleteUrl(`http://127.0.0.1:5000/devices/delete/${GrCtx.deviceId}`)
@@ -101,12 +147,6 @@ function GroupsList() {
     const buttonsRequestEditDevice = (context) => {
         context.setButtonsOpen(false);
         context.setAddDeviceOpen(true);
-    };
-
-    const deleteGroupButtonHandler = (groupId, groupName) => {
-        BtnCtx.setDeleteOpen(true);
-        GrCtx.setDeleteName(groupName);
-        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
     };
 
     const deleteModalRequest = (context) => {
@@ -127,7 +167,7 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid)}}
+        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid, 1, DEVICES_PER_PAGE)}}
           onRequestClose={() => {closeCollapsible(group._id.$oid)}}>
             <Button onClick={() => (newDeviceButtonHandler(group._id.$oid, group.groupName))} label="Add new device"/>
             <Button onClick={() => (editGroupButtonHandler(group._id.$oid, group.groupName))} label="Edit group name"/>
@@ -152,13 +192,29 @@ function GroupsList() {
                             <Table.Cell>{row.securityEngine}</Table.Cell>
                         </Table.Row>
                     ))}
+
                 </Table.Body>
             </Table>
+            <Paginator
+                onChange={(event, { page }) => (handlePagination(page, group._id.$oid))}
+                current={pageNum}
+                alwaysShowLastPageLink
+                totalPages={totalPages}
+            />
         </CollapsiblePanel>
     ))
 
     return (
         <div>
+            <ControlGroup label={"Number of devices per page"} labelPosition="top">
+                <Select value={devicesPerPage} onChange={handleDevicesPerPage} defaultValue={"3"}>
+                    <Select.Option label="3" value="3" />
+                    <Select.Option label="10" value="10" />
+                    <Select.Option label="50" value="50" />
+                    <Select.Option label="100" value="100" />
+                    <Select.Option label="200" value="200" />
+                </Select>
+            </ControlGroup>
             {groupsList}
             <AddDeviceModal />
             <ButtonsModal handleRequestDelete={() => (buttonsRequestDeleteDevice(GrCtx))}

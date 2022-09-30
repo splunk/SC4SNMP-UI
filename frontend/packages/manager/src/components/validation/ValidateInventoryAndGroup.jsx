@@ -2,6 +2,11 @@ import React from 'react';
 
 const validateInventoryAndGroup = (validationObj) => {
 
+    /*
+     'errors' is an object storing error messages for each field.
+     Each property is a list of errors for the respective field.
+     */
+
     let errors = {
         groupName: [],
         address: [],
@@ -29,11 +34,11 @@ const validateInventoryAndGroup = (validationObj) => {
     // Validate address
     if (validationObj.hasOwnProperty("address")){
         if (validationObj.address.length === 0){
-            let err = ((validationObj.hasOwnProperty("onlyAdress")) ? "Address is required" : "Address or Group is required")
+            let err = ((validationObj.hasOwnProperty("inGroupConfig")) ? "Address is required" : "Address or Group is required")
             errors.address.push(err);
             isValid = false;
-        }else if (Number.isInteger(Number(validationObj.address.charAt(0))) || validationObj.hasOwnProperty("onlyAdress")){
-            let doesMatch = validationObj.address.match(/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/);
+        }else if (Number.isInteger(Number(validationObj.address.charAt(0))) || validationObj.hasOwnProperty("inGroupConfig")){
+            let doesMatch = validationObj.address.match(/^(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))$/);
             let octetsValid = true;
             if (doesMatch){
                 let octets = validationObj.address.split(".");
@@ -59,14 +64,23 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate port
     if (validationObj.hasOwnProperty("port")){
-        if (!(Number.isInteger(validationObj.port) && validationObj.port > 0 && validationObj.port < 65535)){
+        if (!validationObj.hasOwnProperty("inGroupConfig") && validationObj.port.length === 0){
             isValid = false;
-            errors.port.push("Port number must be an integer in range 1-65535");
+            errors.port.push("Port number must be specified");
+        }else if (validationObj.port.length > 0){
+            if (!(Number.isInteger(Number(validationObj.port)) && Number(validationObj.port) > 0 && Number(validationObj.port) < 65535)){
+                isValid = false;
+                errors.port.push("Port number must be an integer in range 1-65535");
+            }
         }
     }
 
     // Validate community
     if (validationObj.hasOwnProperty("community")){
+        if ((validationObj.version === "1" || validationObj.version === "2c") && validationObj.community.length === 0){
+            isValid = false;
+            errors.community.push("When using SNMP version 1 or 2c, community string must be specified");
+        }
         if (validationObj.community.length > 0 && !validationObj.community.match(/^[.a-zA-Z0-9_-]+$/)){
             isValid = false;
             errors.community.push("Community can consist only of upper and lower english letters, " +
