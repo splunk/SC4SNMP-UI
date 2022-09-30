@@ -20,7 +20,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=12.9.0"
+    "node": ">=8"
   },
   "dependencies": {
     "cors": "^2.8.5",
