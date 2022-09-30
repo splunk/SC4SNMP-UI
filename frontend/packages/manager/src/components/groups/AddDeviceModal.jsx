@@ -11,6 +11,7 @@ import InventoryDevicesValidationContxt from "../../store/inventory-devices-vali
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { backendHost } from "../../host";
 
 
 function AddDeviceModal(){
