@@ -13,6 +13,7 @@ import DeleteModal from "../DeleteModal";
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
+import { backendHost } from "../../host";
 
 
 function GroupsList() {
@@ -28,7 +29,7 @@ function GroupsList() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://127.0.0.1:5000/groups')
+        axios.get(`http://${backendHost}/groups`)
         .then((response) => {
             if (isMounted){
                 setGroups(response.data);
@@ -74,7 +75,7 @@ function GroupsList() {
     const deleteGroupButtonHandler = (groupId, groupName) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
-        GrCtx.setDeleteUrl(`http://127.0.0.1:5000/groups/delete/${groupId}`);
+        GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
     };
 
     const openCollapsible = (groupId, page) => {
@@ -91,14 +92,14 @@ function GroupsList() {
         // If last item from from current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
-        axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/count`)
+        axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(devicesPerPage));
                 if (maxPages === 0) maxPages = 1;
                 if (page > maxPages){
                     page = maxPages;
                 };
-                axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
+                axios.get(`http://${backendHost}/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
                     .then((response2) => {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
@@ -140,7 +141,7 @@ function GroupsList() {
 
     const buttonsRequestDeleteDevice = (context) => {
         context.setButtonsOpen(false);
-        context.setDeleteUrl(`http://127.0.0.1:5000/devices/delete/${GrCtx.deviceId}`)
+        context.setDeleteUrl(`http://${backendHost}/devices/delete/${GrCtx.deviceId}`)
         context.setDeleteOpen(true);
     };
 

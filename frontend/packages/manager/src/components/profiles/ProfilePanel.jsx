@@ -7,6 +7,7 @@ import { createDOMID } from '@splunk/ui-utils/id';
 import Button from '@splunk/react-ui/Button';
 import ProfileContext from "../../store/profile-contxt";
 import DeleteModal from "../DeleteModal";
+import { backendHost } from "../../host";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
@@ -14,7 +15,7 @@ function ProfilePanel() {
 
     useEffect(() => {
     let isMounted = true;
-    axios.get('http://127.0.0.1:5000/profiles')
+    axios.get(`http://${backendHost}/profiles`)
     .then((response) => {
         if (isMounted)
             setProfiles(response.data);
@@ -39,7 +40,7 @@ function ProfilePanel() {
     };
 
     const deleteModalRequest = (context) => {
-        axios.post(`http://127.0.0.1:5000/profiles/delete/${context.profileId}`)
+        axios.post(`http://${backendHost}/profiles/delete/${context.profileId}`)
           .then(function (response) {
             console.log(response);
             context.makeProfilesChange();

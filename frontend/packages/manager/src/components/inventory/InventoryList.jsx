@@ -8,6 +8,7 @@ import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
+import { backendHost } from "../../host";
 
 
 const columns = [
@@ -37,8 +38,8 @@ class SortableColumns extends Component {
         };
 
         this.reload = true;
-        this.BASE_URL_GET_ALL = 'http://127.0.0.1:5000/inventory/'
-        this.BASE_URL_DELETE = 'http://127.0.0.1:5000/inventory/delete/'
+        this.BASE_URL_GET_ALL = `http://${backendHost}/inventory/`
+        this.BASE_URL_DELETE = `http://${backendHost}/inventory/delete/`
         this.inventoryChange = this.props.inventoryChange;
     }
 
