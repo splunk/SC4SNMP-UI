@@ -47,7 +47,8 @@ class SortableColumns extends Component {
         const urlCount = this.BASE_URL_GET_ALL+"count"
         axios.get(urlCount)
             .then((response) => {
-                const maxPages = Math.ceil(response.data/Number(this.state.devicesPerPage));
+                let maxPages = Math.ceil(response.data/Number(this.state.devicesPerPage));
+                if (maxPages === 0) maxPages = 1;
                 if (page > maxPages){
                     page = maxPages;
                 };
@@ -144,7 +145,7 @@ class SortableColumns extends Component {
                 <Table stripeRows>
                     <Table.Head>
                         {columns.map((headData) => (
-                            <Table.HeadCell>
+                            <Table.HeadCell key={createDOMID()}>
                                 {headData.label}
                             </Table.HeadCell>
                         ))}

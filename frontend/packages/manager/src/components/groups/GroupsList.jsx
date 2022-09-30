@@ -93,7 +93,8 @@ function GroupsList() {
         // of pages and then we load devices for this page.
         axios.get(`http://127.0.0.1:5000/group/${groupId}/devices/count`)
             .then((response) => {
-                const maxPages = Math.ceil(response.data/Number(devicesPerPage));
+                let maxPages = Math.ceil(response.data/Number(devicesPerPage));
+                if (maxPages === 0) maxPages = 1;
                 if (page > maxPages){
                     page = maxPages;
                 };
