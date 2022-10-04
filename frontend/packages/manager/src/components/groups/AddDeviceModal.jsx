@@ -11,6 +11,7 @@ import InventoryDevicesValidationContxt from "../../store/inventory-devices-vali
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { backendHost } from "../../host";
 
 
 function AddDeviceModal(){
@@ -42,7 +43,7 @@ function AddDeviceModal(){
     }, [GrCtx.setSecurityEngine]);
 
     const postDevice = (deviceObj) => {
-        axios.post('http://127.0.0.1:5000/devices/add', deviceObj)
+        axios.post(`http://${backendHost}/devices/add`, deviceObj)
             .then((response) => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
@@ -50,7 +51,7 @@ function AddDeviceModal(){
     };
 
     const updateDevice = (deviceObj, deviceId) => {
-        axios.post(`http://127.0.0.1:5000/devices/update/${deviceId}`, deviceObj)
+        axios.post(`http://${backendHost}/devices/update/${deviceId}`, deviceObj)
             .then((response) => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();

@@ -14,6 +14,7 @@ import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { backendHost } from "../../host";
 
 
 function AddInventoryModal() {
@@ -59,7 +60,7 @@ function AddInventoryModal() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://127.0.0.1:5000/profiles/names')
+        axios.get(`http://${backendHost}/profiles/names`)
         .then((response) => {
             if (isMounted)
                 setInitProfiles(response.data);
@@ -68,14 +69,14 @@ function AddInventoryModal() {
     }, []);
 
     const postInventory = (inventoryObj) => {
-        axios.post('http://127.0.0.1:5000/inventory/add', inventoryObj)
+        axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
         })
     };
 
     const updateInventory = (inventoryObj, inventoryId) => {
-        axios.post(`http://127.0.0.1:5000/inventory/update/${inventoryId}`, inventoryObj)
+        axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
         })

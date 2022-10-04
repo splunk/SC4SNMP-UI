@@ -12,6 +12,7 @@ import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { backendHost } from "../../host";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
@@ -22,14 +23,14 @@ function AddGroupModal() {
     }, [GrCtx.setGroupName]);
 
     const postGroup = (groupObj) => {
-        axios.post('http://127.0.0.1:5000/groups/add', groupObj)
+        axios.post(`http://${backendHost}/groups/add`, groupObj)
             .then((response) => {
                 GrCtx.makeGroupsChange();
         })
     };
 
     const updateGroup = (groupObj, groupId) => {
-        axios.post(`http://127.0.0.1:5000/groups/update/${groupId}`, groupObj)
+        axios.post(`http://${backendHost}/groups/update/${groupId}`, groupObj)
             .then((response) => {
                 GrCtx.makeGroupsChange();
         })

@@ -13,6 +13,7 @@ import ProfileContext from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { backendHost } from "../../host";
 
 
 function AddProfileModal(props) {
@@ -47,7 +48,7 @@ function AddProfileModal(props) {
     }
 
     const postProfile = (profileObj) => {
-        axios.post('http://127.0.0.1:5000/profiles/add', profileObj)
+        axios.post(`http://${backendHost}/profiles/add`, profileObj)
             .then((response) => {
                 console.log(response);
                 ProfCtx.makeProfilesChange();
@@ -55,7 +56,7 @@ function AddProfileModal(props) {
     }
 
     const updateProfile = (profileObj, profileId) => {
-        axios.post(`http://127.0.0.1:5000/profiles/update/${profileId}`, profileObj)
+        axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
             .then((response) => {
                 console.log(response);
                 ProfCtx.makeProfilesChange();
