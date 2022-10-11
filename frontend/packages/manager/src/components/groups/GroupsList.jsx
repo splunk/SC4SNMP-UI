@@ -120,7 +120,7 @@ function GroupsList() {
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupId(groupId);
-        GrCtx.setDeviceId(row._id.$oid);
+        GrCtx.setDeviceId(row._id);
         GrCtx.setAddress(row.address);
         GrCtx.setPort(row.port);
         GrCtx.setVersion(row.version);
