@@ -2,9 +2,56 @@ from bson import json_util, ObjectId
 from flask import Flask, request, Blueprint
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import db
+from SC4SNMP_UI_backend.common.conversions import ProfileConversion
 
 ui = Blueprint('ui', __name__)
 
+profile_conversion = ProfileConversion()
+
+@ui.route('/profiles/names')
+@cross_origin()
+def get_profile_names():
+    profiles = db.profiles_ui.find()
+    profiles_list = []
+    for pr in list(profiles):
+        profiles_list.append(profile_conversion.backend2ui(pr))
+    return json_util.dumps([el["profileName"] for el in profiles_list])
+
+
+@ui.route('/profiles')
+@cross_origin()
+def get_all_profiles_list():
+    profiles = db.profiles.find()
+    profiles_list = []
+    for pr in list(profiles):
+        profiles_list.append(profile_conversion.backend2ui(pr))
+    return json_util.dumps(profiles_list)
+
+
+@ui.route('/profiles/add', methods=['POST'])
+@cross_origin()
+def add_profile_record():
+    profile_obj = request.json
+    profile_obj = profile_conversion.ui2backend(profile_obj)
+    db.profiles.insert_one(profile_obj)
+    return "success"
+
+
+@ui.route('/profiles/delete/<profile_id>', methods=['POST'])
+@cross_origin()
+def delete_profile_record(profile_id):
+    db.profiles.delete_one({'_id': ObjectId(profile_id)})
+    return "success"
+
+
+@ui.route('/profiles/update/<profile_id>', methods=['POST'])
+@cross_origin()
+def update_profile_record(profile_id):
+    profile_obj = request.json
+    profile_obj = profile_conversion.ui2backend(profile_obj)
+    new_values = {"$set": profile_obj}
+    db.profiles.update_one({'_id': ObjectId(profile_id)}, new_values)
+    return "success"
 
 # @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @ui.route('/inventory/<page_num>/<dev_per_page>')
@@ -48,50 +95,6 @@ def update_inventory_record(inventory_id):
     print(f"{inventory_obj}")
     new_values = {"$set": inventory_obj}
     db.inventory_ui.update_one({'_id': ObjectId(inventory_id)}, new_values)
-    return "success"
-
-
-@ui.route('/profiles/names')
-@cross_origin()
-def get_profiles_list():
-    profiles = db.profiles_ui.find()
-    profiles_list = list(profiles)
-    print(profiles_list)
-    return json_util.dumps([el["profileName"] for el in profiles_list])
-
-
-@ui.route('/profiles')
-@cross_origin()
-def get_all_profiles_list():
-    profiles = db.profiles_ui.find()
-    profiles_list = list(profiles)
-    print(profiles_list)
-    return json_util.dumps(profiles_list)
-
-
-@ui.route('/profiles/add', methods=['POST'])
-@cross_origin()
-def add_profile_record():
-    profile_obj = request.json
-    print(profile_obj)
-    db.profiles_ui.insert_one(profile_obj)
-    return "success"
-
-
-@ui.route('/profiles/delete/<profile_id>', methods=['POST'])
-@cross_origin()
-def delete_profile_record(profile_id):
-    db.profiles_ui.delete_one({'_id': ObjectId(profile_id)})
-    return "success"
-
-
-@ui.route('/profiles/update/<profile_id>', methods=['POST'])
-@cross_origin()
-def update_profile_record(profile_id):
-    profile_obj = request.json
-    print(f"{profile_obj}")
-    new_values = {"$set": profile_obj}
-    db.profiles_ui.update_one({'_id': ObjectId(profile_id)}, new_values)
     return "success"
 
 

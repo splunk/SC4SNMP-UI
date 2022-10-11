@@ -35,7 +35,7 @@ class ProfileConversion(Conversion):
                 new_vb = {
                     "family": vb[0],
                     "category": vb[1] if len(vb) >= 2 else "",
-                    "index": vb[2] if len(vb) == 3 else "",
+                    "index": str(vb[2]) if len(vb) == 3 else "",
                 }
                 var_binds.append(new_vb)
 
@@ -43,7 +43,7 @@ class ProfileConversion(Conversion):
                 backend_condition = profile[profile_name]["condition"]
                 condition_type = backend_condition["type"]
                 field = backend_condition["field"] if condition_type == "field" else ""
-                patterns = [{"pattern": p} for p in backend_condition["field"]] if condition_type == "field" else None
+                patterns = [{"pattern": p} for p in backend_condition["patterns"]] if condition_type == "field" else None
                 conditions = {
                     "condition": condition_type,
                     "field": field,
@@ -51,7 +51,7 @@ class ProfileConversion(Conversion):
                 }
             else:
                 conditions = {
-                    "condition": "mandatory",
+                    "condition": "None",
                     "field": "",
                     "patterns": None
                 }
@@ -62,7 +62,6 @@ class ProfileConversion(Conversion):
                 "conditions": conditions,
                 "varBinds": var_binds
             }
-            print(converted)
             return converted
 
     def _ui2backend_map(self, profile: dict):
@@ -72,6 +71,8 @@ class ProfileConversion(Conversion):
                 'field': profile['conditions']['field'],
                 'patterns': [el['pattern'] for el in profile['conditions']['patterns']]
             }
+        elif profile['conditions']['condition'] == "None":
+            conditions = None
         else:
             conditions = {
                 'type': profile['conditions']['condition']
@@ -85,14 +86,21 @@ class ProfileConversion(Conversion):
                     single_var_bind.append(int(var_b['index']))
             var_binds.append(single_var_bind)
 
-        item = {
-            "_id": profile["_id"],
-            profile['profileName']: {
-                'frequency': int(profile['frequency']),
-                'condition': conditions,
-                'varBinds': var_binds
+        if conditions is None:
+            item = {
+                profile['profileName']: {
+                    'frequency': int(profile['frequency']),
+                    'varBinds': var_binds
+                }
             }
-        }
+        else:
+            item = {
+                profile['profileName']: {
+                    'frequency': int(profile['frequency']),
+                    'condition': conditions,
+                    'varBinds': var_binds
+                }
+            }
         return item
 
 
