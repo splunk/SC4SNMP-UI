@@ -2,16 +2,21 @@ from bson import json_util, ObjectId
 from flask import Flask, request, Blueprint
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import db
-from SC4SNMP_UI_backend.common.conversions import ProfileConversion
+from SC4SNMP_UI_backend.common.conversions import ProfileConversion, GroupConversion, GroupDeviceConversion, \
+    get_group_name_from_backend
+from copy import copy
 
 ui = Blueprint('ui', __name__)
 
 profile_conversion = ProfileConversion()
+group_conversion = GroupConversion()
+group_device_conversion = GroupDeviceConversion()
+
 
 @ui.route('/profiles/names')
 @cross_origin()
 def get_profile_names():
-    profiles = db.profiles_ui.find()
+    profiles = db.profiles.find()
     profiles_list = []
     for pr in list(profiles):
         profiles_list.append(profile_conversion.backend2ui(pr))
@@ -52,6 +57,136 @@ def update_profile_record(profile_id):
     new_values = {"$set": profile_obj}
     db.profiles.update_one({'_id': ObjectId(profile_id)}, new_values)
     return "success"
+
+
+@ui.route('/groups')
+@cross_origin()
+def get_groups_list():
+    groups = db.groups.find()
+    groups_list = []
+    for gr in list(groups):
+        groups_list.append(group_conversion.backend2ui(gr))
+    return json_util.dumps(groups_list)
+
+
+@ui.route('/groups/add', methods=['POST'])
+@cross_origin()
+def add_group_record():
+    group_obj = request.json
+    group_obj = group_conversion.ui2backend(group_obj)
+    db.groups.insert_one(group_obj)
+    return "success"
+
+
+@ui.route('/groups/update/<group_id>', methods=['POST'])
+@cross_origin()
+def update_group(group_id):
+    group_obj = request.json
+    old_group = db.groups.find({'_id': ObjectId(group_id)})
+    old_group = list(old_group)[0]
+    try:
+        old_group_name = get_group_name_from_backend(old_group)
+        db.groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
+        return "success"
+    except ValueError as e:
+        raise e
+
+
+@ui.route('/groups/delete/<group_id>', methods=['POST'])
+@cross_origin()
+def delete_group_and_devices(group_id):
+    db.groups.delete_one({'_id': ObjectId(group_id)})
+    return "success"
+
+
+@ui.route('/group/<group_id>/devices/count')
+@cross_origin()
+def get_devices_count_for_group(group_id):
+    group = db.groups.find({"_id": ObjectId(group_id)})
+    group = list(group)[0]
+    try:
+        old_group_name = get_group_name_from_backend(group)
+        total_count = len(group[old_group_name])
+        return json_util.dumps(total_count)
+    except ValueError as e:
+        raise e
+
+
+@ui.route('/group/<group_id>/devices/<page_num>/<dev_per_page>')
+@cross_origin()
+def get_devices_of_group(group_id, page_num, dev_per_page):
+    page_num = int(page_num)
+    dev_per_page = int(dev_per_page)
+    skips = dev_per_page * (page_num - 1)
+    group = db.groups.find({"_id": ObjectId(group_id)})
+    group = list(group)[0]
+    try:
+        group_name = get_group_name_from_backend(group)
+        devices_list = []
+        i = 0
+        for device in group[group_name]:
+            devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
+            i += 1
+        devices_list = devices_list[skips:skips+dev_per_page]
+        return json_util.dumps(devices_list)
+    except ValueError as e:
+        raise e
+
+
+@ui.route('/devices/add', methods=['POST'])
+@cross_origin()
+def add_device_to_group():
+    device_obj = request.json
+    group_id = device_obj["groupId"]
+    group = db.groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
+    group = list(group)[0]
+    device_obj = group_device_conversion.ui2backend(device_obj)
+    try:
+        group_name = get_group_name_from_backend(group)
+        group[group_name].append(device_obj)
+        new_values = {"$set": group}
+        print(group_id, new_values)
+        db.groups.update_one({"_id": ObjectId(group_id)}, new_values)
+        return "success"
+    except ValueError as e:
+        raise e
+
+
+@ui.route('/devices/update/<device_id>', methods=['POST'])
+@cross_origin()
+def update_device_from_group(device_id):
+    device_obj = request.json
+    group_id = device_id.split("-")[0]
+    device_id = device_id.split("-")[1]
+    group = db.groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
+    group = list(group)[0]
+    device_obj = group_device_conversion.ui2backend(device_obj)
+    try:
+        group_name = get_group_name_from_backend(group)
+        group[group_name][int(device_id)] = device_obj
+        new_values = {"$set": group}
+        db.groups.update_one({"_id": ObjectId(group_id)}, new_values)
+        return "success"
+    except ValueError as e:
+        raise e
+
+
+@ui.route('/devices/delete/<device_id>', methods=['POST'])
+@cross_origin()
+def delete_device_from_group_record(device_id: str):
+    group_id = device_id.split("-")[0]
+    device_id = device_id.split("-")[1]
+    group = db.groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
+    group = list(group)[0]
+    try:
+        group_name = get_group_name_from_backend(group)
+        group[group_name].pop(int(device_id))
+        new_values = {"$set": group}
+        db.groups.update_one({"_id": ObjectId(group_id)}, new_values)
+        return "success"
+    except ValueError as e:
+        raise e
+
 
 # @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @ui.route('/inventory/<page_num>/<dev_per_page>')
@@ -96,83 +231,3 @@ def update_inventory_record(inventory_id):
     new_values = {"$set": inventory_obj}
     db.inventory_ui.update_one({'_id': ObjectId(inventory_id)}, new_values)
     return "success"
-
-
-@ui.route('/groups')
-@cross_origin()
-def get_groups_list():
-    groups = db.groups_ui.find()
-    groups_list = list(groups)
-    return json_util.dumps(groups_list)
-
-
-@ui.route('/groups/add', methods=['POST'])
-@cross_origin()
-def add_group_record():
-    group_obj = request.json
-    print(group_obj)
-    db.groups_ui.insert_one(group_obj)
-    return "success"
-
-
-@ui.route('/groups/update/<group_id>', methods=['POST'])
-@cross_origin()
-def update_group(group_id):
-    group_obj = request.json
-    print(f"{group_obj}")
-    new_values = {"$set": group_obj}
-    db.groups_ui.update_one({'_id': ObjectId(group_id)}, new_values)
-    return "success"
-
-
-@ui.route('/groups/delete/<group_id>', methods=['POST'])
-@cross_origin()
-def delete_group_and_devices(group_id):
-    db.groups_ui.delete_one({'_id': ObjectId(group_id)})
-    db.devices_ui.delete_many({"groupId": group_id})
-    return "success"
-
-
-@ui.route('/group/<group_id>/devices/count')
-@cross_origin()
-def get_devices_count_for_group(group_id):
-    total_count = db.devices_ui.count_documents({"groupId": group_id})
-    return json_util.dumps(total_count)
-
-
-@ui.route('/group/<group_id>/devices/<page_num>/<dev_per_page>')
-@cross_origin()
-def get_devices_of_groups_list(group_id, page_num, dev_per_page):
-    page_num = int(page_num)
-    dev_per_page = int(dev_per_page)
-    skips = dev_per_page * (page_num - 1)
-    devices = db.devices_ui.find({"groupId": group_id}).skip(skips).limit(dev_per_page)
-    devices_list = list(devices)
-    return json_util.dumps(devices_list)
-
-
-@ui.route('/devices/add', methods=['POST'])
-@cross_origin()
-def add_device_to_group_record():
-    device_obj = request.json
-    print(device_obj)
-    db.devices_ui.insert_one(device_obj)
-    return "success"
-
-
-@ui.route('/devices/update/<device_id>', methods=['POST'])
-@cross_origin()
-def update_device_from_group(device_id):
-    device_obj = request.json
-    print(f"{device_obj}")
-    new_values = {"$set": device_obj}
-    db.devices_ui.update_one({'_id': ObjectId(device_id)}, new_values)
-    return "success"
-
-
-@ui.route('/devices/delete/<device_id>', methods=['POST'])
-@cross_origin()
-def delete_device_from_group_record(device_id):
-    db.devices_ui.delete_one({'_id': ObjectId(device_id)})
-    return "success"
-
