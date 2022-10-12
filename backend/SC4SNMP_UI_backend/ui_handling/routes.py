@@ -21,7 +21,9 @@ def get_profile_names():
     profiles = db.profiles.find()
     profiles_list = []
     for pr in list(profiles):
-        profiles_list.append(profile_conversion.backend2ui(pr))
+        converted = profile_conversion.backend2ui(pr)
+        if converted['conditions']['condition'] not in ['mandatory', 'base']:
+            profiles_list.append(converted)
     return json_util.dumps([el["profileName"] for el in profiles_list])
 
 
@@ -213,8 +215,8 @@ def get_inventory_count():
 @cross_origin()
 def add_inventory_record():
     inventory_obj = request.json
-    print(inventory_obj)
-    db.inventory_ui.insert_one(inventory_obj)
+    inventory_processing = InventoryProcessing(inventory_conversion, db)
+    inventory_processing.add_record(inventory_obj)
     return "success"
 
 

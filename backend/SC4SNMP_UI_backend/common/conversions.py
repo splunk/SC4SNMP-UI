@@ -66,8 +66,8 @@ class ProfileConversion(Conversion):
                 }
                 var_binds.append(new_vb)
 
-            if "conditions" in document[profile_name]:
-                backend_condition = document[profile_name]["conditions"]
+            if "condition" in document[profile_name]:
+                backend_condition = document[profile_name]["condition"]
                 condition_type = backend_condition["type"]
                 field = backend_condition["field"] if condition_type == "field" else ""
                 patterns = [{"pattern": p} for p in backend_condition["patterns"]] if condition_type == "field" else None

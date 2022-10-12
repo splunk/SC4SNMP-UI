@@ -10,8 +10,20 @@ class InventoryProcessing:
         self._db = db
 
     def read_from_backend(self):
-        groups_query = list(self._db.groups.find({}))
+        self._load_groups_from_mongo()
 
+        inventory_backend = list(self._db.inventory.find({}))
+        self._inventory_ui = []
+        for record in inventory_backend:
+            self._process_inventory_line(record)
+        for group_in_record in self._groups_inventory.values():
+            converted = self._conversion.backend2ui(group_in_record)
+            self._inventory_ui.append(converted)
+        return self._inventory_ui
+
+    def _load_groups_from_mongo(self):
+        self._groups_backend = {}
+        groups_query = list(self._db.groups.find({}))
         for group_from_query in groups_query:
             gr_name = get_group_name_from_backend(group_from_query)
 
@@ -23,15 +35,6 @@ class InventoryProcessing:
                     f"{device['address']}:{port}": {key: value for key, value in device.items() if key != 'address' and key != 'port'}
                 }
                 self._groups_backend[gr_name].update(new_device)
-
-        inventory_backend = list(self._db.inventory.find({}))
-        self._inventory_ui = []
-        for record in inventory_backend:
-            self._process_inventory_line(record)
-        for group_in_record in self._groups_inventory.values():
-            converted = self._conversion.backend2ui(group_in_record)
-            self._inventory_ui.append(converted)
-        return self._inventory_ui
 
     def _process_inventory_line(self, record: dict):
         if record["group"] is None:
@@ -88,4 +91,41 @@ class InventoryProcessing:
             if security_engine is not False:
                 self._groups_inventory[group_name]['security_engine'] = security_engine
 
+    def add_record(self, record: dict):
+        # TODO: add mandatory profiles and base profiles if smart = true
+        address = record['address']
+        if address[0].isdigit():
+            converted = self._conversion.ui2backend(record, delete=False, group=None)
+            self._db.inventory.insert_one(converted)
+        else:
+            self._load_groups_from_mongo()
+            if address not in self._groups_backend.keys():
+                # TODO: display error if user wants to add nonexistent group
+                return None
+            else:
+                all_records = []
+                for key, value in self._groups_backend[address].items():
+                    ip_address = key.split(":")[0]
+                    port = key.split(":")[1]
+                    port = int(port) if len(port) > 0 else record['port']
+                    community = value['community'] if 'community' in value.keys() else record['community']
+                    secret = value['secret'] if 'secret' in value.keys() else record['secret']
+                    version = value['version'] if 'version' in value.keys() else record['version']
+                    security_engine = value['security_engine'] if 'security_engine' in value.keys() else record['securityEngine']
+
+                    inventory_data = {
+                        'address': ip_address,
+                        'port': port,
+                        'version': version,
+                        'community': community,
+                        'secret': secret,
+                        'security_engine': security_engine,
+                        'walk_interval': record['walkInterval'],
+                        'profiles': record['profiles'],
+                        'smart_profiles': record['smartProfiles'],
+                        'group': address,
+                        'delete': False
+                    }
+                    all_records.append(inventory_data)
+                self._db.inventory.insert_many(all_records)
 
