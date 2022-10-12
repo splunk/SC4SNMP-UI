@@ -25,10 +25,7 @@ def get_group_name_from_backend(document: dict):
     for key in document.keys():
         if key != "_id":
             group_name = key
-    if group_name is None:
-        raise ValueError("No group name detected")
-    else:
-        return group_name
+    return group_name
 
 
 class Conversion:
@@ -132,15 +129,12 @@ class GroupConversion(Conversion):
         super().__init__(*args, **kwargs)
 
     def _backend2ui_map(self, document: dict, **kwargs):
-        try:
-            group_name = get_group_name_from_backend(document)
-            result = {
-                "_id": document["_id"],
-                "groupName": group_name
-            }
-            return result
-        except ValueError as e:
-            raise e
+        group_name = get_group_name_from_backend(document)
+        result = {
+            "_id": document["_id"],
+            "groupName": group_name
+        }
+        return result
 
     def _ui2backend_map(self, document: dict, **kwargs):
         result = {
@@ -184,4 +178,43 @@ class GroupDeviceConversion(Conversion):
                 result.update({f"{backend_key}": str(document[ui_key])})
         if len(document['port']) > 0:
             result.update({"port": int(document['port'])})
+        return result
+
+
+class InventoryConversion(Conversion):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _ui2backend_map(self, document: dict, **kwargs):
+        if "delete" in kwargs.keys() and "group" in kwargs.keys():
+            result = {
+                'address': document['address'],
+                'port': int(document['port']),
+                'version': document['version'],
+                'community': document['community'] if len(document['community']) > 0 else None,
+                'secret': document['secret'] if len(document['secret']) > 0 else None,
+                'security_engine': document['securityEngine'] if len(document['securityEngine']) > 0 else None,
+                'walk_interval': document['walkInterval'],
+                'profiles': document['profiles'],
+                'smart_profiles': document['smartProfiles'],
+                'group': kwargs['group'],
+                'delete': kwargs['delete']
+            }
+            return result
+        else:
+            raise ValueError("No delete or group provided")
+
+    def _backend2ui_map(self, document: dict, **kwargs):
+        result = {
+            '_id': document['_id'],
+            'address': document['address'],
+            'port': str(document['port']),
+            'version': document['version'],
+            'community': document['community'] if document['secret'] is not None else "",
+            'secret': document['secret'] if document['secret'] is not None else "",
+            'securityEngine': document['security_engine'] if document['security_engine'] is not None else "",
+            'walkInterval': document['walk_interval'],
+            'profiles': document['profiles'],
+            'smartProfiles': document['smart_profiles']
+        }
         return result
