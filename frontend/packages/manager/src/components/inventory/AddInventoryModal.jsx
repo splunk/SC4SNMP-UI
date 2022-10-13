@@ -75,8 +75,8 @@ function AddInventoryModal() {
         })
     };
 
-    const updateInventory = (inventoryObj, inventoryId) => {
-        axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
+    const updateInventory = (inventoryObj, inventoryAddress, inventoryPort) => {
+        axios.post(`http://${backendHost}/inventory/update/${inventoryAddress}/${inventoryPort}`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
         })
@@ -110,7 +110,7 @@ function AddInventoryModal() {
             // form is valid
             ValCtx.resetAllErrors();
             if (InvCtx.isEdit){
-                updateInventory(inventoryObj, InvCtx.inventoryId)
+                updateInventory(inventoryObj, InvCtx.address, InvCtx.port)
             }else{
                 postInventory(inventoryObj);
             }
