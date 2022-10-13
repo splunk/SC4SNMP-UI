@@ -124,7 +124,6 @@ class InventoryProcessing:
                         self._db.inventory.insert_many(all_new_records_in_mongo)
 
     def update_record(self, address, port, inventory_id, record_from_ui):
-        print("updating",address)
         if address[0].isdigit():
             default_profiles = self._get_default_profiles(record_from_ui['smartProfiles'])
             record_from_ui['profiles'] += default_profiles
