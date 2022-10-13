@@ -1,22 +1,43 @@
-from SC4SNMP_UI_backend.common.conversions import InventoryConversion, ProfileConversion, get_group_name_from_backend
+from SC4SNMP_UI_backend.common.conversions import InventoryConversion, ProfileConversion, get_group_name_from_backend, \
+    camel_case2snake_case, snake_case2camel_case
 
-
+# TODO: When someone updates devices in group then update inventory collection
 class InventoryProcessing:
-    def __init__(self, conversion: InventoryConversion, db):
+    def __init__(self, conversion: InventoryConversion, mongo_client):
         self._inventory_ui = []
-        self._groups_backend = {}
-        self._groups_inventory = {}
+        self._groups_backend = {}  # _groups_backend stores all fields except port,
+        # that were overwritten by group device config.
+
+        self._groups_ui = {}  # _groups_ui stores field values that will be
+        # shown in the inventory ui for each group
+
         self._conversion = conversion
-        self._db = db
+        self._mongo_client = mongo_client
+        self._db = mongo_client.sc4snmp
+
+        self._device_in_group_fields_ui = {
+            'port': None,
+            'version': None,
+            'community': None,
+            'secret': None,
+            'security_engine': None
+        }
+
+        self._common_fields_ui = {
+            'address': None,
+            'walk_interval': None,
+            'profiles': None,
+            'smart_profiles': None
+        }
 
     def read_from_backend(self):
         self._load_groups_from_mongo()
 
-        inventory_backend = list(self._db.inventory.find({}))
+        inventory_backend = list(self._db.inventory.find())
         self._inventory_ui = []
         for record in inventory_backend:
             self._process_inventory_line(record)
-        for group_in_record in self._groups_inventory.values():
+        for group_in_record in self._groups_ui.values():
             converted = self._conversion.backend2ui(group_in_record)
             self._inventory_ui.append(converted)
         return self._inventory_ui
@@ -66,16 +87,30 @@ class InventoryProcessing:
                         'delete': False
                     }
                     all_records.append(inventory_data)
-                self._db.inventory.insert_many(all_records)
+                with self._mongo_client.start_session() as session:
+                    with session.start_transaction():
+                        self._db.inventory.insert_many(all_records)
 
     def delete_record(self, address, port):
         if address[0].isdigit():
             self._db.inventory.delete_one({'address': address, 'port': int(port)})
         else:
-            self._db.inventory.delete_many({'group': address})
+            with self._mongo_client.start_session() as session:
+                with session.start_transaction():
+                    self._db.inventory.delete_many({'group': address})
 
-    def update_record(self, address, port, object):
-        pass
+    """def update_record(self, address, port, new_record):
+        if address[0].isdigit():
+            converted = self._conversion.ui2backend(new_record, delete=False, group=None)
+            new_values = {"$set": converted}
+            self._db.inventory.update_one({"address": address, "port": int(port)}, new_values)
+        else:
+            group_name = address
+            self._load_groups_from_mongo()
+            inventory_backend = list(self._db.inventory.find({'group': address}))
+            for record in inventory_backend:
+                for field in self._device_in_group_fields_ui.keys():
+                    if field in self._groups_backend[group_name][]"""
 
     def _load_groups_from_mongo(self):
         self._groups_backend = {}
@@ -83,12 +118,12 @@ class InventoryProcessing:
         for group_from_query in groups_query:
             gr_name = get_group_name_from_backend(group_from_query)
 
-            # self.groups_backend stores all fields except port, that were overwritten by group device config
+            # self.groups_backend stores all fields, that were overwritten by group device config
             self._groups_backend[gr_name] = {}
             for device in group_from_query[gr_name]:
                 port = device['port'] if 'port' in device.keys() else ""
                 new_device = {
-                    f"{device['address']}:{port}": {key: value for key, value in device.items() if key != 'address' and key != 'port'}
+                    f"{device['address']}:{port}": {key: value for key, value in device.items() if key != 'address'}
                 }
                 self._groups_backend[gr_name].update(new_device)
 
@@ -119,7 +154,7 @@ class InventoryProcessing:
         version = record['version'] if 'version' not in group[device_key].keys() else False
         security_engine = record['security_engine'] if 'security_engine' not in group[device_key].keys() else False
 
-        if group_name not in self._groups_inventory.keys():
+        if group_name not in self._groups_ui.keys():
             inventory_data = {
                 '_id': record["_id"],
                 'address': group_name,
@@ -134,7 +169,7 @@ class InventoryProcessing:
                 'group': record['group'],
                 'delete': record['delete']
             }
-            self._groups_inventory[group_name] = inventory_data
+            self._groups_ui[group_name] = inventory_data
         else:
             string_to_var_map = {
                 'port': port,
@@ -145,4 +180,4 @@ class InventoryProcessing:
             }
             for field, value in string_to_var_map.items():
                 if value is not False:
-                    self._groups_inventory[group_name][field] = value
+                    self._groups_ui[group_name][field] = value
