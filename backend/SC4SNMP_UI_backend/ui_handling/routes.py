@@ -216,20 +216,23 @@ def get_inventory_count():
 def add_inventory_record():
     inventory_obj = request.json
     inventory_processing = InventoryProcessing(inventory_conversion, db)
-    inventory_processing.add_record(inventory_obj)
+    inventory_processing.create_record(inventory_obj)
     return "success"
 
 
-@ui.route('/inventory/delete/<inventory_id>', methods=['POST'])
+@ui.route('/inventory/delete/<address>/<port>', methods=['POST'])
 @cross_origin()
-def delete_inventory_record(inventory_id):
-    db.inventory_ui.delete_one({'_id': ObjectId(inventory_id)})
+def delete_inventory_record(address, port):
+    print(address, port)
+    inventory_processing = InventoryProcessing(inventory_conversion, db)
+    inventory_processing.delete_record(address, port)
+    #db.inventory_ui.delete_one({'_id': ObjectId(inventory_id)})
     return "success"
 
 
-@ui.route('/inventory/update/<inventory_id>', methods=['POST'])
+@ui.route('/inventory/update/<address>/<port>', methods=['POST'])
 @cross_origin()
-def update_inventory_record(inventory_id):
+def update_inventory_record(address, port):
     inventory_obj = request.json
     print(f"{inventory_obj}")
     new_values = {"$set": inventory_obj}

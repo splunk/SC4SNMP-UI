@@ -1,4 +1,4 @@
-from SC4SNMP_UI_backend.common.conversions import InventoryConversion, get_group_name_from_backend
+from SC4SNMP_UI_backend.common.conversions import InventoryConversion, ProfileConversion, get_group_name_from_backend
 
 
 class InventoryProcessing:
@@ -20,6 +20,62 @@ class InventoryProcessing:
             converted = self._conversion.backend2ui(group_in_record)
             self._inventory_ui.append(converted)
         return self._inventory_ui
+
+    def create_record(self, record: dict):
+        # TODO: If the same record alredy exists in mongo, return an error.
+        # Always add mandatory profiles. Base profiles if smartProfiles = true
+        profiles = self._db.profiles.find()
+        profile_conversion = ProfileConversion()
+        for prof in list(profiles):
+            converted = profile_conversion.backend2ui(prof)
+            if converted['conditions']['condition'] == 'mandatory' or \
+                    (record['smartProfiles'] and converted['conditions']['condition'] == 'mandatory'):
+                record['profiles'].append(converted['profileName'])
+
+        address = record['address']
+        if address[0].isdigit():
+            converted = self._conversion.ui2backend(record, delete=False, group=None)
+            self._db.inventory.insert_one(converted)
+        else:
+            self._load_groups_from_mongo()
+            if address not in self._groups_backend.keys():
+                # TODO: display error if user wants to add nonexistent group
+                return None
+            else:
+                all_records = []
+                for addres_port, field in self._groups_backend[address].items():
+                    ip_address = addres_port.split(":")[0]
+                    port = addres_port.split(":")[1]
+                    port = int(port) if len(port) > 0 else record['port']
+                    community = field['community'] if 'community' in field.keys() else record['community']
+                    secret = field['secret'] if 'secret' in field.keys() else record['secret']
+                    version = field['version'] if 'version' in field.keys() else record['version']
+                    security_engine = field['security_engine'] if 'security_engine' in field.keys() else record['securityEngine']
+
+                    inventory_data = {
+                        'address': ip_address,
+                        'port': port,
+                        'version': version,
+                        'community': community,
+                        'secret': secret,
+                        'security_engine': security_engine,
+                        'walk_interval': record['walkInterval'],
+                        'profiles': record['profiles'],
+                        'smart_profiles': record['smartProfiles'],
+                        'group': address,
+                        'delete': False
+                    }
+                    all_records.append(inventory_data)
+                self._db.inventory.insert_many(all_records)
+
+    def delete_record(self, address, port):
+        if address[0].isdigit():
+            self._db.inventory.delete_one({'address': address, 'port': int(port)})
+        else:
+            self._db.inventory.delete_many({'group': address})
+
+    def update_record(self, address, port, object):
+        pass
 
     def _load_groups_from_mongo(self):
         self._groups_backend = {}
@@ -80,52 +136,13 @@ class InventoryProcessing:
             }
             self._groups_inventory[group_name] = inventory_data
         else:
-            if port is not False:
-                self._groups_inventory[group_name]['port'] = port
-            if community is not False:
-                self._groups_inventory[group_name]['community'] = community
-            if secret is not False:
-                self._groups_inventory[group_name]['secret'] = secret
-            if version is not False:
-                self._groups_inventory[group_name]['version'] = version
-            if security_engine is not False:
-                self._groups_inventory[group_name]['security_engine'] = security_engine
-
-    def add_record(self, record: dict):
-        # TODO: add mandatory profiles and base profiles if smart = true
-        address = record['address']
-        if address[0].isdigit():
-            converted = self._conversion.ui2backend(record, delete=False, group=None)
-            self._db.inventory.insert_one(converted)
-        else:
-            self._load_groups_from_mongo()
-            if address not in self._groups_backend.keys():
-                # TODO: display error if user wants to add nonexistent group
-                return None
-            else:
-                all_records = []
-                for key, value in self._groups_backend[address].items():
-                    ip_address = key.split(":")[0]
-                    port = key.split(":")[1]
-                    port = int(port) if len(port) > 0 else record['port']
-                    community = value['community'] if 'community' in value.keys() else record['community']
-                    secret = value['secret'] if 'secret' in value.keys() else record['secret']
-                    version = value['version'] if 'version' in value.keys() else record['version']
-                    security_engine = value['security_engine'] if 'security_engine' in value.keys() else record['securityEngine']
-
-                    inventory_data = {
-                        'address': ip_address,
-                        'port': port,
-                        'version': version,
-                        'community': community,
-                        'secret': secret,
-                        'security_engine': security_engine,
-                        'walk_interval': record['walkInterval'],
-                        'profiles': record['profiles'],
-                        'smart_profiles': record['smartProfiles'],
-                        'group': address,
-                        'delete': False
-                    }
-                    all_records.append(inventory_data)
-                self._db.inventory.insert_many(all_records)
-
+            string_to_var_map = {
+                'port': port,
+                'community': community,
+                'secret': secret,
+                'version': version,
+                'security_engine': security_engine
+            }
+            for field, value in string_to_var_map.items():
+                if value is not False:
+                    self._groups_inventory[group_name][field] = value
