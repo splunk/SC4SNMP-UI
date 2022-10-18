@@ -8,7 +8,7 @@ class Status(Enum):
     NOT_SPECIFIED = 1
 
 
-# TODO: When someone updates devices in group then update inventory collection
+# TODO: When someone updates devices in group or group name, then update inventory collection
 class InventoryProcessing:
     def __init__(self, conversion: InventoryConversion, mongo_client):
         self._conversion = conversion
@@ -79,7 +79,7 @@ class InventoryProcessing:
                 with session.start_transaction():
                     self._db.inventory.delete_many({'group': address})
 
-    def create_record(self, record_from_ui: dict, edit = False):
+    def create_record(self, record_from_ui: dict, edit=False, record_id=None):
         # TODO: If the same record alredy exists in mongo, return an error.
         # Always add mandatory profiles. Base profiles if smartProfiles = true
         default_profiles = self._get_default_profiles(record_from_ui['smartProfiles'])
@@ -119,8 +119,10 @@ class InventoryProcessing:
 
                 with self._mongo_client.start_session() as session:
                     with session.start_transaction():
-                        if edit:
-                            self._db.inventory.delete_many({"group": group_name})
+                        if edit and record_id:
+                            record = self._db.inventory.find({'_id': ObjectId(record_id)})
+                            record = list(record)[0]
+                            self._db.inventory.delete_many({"group": record['group']})
                         self._db.inventory.insert_many(all_new_records_in_mongo)
 
     def update_record(self, address, port, inventory_id, record_from_ui):
@@ -133,7 +135,7 @@ class InventoryProcessing:
                     self._db.inventory.delete_one({'_id': ObjectId(inventory_id)})
                     self._db.inventory.insert_one(converted)
         else:
-            self.create_record(record_from_ui, True)
+            self.create_record(record_from_ui, True, inventory_id)
 
     def _get_default_profiles(self, smart_profiles: bool):
         result = []
@@ -194,6 +196,8 @@ class InventoryProcessing:
                     for field, value in self._device_in_group_fields_ui.items():
                         if value != Status.NOT_SPECIFIED:
                             group_record.update({field: value})
+
+                counter += 1
 
         self._reset_fields()
         return group_record
