@@ -186,23 +186,22 @@ class InventoryConversion(Conversion):
         super().__init__(*args, **kwargs)
 
     def _ui2backend_map(self, document: dict, **kwargs):
-        if "delete" in kwargs.keys() and "group" in kwargs.keys():
+        if "delete" in kwargs.keys():
             result = {
                 'address': document['address'],
                 'port': int(document['port']),
                 'version': document['version'],
-                'community': document['community'] if len(document['community']) > 0 else None,
-                'secret': document['secret'] if len(document['secret']) > 0 else None,
-                'security_engine': document['securityEngine'] if len(document['securityEngine']) > 0 else None,
+                'community': document['community'],
+                'secret': document['secret'],
+                'security_engine': document['securityEngine'],
                 'walk_interval': document['walkInterval'],
                 'profiles': document['profiles'],
                 'smart_profiles': document['smartProfiles'],
-                'group': kwargs['group'],
                 'delete': kwargs['delete']
             }
             return result
         else:
-            raise ValueError("No delete or group provided")
+            raise ValueError("No delete provided")
 
     def _backend2ui_map(self, document: dict, **kwargs):
         result = {
@@ -210,9 +209,9 @@ class InventoryConversion(Conversion):
             'address': document['address'],
             'port': str(document['port']),
             'version': document['version'],
-            'community': document['community'] if document['secret'] is not None else "",
-            'secret': document['secret'] if document['secret'] is not None else "",
-            'securityEngine': document['security_engine'] if document['security_engine'] is not None else "",
+            'community': document['community'],
+            'secret': document['secret'],
+            'securityEngine': document['security_engine'],
             'walkInterval': document['walk_interval'],
             'profiles': document['profiles'],
             'smartProfiles': document['smart_profiles']

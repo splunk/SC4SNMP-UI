@@ -1,3 +1,5 @@
+# With recent updates, this file currently isn't used anywhere.
+
 from SC4SNMP_UI_backend.common.conversions import InventoryConversion, ProfileConversion, get_group_name_from_backend, \
     camel_case2snake_case, snake_case2camel_case
 from enum import Enum

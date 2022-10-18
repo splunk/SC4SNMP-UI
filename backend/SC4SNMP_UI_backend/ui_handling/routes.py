@@ -4,7 +4,6 @@ from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.conversions import ProfileConversion, GroupConversion, GroupDeviceConversion, \
     InventoryConversion, get_group_name_from_backend
-from SC4SNMP_UI_backend.common.inventory import InventoryProcessing as InventoryProcessing
 from copy import copy
 
 ui = Blueprint('ui', __name__)
@@ -13,7 +12,6 @@ profile_conversion = ProfileConversion()
 group_conversion = GroupConversion()
 group_device_conversion = GroupDeviceConversion()
 inventory_conversion = InventoryConversion()
-inventory_processing = InventoryProcessing(inventory_conversion, mongo_client)
 
 
 @ui.route('/profiles/names')
@@ -34,7 +32,9 @@ def get_all_profiles_list():
     profiles = mongo_client.sc4snmp.profiles.find()
     profiles_list = []
     for pr in list(profiles):
-        profiles_list.append(profile_conversion.backend2ui(pr))
+        converted = profile_conversion.backend2ui(pr)
+        if converted['conditions']['condition'] not in ['mandatory']:
+            profiles_list.append(converted)
     return json_util.dumps(profiles_list)
 
 
@@ -91,14 +91,23 @@ def update_group(group_id):
     old_group = list(old_group)[0]
     old_group_name = get_group_name_from_backend(old_group)
     mongo_client.sc4snmp.groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
+
+    # rename corresponding group in inventory
+    mongo_client.sc4snmp.inventory_ui.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
     return "success"
 
 
 @ui.route('/groups/delete/<group_id>', methods=['POST'])
 @cross_origin()
 def delete_group_and_devices(group_id):
-    mongo_client.sc4snmp.groups.delete_one({'_id': ObjectId(group_id)})
-    return "success"
+    group = mongo_client.sc4snmp.groups.find({'_id': ObjectId(group_id)})
+    group = list(group)[0]
+    group_name = get_group_name_from_backend(group)
+    with mongo_client.start_session() as session:
+        with session.start_transaction():
+            mongo_client.sc4snmp.groups.delete_one({'_id': ObjectId(group_id)})
+            mongo_client.sc4snmp.inventory_ui.update_one({"address": group_name}, {"$set": {"delete": True}})
+    return json_util.dumps({"message": f"{group_name} was also deleted from inventory"}), 200
 
 
 @ui.route('/group/<group_id>/devices/count')
@@ -189,16 +198,17 @@ def get_inventory_list(page_num, dev_per_page):
     dev_per_page = int(dev_per_page)
     skips = dev_per_page * (page_num - 1)
 
-    inventory_list = inventory_processing.read_from_backend()
-    inventory_list = inventory_list[skips:skips + dev_per_page]
+    inventory = mongo_client.sc4snmp.inventory_ui.find({"delete": False}).skip(skips).limit(dev_per_page)
+    inventory_list = []
+    for inv in list(inventory):
+        inventory_list.append(inventory_conversion.backend2ui(inv))
     return json_util.dumps(inventory_list)
 
 
 @ui.route('/inventory/count')
 @cross_origin()
 def get_inventory_count():
-    inventory_list = inventory_processing.read_from_backend()
-    total_count = len(inventory_list)
+    total_count = mongo_client.sc4snmp.inventory_ui.count_documents({"delete": False})
     return json_util.dumps(total_count)
 
 
@@ -206,20 +216,36 @@ def get_inventory_count():
 @cross_origin()
 def add_inventory_record():
     inventory_obj = request.json
-    inventory_processing.create_record(inventory_obj)
+    inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
+    address = inventory_obj['address']
+    port = inventory_obj['port']
+    inventory_record = mongo_client.sc4snmp.inventory_ui.find({'address': address, "port": port, "delete": False})
+
+    if not address[0].isdigit():
+        group = list(mongo_client.sc4snmp.groups.find({address: {"$exists": 1}}))
+        if len(group) == 0:
+            return json_util.dumps({"message": f"There is no group {address} configured. Record was not added."}), 400
+
+    if len(list(inventory_record)) == 0:
+        mongo_client.sc4snmp.inventory_ui.insert_one(inventory_obj)
+        return "success"
+    else:
+        identifier = f"{address}:{port}" if address[0].isdigit() else address
+        return json_util.dumps({"message": f"Inventory record for {identifier} already exists. Record was not added."}), 400
+
+
+
+@ui.route('/inventory/delete/<inventory_id>', methods=['POST'])
+@cross_origin()
+def delete_inventory_record(inventory_id):
+    mongo_client.sc4snmp.inventory_ui.update_one({"_id": ObjectId(inventory_id)}, {"$set": {"delete": True}})
     return "success"
 
 
-@ui.route('/inventory/delete/<address>/<port>', methods=['POST'])
+@ui.route('/inventory/update/<inventory_id>', methods=['POST'])
 @cross_origin()
-def delete_inventory_record(address, port):
-    inventory_processing.delete_record(address, port)
-    return "success"
-
-
-@ui.route('/inventory/update/<address>/<port>/<inventory_id>', methods=['POST'])
-@cross_origin()
-def update_inventory_record(address, port, inventory_id):
+def update_inventory_record(inventory_id):
     inventory_obj = request.json
-    inventory_processing.update_record(address, port, inventory_id, inventory_obj)
+    inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
+    mongo_client.sc4snmp.inventory_ui.update_one({"_id": ObjectId(inventory_id)}, {"$set": inventory_obj})
     return "success"
