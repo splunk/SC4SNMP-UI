@@ -14,6 +14,7 @@ import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function GroupsList() {
@@ -21,6 +22,7 @@ function GroupsList() {
     const [openedGroups, setOpenedGroups] = useState({});
     const GrCtx = useContext(GroupContext);
     const BtnCtx = useContext(ButtonsContext);
+    const ErrCtx = useContext(ErrorsModalContext);
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
@@ -153,7 +155,10 @@ function GroupsList() {
     const deleteModalRequest = (context) => {
         axios.post(context.deleteUrl)
           .then(function (response) {
-            console.log(response);
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
             context.makeGroupsChange();
           })
           .catch(function (error) {

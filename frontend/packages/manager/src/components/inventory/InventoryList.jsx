@@ -87,7 +87,7 @@ class SortableColumns extends Component {
     }
 
     deleteModalRequest(context) {
-        let url = this.BASE_URL_DELETE+`${context.address.toString()}/${context.port.toString()}`;
+        let url = this.BASE_URL_DELETE+`${context.inventoryId.toString()}`;
         axios.post(url)
           .then(function (response) {
             console.log(response);
