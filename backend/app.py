@@ -1,3 +1,5 @@
+import os
+
 from bson import json_util, ObjectId
 from flask import Flask, request
 from flask_cors import cross_origin
@@ -5,7 +7,9 @@ from pymongo import MongoClient
 
 
 app = Flask(__name__)
-client = MongoClient('localhost', 27017)
+mongo_ip = os.getenv('MONGO_IP', "127.0.0.1")
+mongo_port = os.getenv('MONGO_PORT', 27017)
+client = MongoClient(mongo_ip, mongo_port)
 db = client.sc4snmp
 
 
