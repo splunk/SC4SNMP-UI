@@ -87,7 +87,13 @@ function AddInventoryModal() {
         axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
-        })
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+                console.log(error.response.data);
+                console.log(error.response.status);
+            })
     };
 
     const handleRequestClose = () => {
