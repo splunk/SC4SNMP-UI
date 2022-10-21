@@ -4,14 +4,18 @@ from bson import json_util, ObjectId
 from flask import Flask, request
 from flask_cors import cross_origin
 from pymongo import MongoClient
+import logging
 
 
 app = Flask(__name__)
-mongo_ip = os.getenv('MONGO_IP', "127.0.0.1")
-mongo_port = os.getenv('MONGO_PORT', 27017)
-client = MongoClient(mongo_ip, mongo_port)
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers = gunicorn_logger.handlers
+app.logger.setLevel(gunicorn_logger.level)
+MONGO_URI = os.getenv('MONGO_URI')
+client = MongoClient(MONGO_URI)
 db = client.sc4snmp
 
+app.logger.info("FALFLAFLAFLAFLAFALF")
 
 @app.route('/')
 @cross_origin()
@@ -125,7 +129,7 @@ def get_groups_list():
 
 
 @app.route('/groups/add', methods=['POST'])
-#@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
+@cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @cross_origin()
 def add_group_record():
     group_obj = request.json
