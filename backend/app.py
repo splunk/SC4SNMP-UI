@@ -15,7 +15,6 @@ MONGO_URI = os.getenv('MONGO_URI')
 client = MongoClient(MONGO_URI)
 db = client.sc4snmp
 
-app.logger.info("FALFLAFLAFLAFLAFALF")
 
 @app.route('/')
 @cross_origin()
