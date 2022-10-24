@@ -68,8 +68,7 @@ jobs:
         id: docker_action_build_frontend
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: frontend/Dockerfile
+          context: frontend
           push: false
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
@@ -82,8 +81,7 @@ jobs:
         id: docker_action_build_backend
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: backend/Dockerfile
+          context: backend
           push: false
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
