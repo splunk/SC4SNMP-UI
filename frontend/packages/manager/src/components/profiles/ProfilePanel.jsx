@@ -8,10 +8,12 @@ import Button from '@splunk/react-ui/Button';
 import ProfileContext from "../../store/profile-contxt";
 import DeleteModal from "../DeleteModal";
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
     const ProfCtx = useContext(ProfileContext);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     useEffect(() => {
     let isMounted = true;
@@ -42,7 +44,10 @@ function ProfilePanel() {
     const deleteModalRequest = (context) => {
         axios.post(`http://${backendHost}/profiles/delete/${context.profileId}`)
           .then(function (response) {
-            console.log(response);
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
             context.makeProfilesChange();
           })
           .catch(function (error) {
