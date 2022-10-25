@@ -6,6 +6,7 @@ from SC4SNMP_UI_backend.common.conversions import ProfileConversion, GroupConver
     InventoryConversion, get_group_name_from_backend
 from copy import copy
 from enum import Enum
+from typing import Callable
 
 ui = Blueprint('ui', __name__)
 
@@ -23,6 +24,7 @@ class InventoryAddEdit(Enum):
     EDIT = 2
 
 
+# @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @ui.route('/profiles/names')
 @cross_origin()
 def get_profile_names():
@@ -59,17 +61,15 @@ def add_profile_record():
 @ui.route('/profiles/delete/<profile_id>', methods=['POST'])
 @cross_origin()
 def delete_profile_record(profile_id):
-    # TODO: if profile was used in some inventory records, update those records
     profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
     profile_name = list(profile.keys())[0]
-    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_name}.*'}}))
-    for record in inventory_records:
-        record_id = record["_id"]
-        record_updated = inventory_conversion.backend2ui(record)
-        index_to_delete = record_updated["profiles"].index(profile_name)
-        record_updated["profiles"].pop(index_to_delete)
-        record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
-        mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
+
+    # Find records from inventory where this profile was used.
+    def delete_profile(index, record_to_update, kwargs):
+        record_to_update["profiles"].pop(index)
+        return record_to_update
+    update_profiles_in_inventory(profile_name, delete_profile)
+
     mongo_profiles.delete_one({'_id': ObjectId(profile_id)})
     return json_util.dumps({"message": f"If {profile_name} was used in some records in the inventory,"
                                        f" those records were updated"}), 200
@@ -85,19 +85,16 @@ def update_profile_record(profile_id):
     old_profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
     old_profile_name = list(old_profile.keys())[0]
 
-    # TODO: if profile name was changed, update all inventory records which used this profile. -> Done, needs testing
+    # If profile name was changed update it and also update all inventory records where this profile is used
     if old_profile_name != new_profile_name:
         mongo_profiles.update_one({'_id': ObjectId(profile_id)},
                                   {"$rename": {f"{old_profile_name}": f"{new_profile_name}"}})
-        inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{old_profile_name}.*'}}))
-        for record in inventory_records:
-            record_id = record["_id"]
-            record_updated = inventory_conversion.backend2ui(record)
-            for i in range(len(record_updated["profiles"])):
-                if record_updated["profiles"][i] == old_profile_name:
-                    record_updated["profiles"][i] = new_profile_name
-            record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
-            mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
+
+        def update_name(index, record_to_update, kwargs):
+            record_to_update["profiles"][index] = kwargs["new_name"]
+            return record_to_update
+        update_profiles_in_inventory(old_profile_name, update_name, new_name=new_profile_name)
+
         result = json_util.dumps({"message": f"If {old_profile_name} was used in some records in the inventory,"
                                        f" it was updated to {new_profile_name}"}), 200
     else:
@@ -131,12 +128,11 @@ def add_group_record():
 @cross_origin()
 def update_group(group_id):
     group_obj = request.json
-    old_group = mongo_groups.find({'_id': ObjectId(group_id)})
-    old_group = list(old_group)[0]
+    old_group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
     old_group_name = get_group_name_from_backend(old_group)
     mongo_groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
 
-    # rename corresponding group in inventory
+    # Rename corresponding group in the inventory
     mongo_inventory.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
     return json_util.dumps({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
 
@@ -144,8 +140,7 @@ def update_group(group_id):
 @ui.route('/groups/delete/<group_id>', methods=['POST'])
 @cross_origin()
 def delete_group_and_devices(group_id):
-    group = mongo_groups.find({'_id': ObjectId(group_id)})
-    group = list(group)[0]
+    group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
     group_name = get_group_name_from_backend(group)
     with mongo_client.start_session() as session:
         with session.start_transaction():
@@ -157,8 +152,7 @@ def delete_group_and_devices(group_id):
 @ui.route('/group/<group_id>/devices/count')
 @cross_origin()
 def get_devices_count_for_group(group_id):
-    group = mongo_groups.find({"_id": ObjectId(group_id)})
-    group = list(group)[0]
+    group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
     group_name = get_group_name_from_backend(group)
     total_count = len(group[group_name])
     return json_util.dumps(total_count)
@@ -170,20 +164,16 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
     page_num = int(page_num)
     dev_per_page = int(dev_per_page)
     skips = dev_per_page * (page_num - 1)
-    group = mongo_groups.find({"_id": ObjectId(group_id)})
-    group = list(group)[0]
-    try:
-        group_name = get_group_name_from_backend(group)
-        devices_list = []
-        i = 0
-        for device in group[group_name]:
-            devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
-            i += 1
-        devices_list = devices_list[skips:skips+dev_per_page]
-        return json_util.dumps(devices_list)
-    except ValueError as e:
-        print(str(e))
-        return 500
+    group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
+
+    group_name = get_group_name_from_backend(group)
+    devices_list = []
+    i = 0
+    for device in group[group_name]:
+        devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
+        i += 1
+    devices_list = devices_list[skips:skips+dev_per_page]
+    return json_util.dumps(devices_list)
 
 
 @ui.route('/devices/add', methods=['POST'])
@@ -191,8 +181,7 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
 def add_device_to_group():
     device_obj = request.json
     group_id = device_obj["groupId"]
-    group = mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
-    group = list(group)[0]
+    group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     device_obj = group_device_conversion.ui2backend(device_obj)
 
     group_name = get_group_name_from_backend(group)
@@ -208,8 +197,7 @@ def update_device_from_group(device_id):
     device_obj = request.json
     group_id = device_id.split("-")[0]
     device_id = device_id.split("-")[1]
-    group = mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
-    group = list(group)[0]
+    group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     device_obj = group_device_conversion.ui2backend(device_obj)
 
     group_name = get_group_name_from_backend(group)
@@ -224,8 +212,7 @@ def update_device_from_group(device_id):
 def delete_device_from_group_record(device_id: str):
     group_id = device_id.split("-")[0]
     device_id = device_id.split("-")[1]
-    group = mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0})
-    group = list(group)[0]
+    group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     group_name = get_group_name_from_backend(group)
     group[group_name].pop(int(device_id))
     new_values = {"$set": group}
@@ -233,7 +220,6 @@ def delete_device_from_group_record(device_id: str):
     return "success"
 
 
-# @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @ui.route('/inventory/<page_num>/<dev_per_page>')
 @cross_origin()
 def get_inventory_list(page_num, dev_per_page):
@@ -253,10 +239,6 @@ def get_inventory_list(page_num, dev_per_page):
 def get_inventory_count():
     total_count = mongo_inventory.count_documents({"delete": False})
     return json_util.dumps(total_count)
-
-# TODO: In the inventory_ui there should be only one document for the specific record. If user adds a record,
-#  then removes it and then adds it once again, there will be three documents in the inventory_ui with different
-#  delete flags. -> Done, but requires more testing
 
 
 @ui.route('/inventory/add', methods=['POST'])
@@ -283,6 +265,16 @@ def update_inventory_record(inventory_id):
 
 
 def check_if_inventory_can_be_added(inventory_obj, change_type: InventoryAddEdit, inventory_id):
+    """
+    Before updating or adding new inventory check if it can be done. For example users shouldn't add new
+    inventory if the same inventory already exists.
+
+    :param inventory_obj: new inventory object to be added/updated
+    :param change_type: InventoryAddEdit.EDIT or InventoryAddEdit.ADD
+    :param inventory_id: id of the inventory to be edited
+    :return:
+    """
+
     address = inventory_obj['address']
     port = inventory_obj['port']
     message = "added" if change_type == InventoryAddEdit.ADD else "edited"
@@ -292,12 +284,16 @@ def check_if_inventory_can_be_added(inventory_obj, change_type: InventoryAddEdit
     if address[0].isdigit():
         # record is a single host
         existing_inventory_record = list(mongo_inventory.find({'address': address, 'port': port, "delete": False}))
+
+        # check if there is any record for this device which has been assigned to be deleted
         deleted_inventory_record = list(mongo_inventory.find({'address': address, 'port': port, "delete": True}))
         identifier = f"{address}:{port}"
         check_duplicates = True
     else:
         # record is a group
         existing_inventory_record = list(mongo_inventory.find({'address': address, "delete": False}))
+
+        # check if there is any record for this group which has been assigned to be deleted
         deleted_inventory_record = list(mongo_inventory.find({'address': address, "delete": True}))
         identifier = address
         group = list(mongo_groups.find({address: {"$exists": 1}}))
@@ -329,3 +325,23 @@ def check_if_inventory_can_be_added(inventory_obj, change_type: InventoryAddEdit
                 {"message": f"Inventory record for {identifier} already exists. Record was not {message}."}), 400
 
     return result
+
+
+def update_profiles_in_inventory(profile_to_search: str, process_record: Callable, **kwargs):
+    """
+    When profile is edited, then in some cases inventory records using this profile should be updated.
+
+    :param profile_to_search: name of the profile which should be updated in the inventory
+    :param process_record: function to process profiles in record. It should accept index of profile to update,
+    whole record dictionary and kwargs passed by user.
+    :param kwargs: additional variables which user can pass to process_record function
+    :return:
+    """
+    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_to_search}.*'}}))
+    for record in inventory_records:
+        record_id = record["_id"]
+        record_updated = inventory_conversion.backend2ui(record)
+        index_to_update = record_updated["profiles"].index(profile_to_search)
+        record_updated = process_record(index_to_update, record_updated, kwargs)
+        record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
+        mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})

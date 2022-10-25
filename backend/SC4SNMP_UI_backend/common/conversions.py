@@ -70,7 +70,8 @@ class ProfileConversion(Conversion):
                 backend_condition = document[profile_name]["condition"]
                 condition_type = backend_condition["type"]
                 field = backend_condition["field"] if condition_type == "field" else ""
-                patterns = [{"pattern": p} for p in backend_condition["patterns"]] if condition_type == "field" else None
+                patterns = [{"pattern": p} for p in backend_condition["patterns"]] \
+                    if condition_type == "field" else None
                 conditions = {
                     "condition": condition_type,
                     "field": field,
@@ -163,7 +164,6 @@ class GroupDeviceConversion(Conversion):
                     result.update({f'{ui_key}': str(document[backend_key])})
                 else:
                     result.update({f'{ui_key}': ""})
-            print(result)
             return result
         else:
             raise ValueError("No group_id or device_id provided")
