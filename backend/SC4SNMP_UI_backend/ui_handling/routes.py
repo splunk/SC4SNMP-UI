@@ -17,6 +17,7 @@ mongo_profiles = mongo_client.sc4snmp.profiles_ui
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
+
 class InventoryAddEdit(Enum):
     ADD = 1
     EDIT = 2
@@ -58,8 +59,20 @@ def add_profile_record():
 @ui.route('/profiles/delete/<profile_id>', methods=['POST'])
 @cross_origin()
 def delete_profile_record(profile_id):
+    # TODO: if profile was used in some inventory records, update those records
+    profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
+    profile_name = list(profile.keys())[0]
+    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_name}.*'}}))
+    for record in inventory_records:
+        record_id = record["_id"]
+        record_updated = inventory_conversion.backend2ui(record)
+        index_to_delete = record_updated["profiles"].index(profile_name)
+        record_updated["profiles"].pop(index_to_delete)
+        record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
+        mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
     mongo_profiles.delete_one({'_id': ObjectId(profile_id)})
-    return "success"
+    return json_util.dumps({"message": f"If {profile_name} was used in some records in the inventory,"
+                                       f" those records were updated"}), 200
 
 
 @ui.route('/profiles/update/<profile_id>', methods=['POST'])
@@ -72,13 +85,27 @@ def update_profile_record(profile_id):
     old_profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
     old_profile_name = list(old_profile.keys())[0]
 
-    # TODO: if profile name was changed, update all inventory records which used this profile
+    # TODO: if profile name was changed, update all inventory records which used this profile. -> Done, needs testing
     if old_profile_name != new_profile_name:
         mongo_profiles.update_one({'_id': ObjectId(profile_id)},
                                   {"$rename": {f"{old_profile_name}": f"{new_profile_name}"}})
+        inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{old_profile_name}.*'}}))
+        for record in inventory_records:
+            record_id = record["_id"]
+            record_updated = inventory_conversion.backend2ui(record)
+            for i in range(len(record_updated["profiles"])):
+                if record_updated["profiles"][i] == old_profile_name:
+                    record_updated["profiles"][i] = new_profile_name
+            record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
+            mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
+        result = json_util.dumps({"message": f"If {old_profile_name} was used in some records in the inventory,"
+                                       f" it was updated to {new_profile_name}"}), 200
+    else:
+        result = "success", 200
+
     mongo_profiles.update_one({'_id': ObjectId(profile_id)},
                               {"$set": {new_profile_name: profile_obj[new_profile_name]}})
-    return "success"
+    return result
 
 
 @ui.route('/groups')
@@ -123,11 +150,8 @@ def delete_group_and_devices(group_id):
     with mongo_client.start_session() as session:
         with session.start_transaction():
             mongo_groups.delete_one({'_id': ObjectId(group_id)})
-            existing_inventory = list(mongo_inventory.find({"address": group_name, "delete": False}))
-            if len(existing_inventory) > 0:
-                # TODO: It is not working from the sc4snmp side
-                mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}})
-    return json_util.dumps({"message": f"{group_name} was also deleted from inventory"}), 200
+            mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}})
+    return json_util.dumps({"message": f"If {group_name} was configured in the inventory, it was deleted from there"}), 200
 
 
 @ui.route('/group/<group_id>/devices/count')
