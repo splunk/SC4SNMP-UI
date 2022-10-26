@@ -168,10 +168,8 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
 
     group_name = get_group_name_from_backend(group)
     devices_list = []
-    i = 0
-    for device in group[group_name]:
+    for i, device in enumerate(group[group_name]):
         devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
-        i += 1
     devices_list = devices_list[skips:skips+dev_per_page]
     return json_util.dumps(devices_list)
 

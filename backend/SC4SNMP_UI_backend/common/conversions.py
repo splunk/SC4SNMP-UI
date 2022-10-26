@@ -121,7 +121,7 @@ class ProfileConversion(Conversion):
             }
         }
         if conditions is not None:
-            item[document['profileName']].update({'conditions': conditions})
+            item[document['profileName']].update({'condition': conditions})
         return item
 
 
