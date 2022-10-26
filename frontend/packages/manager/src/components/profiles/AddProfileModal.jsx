@@ -60,11 +60,11 @@ function AddProfileModal(props) {
     const updateProfile = (profileObj, profileId) => {
         axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
             .then((response) => {
+                ProfCtx.makeProfilesChange();
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
                     ErrCtx.setMessage(response.data.message);
                 }
-                ProfCtx.makeProfilesChange();
         })
     }
 
