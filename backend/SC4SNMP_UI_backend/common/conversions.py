@@ -84,7 +84,7 @@ class ProfileConversion(Conversion):
                     "patterns": None
                 }
             result = {
-                "_id": document["_id"],
+                "_id": str(document["_id"]),
                 "profileName": profile_name,
                 "frequency": document[profile_name]["frequency"],
                 "conditions": conditions,
@@ -132,7 +132,7 @@ class GroupConversion(Conversion):
     def _backend2ui_map(self, document: dict, **kwargs):
         group_name = get_group_name_from_backend(document)
         result = {
-            "_id": document["_id"],
+            "_id": str(document["_id"]),
             "groupName": group_name
         }
         return result
@@ -212,7 +212,7 @@ class InventoryConversion(Conversion):
         profiles_mongo = document['profiles']
         profiles = profiles_mongo.split(";")
         result = {
-            '_id': document['_id'],
+            '_id': str(document["_id"]),
             'address': document['address'],
             'port': str(document['port']),
             'version': document['version'],

@@ -1,5 +1,5 @@
 from bson import json_util, ObjectId
-from flask import Flask, request, Blueprint
+from flask import Flask, request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.conversions import ProfileConversion, GroupConversion, GroupDeviceConversion, \
@@ -28,25 +28,25 @@ class InventoryAddEdit(Enum):
 @ui.route('/profiles/names')
 @cross_origin()
 def get_profile_names():
-    profiles = mongo_profiles.find()
+    profiles = list(mongo_profiles.find())
     profiles_list = []
-    for pr in list(profiles):
+    for pr in profiles:
         converted = profile_conversion.backend2ui(pr)
         if converted['conditions']['condition'] not in ['mandatory', 'base']:
             profiles_list.append(converted)
-    return json_util.dumps([el["profileName"] for el in profiles_list])
+    return jsonify([el["profileName"] for el in profiles_list])
 
 
 @ui.route('/profiles')
 @cross_origin()
 def get_all_profiles_list():
-    profiles = mongo_profiles.find()
+    profiles = list(mongo_profiles.find())
     profiles_list = []
-    for pr in list(profiles):
+    for pr in profiles:
         converted = profile_conversion.backend2ui(pr)
         if converted['conditions']['condition'] not in ['mandatory']:
             profiles_list.append(converted)
-    return json_util.dumps(profiles_list)
+    return jsonify(profiles_list)
 
 
 @ui.route('/profiles/add', methods=['POST'])
@@ -55,7 +55,7 @@ def add_profile_record():
     profile_obj = request.json
     profile_obj = profile_conversion.ui2backend(profile_obj)
     mongo_profiles.insert_one(profile_obj)
-    return "success"
+    return jsonify("success")
 
 
 @ui.route('/profiles/delete/<profile_id>', methods=['POST'])
@@ -71,7 +71,7 @@ def delete_profile_record(profile_id):
     update_profiles_in_inventory(profile_name, delete_profile)
 
     mongo_profiles.delete_one({'_id': ObjectId(profile_id)})
-    return json_util.dumps({"message": f"If {profile_name} was used in some records in the inventory,"
+    return jsonify({"message": f"If {profile_name} was used in some records in the inventory,"
                                        f" those records were updated"}), 200
 
 
@@ -95,10 +95,10 @@ def update_profile_record(profile_id):
             return record_to_update
         update_profiles_in_inventory(old_profile_name, update_name, new_name=new_profile_name)
 
-        result = json_util.dumps({"message": f"If {old_profile_name} was used in some records in the inventory,"
+        result = jsonify({"message": f"If {old_profile_name} was used in some records in the inventory,"
                                        f" it was updated to {new_profile_name}"}), 200
     else:
-        result = "success", 200
+        result = jsonify("success"), 200
 
     mongo_profiles.update_one({'_id': ObjectId(profile_id)},
                               {"$set": {new_profile_name: profile_obj[new_profile_name]}})
@@ -112,7 +112,7 @@ def get_groups_list():
     groups_list = []
     for gr in list(groups):
         groups_list.append(group_conversion.backend2ui(gr))
-    return json_util.dumps(groups_list)
+    return jsonify(groups_list)
 
 
 @ui.route('/groups/add', methods=['POST'])
@@ -134,7 +134,7 @@ def update_group(group_id):
 
     # Rename corresponding group in the inventory
     mongo_inventory.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
-    return json_util.dumps({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
+    return jsonify({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
 
 
 @ui.route('/groups/delete/<group_id>', methods=['POST'])
@@ -146,7 +146,7 @@ def delete_group_and_devices(group_id):
         with session.start_transaction():
             mongo_groups.delete_one({'_id': ObjectId(group_id)})
             mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}})
-    return json_util.dumps({"message": f"If {group_name} was configured in the inventory, it was deleted from there"}), 200
+    return jsonify({"message": f"If {group_name} was configured in the inventory, it was deleted from there"}), 200
 
 
 @ui.route('/group/<group_id>/devices/count')
@@ -155,7 +155,7 @@ def get_devices_count_for_group(group_id):
     group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
     group_name = get_group_name_from_backend(group)
     total_count = len(group[group_name])
-    return json_util.dumps(total_count)
+    return jsonify(total_count)
 
 
 @ui.route('/group/<group_id>/devices/<page_num>/<dev_per_page>')
@@ -171,7 +171,7 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
     for i, device in enumerate(group[group_name]):
         devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
     devices_list = devices_list[skips:skips+dev_per_page]
-    return json_util.dumps(devices_list)
+    return jsonify(devices_list)
 
 
 @ui.route('/devices/add', methods=['POST'])
@@ -225,18 +225,18 @@ def get_inventory_list(page_num, dev_per_page):
     dev_per_page = int(dev_per_page)
     skips = dev_per_page * (page_num - 1)
 
-    inventory = mongo_inventory.find({"delete": False}).skip(skips).limit(dev_per_page)
+    inventory = list(mongo_inventory.find({"delete": False}).skip(skips).limit(dev_per_page))
     inventory_list = []
-    for inv in list(inventory):
+    for inv in inventory:
         inventory_list.append(inventory_conversion.backend2ui(inv))
-    return json_util.dumps(inventory_list)
+    return jsonify(inventory_list)
 
 
 @ui.route('/inventory/count')
 @cross_origin()
 def get_inventory_count():
     total_count = mongo_inventory.count_documents({"delete": False})
-    return json_util.dumps(total_count)
+    return jsonify(total_count)
 
 
 @ui.route('/inventory/add', methods=['POST'])
@@ -319,7 +319,7 @@ def check_if_inventory_can_be_added(inventory_obj, change_type: InventoryAddEdit
                 mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
             result = "success", 200
         else:
-            result = json_util.dumps(
+            result = jsonify(
                 {"message": f"Inventory record for {identifier} already exists. Record was not {message}."}), 400
 
     return result

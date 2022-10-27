@@ -38,8 +38,8 @@ function GroupsList() {
                 let existingGroups = [];
                 let opened = {};
                 for (let group of response.data){
-                    opened[group._id.$oid] = false;
-                    existingGroups.push(group._id.$oid);
+                    opened[group._id] = false;
+                    existingGroups.push(group._id);
                 }
                 // If page was reloaded after updating one of devices, open tab of that group
                 if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
@@ -173,11 +173,11 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid, 1, DEVICES_PER_PAGE)}}
-          onRequestClose={() => {closeCollapsible(group._id.$oid)}}>
-            <Button onClick={() => (newDeviceButtonHandler(group._id.$oid, group.groupName))} label="Add new device"/>
-            <Button onClick={() => (editGroupButtonHandler(group._id.$oid, group.groupName))} label="Edit group name"/>
-            <Button onClick={() => (deleteGroupButtonHandler(group._id.$oid, group.groupName))} label="Delete group"/>
+        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id]} onRequestOpen={() => {openCollapsible(group._id, 1, DEVICES_PER_PAGE)}}
+          onRequestClose={() => {closeCollapsible(group._id)}}>
+            <Button onClick={() => (newDeviceButtonHandler(group._id, group.groupName))} label="Add new device"/>
+            <Button onClick={() => (editGroupButtonHandler(group._id, group.groupName))} label="Edit group name"/>
+            <Button onClick={() => (deleteGroupButtonHandler(group._id, group.groupName))} label="Delete group"/>
             <Table stripeRows>
                 <Table.Head>
                     <Table.HeadCell>Address</Table.HeadCell>
@@ -189,7 +189,7 @@ function GroupsList() {
                 </Table.Head>
                 <Table.Body>
                     {GrCtx.devices.map((row) => (
-                        <Table.Row key={createDOMID()} onClick={() => handleRowClick(JSON.parse(JSON.stringify(row)), group._id.$oid)}>
+                        <Table.Row key={createDOMID()} onClick={() => handleRowClick(JSON.parse(JSON.stringify(row)), group._id)}>
                             <Table.Cell>{row.address}</Table.Cell>
                             <Table.Cell>{row.port}</Table.Cell>
                             <Table.Cell>{row.community}</Table.Cell>
@@ -202,7 +202,7 @@ function GroupsList() {
                 </Table.Body>
             </Table>
             <Paginator
-                onChange={(event, { page }) => (handlePagination(page, group._id.$oid))}
+                onChange={(event, { page }) => (handlePagination(page, group._id))}
                 current={pageNum}
                 alwaysShowLastPageLink
                 totalPages={totalPages}

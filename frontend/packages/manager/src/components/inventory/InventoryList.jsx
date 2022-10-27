@@ -63,7 +63,7 @@ class SortableColumns extends Component {
 
     handleRowClick = (row) => {
         this.context.setButtonsOpen(true);
-        this.context.setInventoryId(row._id.$oid);
+        this.context.setInventoryId(row._id);
         this.context.setAddress(row.address);
         this.context.setPort(row.port);
         this.context.setVersion(row.version);
