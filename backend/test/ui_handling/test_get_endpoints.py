@@ -356,6 +356,7 @@ def test_get_inventory_list(m_cursor, client):
 
 @mock.patch("pymongo.collection.Collection.count_documents")
 def test_get_inventory_count(m_client, client):
+    pass
     m_client.return_value = 3
     response = client.get('/inventory/count')
     assert response.json == 3

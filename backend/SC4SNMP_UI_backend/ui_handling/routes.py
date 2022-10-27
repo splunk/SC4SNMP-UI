@@ -121,7 +121,7 @@ def add_group_record():
     group_obj = request.json
     group_obj = group_conversion.ui2backend(group_obj)
     mongo_groups.insert_one(group_obj)
-    return "success"
+    return jsonify("success")
 
 
 @ui.route('/groups/update/<group_id>', methods=['POST'])

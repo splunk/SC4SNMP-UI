@@ -13,7 +13,7 @@ class TestConversions(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        common_id = ObjectId("635916b2c8cb7a15f28af40a")
+        common_id = "635916b2c8cb7a15f28af40a"
 
         cls.ui_prof_1 = {
             "_id": common_id,
@@ -58,7 +58,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_prof_1 = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "profile_1": {
                 "frequency": 10,
                 "varBinds": [["IF-MIB", "ifInDiscards", 1], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
@@ -66,7 +66,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_prof_2 = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "profile_2": {
                 "frequency": 20,
                 "condition": {"type": "base"},
@@ -75,7 +75,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_prof_3 = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "profile_3": {
                 "frequency": 30,
                 "condition": {"type": "field",
@@ -86,7 +86,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_group = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "group_1": [
                 {"address": "1.2.3.4"},
                 {"address": "1.2.3.4", "port": 1161},
@@ -145,7 +145,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_inventory_1 = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "address": "11.0.78.114",
             "port": 161,
             "version": "3",
@@ -172,7 +172,7 @@ class TestConversions(TestCase):
         }
 
         cls.backend_inventory_2 = {
-            "_id": common_id,
+            "_id": ObjectId(common_id),
             "address": "group_1",
             "port": 1161,
             "version": "2c",
