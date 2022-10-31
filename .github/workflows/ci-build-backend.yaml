@@ -54,7 +54,7 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/splunk/SC4SNMP-UI/backend/container
+          images: ghcr.io/splunk/sc4snmp-ui/backend/container
           tags: |
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
