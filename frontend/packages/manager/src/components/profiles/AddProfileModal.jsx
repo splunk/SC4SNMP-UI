@@ -14,11 +14,13 @@ import validateProfiles from "../validation/ValidateProfiles";
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
     const ValCtx = useContext(ProfilesValidationContxt);
+    const ErrCtx = useContext(ErrorsModalContext);
     const [newSubmitPatterns, setNewSubmitPatterns] = useState(false);
     const [newSubmitVarBinds, setNewSubmitVarBinds] = useState(false);
 
@@ -58,8 +60,11 @@ function AddProfileModal(props) {
     const updateProfile = (profileObj, profileId) => {
         axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
             .then((response) => {
-                console.log(response);
                 ProfCtx.makeProfilesChange();
+                if ('message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
         })
     }
 

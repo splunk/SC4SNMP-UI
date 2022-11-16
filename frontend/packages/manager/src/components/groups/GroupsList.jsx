@@ -14,6 +14,7 @@ import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function GroupsList() {
@@ -21,6 +22,7 @@ function GroupsList() {
     const [openedGroups, setOpenedGroups] = useState({});
     const GrCtx = useContext(GroupContext);
     const BtnCtx = useContext(ButtonsContext);
+    const ErrCtx = useContext(ErrorsModalContext);
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
@@ -36,8 +38,8 @@ function GroupsList() {
                 let existingGroups = [];
                 let opened = {};
                 for (let group of response.data){
-                    opened[group._id.$oid] = false;
-                    existingGroups.push(group._id.$oid);
+                    opened[group._id] = false;
+                    existingGroups.push(group._id);
                 }
                 // If page was reloaded after updating one of devices, open tab of that group
                 if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
@@ -120,7 +122,7 @@ function GroupsList() {
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setDeleteName(`${row.address}:${row.port}`)
         GrCtx.setGroupId(groupId);
-        GrCtx.setDeviceId(row._id.$oid);
+        GrCtx.setDeviceId(row._id);
         GrCtx.setAddress(row.address);
         GrCtx.setPort(row.port);
         GrCtx.setVersion(row.version);
@@ -153,7 +155,10 @@ function GroupsList() {
     const deleteModalRequest = (context) => {
         axios.post(context.deleteUrl)
           .then(function (response) {
-            console.log(response);
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
             context.makeGroupsChange();
           })
           .catch(function (error) {
@@ -168,11 +173,11 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id.$oid]} onRequestOpen={() => {openCollapsible(group._id.$oid, 1, DEVICES_PER_PAGE)}}
-          onRequestClose={() => {closeCollapsible(group._id.$oid)}}>
-            <Button onClick={() => (newDeviceButtonHandler(group._id.$oid, group.groupName))} label="Add new device"/>
-            <Button onClick={() => (editGroupButtonHandler(group._id.$oid, group.groupName))} label="Edit group name"/>
-            <Button onClick={() => (deleteGroupButtonHandler(group._id.$oid, group.groupName))} label="Delete group"/>
+        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id]} onRequestOpen={() => {openCollapsible(group._id, 1, DEVICES_PER_PAGE)}}
+          onRequestClose={() => {closeCollapsible(group._id)}}>
+            <Button onClick={() => (newDeviceButtonHandler(group._id, group.groupName))} label="Add new device"/>
+            <Button onClick={() => (editGroupButtonHandler(group._id, group.groupName))} label="Edit group name"/>
+            <Button onClick={() => (deleteGroupButtonHandler(group._id, group.groupName))} label="Delete group"/>
             <Table stripeRows>
                 <Table.Head>
                     <Table.HeadCell>Address</Table.HeadCell>
@@ -184,7 +189,7 @@ function GroupsList() {
                 </Table.Head>
                 <Table.Body>
                     {GrCtx.devices.map((row) => (
-                        <Table.Row key={createDOMID()} onClick={() => handleRowClick(JSON.parse(JSON.stringify(row)), group._id.$oid)}>
+                        <Table.Row key={createDOMID()} onClick={() => handleRowClick(JSON.parse(JSON.stringify(row)), group._id)}>
                             <Table.Cell>{row.address}</Table.Cell>
                             <Table.Cell>{row.port}</Table.Cell>
                             <Table.Cell>{row.community}</Table.Cell>
@@ -197,7 +202,7 @@ function GroupsList() {
                 </Table.Body>
             </Table>
             <Paginator
-                onChange={(event, { page }) => (handlePagination(page, group._id.$oid))}
+                onChange={(event, { page }) => (handlePagination(page, group._id))}
                 current={pageNum}
                 alwaysShowLastPageLink
                 totalPages={totalPages}

@@ -15,12 +15,14 @@ import { createDOMID } from '@splunk/ui-utils/id';
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function AddInventoryModal() {
     const [initProfiles, setInitProfiles] = useState([]);
     const InvCtx = useContext(InventoryContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         InvCtx.setAddress(val);
@@ -72,14 +74,26 @@ function AddInventoryModal() {
         axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
-        })
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+                console.log(error.response.data);
+                console.log(error.response.status);
+            })
     };
 
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
                 InvCtx.makeInventoryChange();
-        })
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+                console.log(error.response.data);
+                console.log(error.response.status);
+            })
     };
 
     const handleRequestClose = () => {

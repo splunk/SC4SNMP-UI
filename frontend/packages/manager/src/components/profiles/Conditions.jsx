@@ -14,7 +14,7 @@ class Conditions extends Component {
             stateValue = this.props.value;
         }else{
             stateValue = {
-                condition: 'base',
+                condition: 'None',
                 field: '',
                 patterns: null
             };
@@ -46,6 +46,7 @@ class Conditions extends Component {
                 <ControlGroup label="Condition"
                     labelFor="customized-select-after">
                 <Select value={this.state.condition} onChange={this.handleChange} filter>
+                    <Select.Option label="None" value="None"/>
                     <Select.Option label="base" value="base"/>
                     <Select.Option label="field" value="field"/>
                     <Select.Option label="walk" value="walk"/>

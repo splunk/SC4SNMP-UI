@@ -12,7 +12,7 @@
     "lint:ci": "yarn run eslint:ci && yarn run stylelint",
     "start": "webpack --watch",
     "start:app": "webpack --watch --config demo/webpack.splunkapp.config.js",
-    "start:demo": "webpack-dev-server --config demo/webpack.standalone.config.js --port ${DEMO_PORT-8080}",
+    "start:demo": "webpack-dev-server --config demo/webpack.standalone.config.js --port ${DEMO_PORT-8080} --host 0.0.0.0",
     "stylelint": "stylelint \"src/**/*.{js,jsx}\" --config stylelint.config.js",
     "test": "jest",
     "test:ci": "JEST_JUNIT_OUTPUT_DIR=./test-reports JEST_JUNIT_OUTPUT_NAME=unit-results.xml JEST_JUNIT_CLASSNAME=unit yarn run test --ci --reporters=default jest-junit --coverage --coverageDirectory=coverage_report/coverage_maps_unit --coverageReporters=cobertura",
@@ -28,7 +28,6 @@
     "scriptjs": "^2.5.9",
     "style-loader": "^3.3.1"
   },
-  "proxy": "http://localhost:5000",
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@splunk/babel-preset": "^3.0.0",

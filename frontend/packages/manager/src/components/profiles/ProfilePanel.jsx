@@ -8,10 +8,12 @@ import Button from '@splunk/react-ui/Button';
 import ProfileContext from "../../store/profile-contxt";
 import DeleteModal from "../DeleteModal";
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 function ProfilePanel() {
     const [profiles, setProfiles] = useState([]);
     const ProfCtx = useContext(ProfileContext);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     useEffect(() => {
     let isMounted = true;
@@ -24,7 +26,7 @@ function ProfilePanel() {
     }, [ProfCtx.profilesChange]);
 
     const editProfileButtonHandler = (profile) => {
-        ProfCtx.setProfileId(profile._id.$oid);
+        ProfCtx.setProfileId(profile._id);
         ProfCtx.setProfileName(profile.profileName);
         ProfCtx.setFrequency(profile.frequency);
         ProfCtx.setVarBinds(profile.varBinds);
@@ -42,7 +44,10 @@ function ProfilePanel() {
     const deleteModalRequest = (context) => {
         axios.post(`http://${backendHost}/profiles/delete/${context.profileId}`)
           .then(function (response) {
-            console.log(response);
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
             context.makeProfilesChange();
           })
           .catch(function (error) {
@@ -56,7 +61,7 @@ function ProfilePanel() {
     let mappedPatterns = null;
     const profilesPanels = profiles.map((v) => (
         <CollapsiblePanel title={v.profileName} key={createDOMID()}>
-            <Button onClick={() => deleteProfileButtonHandler(v._id.$oid, v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
+            <Button onClick={() => deleteProfileButtonHandler(v._id, v.profileName)} ref={ProfCtx.deleteModalToggle} label="Delete profile" />
             <Button onClick={() => editProfileButtonHandler(JSON.parse(JSON.stringify(v)))} label="Edit profile" />
 
             { v.frequency && <P>Frequency: {v.frequency}</P> }

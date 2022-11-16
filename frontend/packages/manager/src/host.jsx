@@ -1,5 +1,6 @@
 import React from 'react';
 
-const backendHost = "127.0.0.1:5000";
-
+const backendPort = process.env.REACT_APP_FLASK_PORT;
+const backendIp = window.location.host.split(/(:\d.)/)[0]
+const backendHost = `${backendIp}:${backendPort}`;
 export {backendHost};

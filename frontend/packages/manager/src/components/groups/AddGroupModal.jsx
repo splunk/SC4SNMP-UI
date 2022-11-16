@@ -13,10 +13,12 @@ import InventoryDevicesValidationContxt from "../../store/inventory-devices-vali
 import { createDOMID } from '@splunk/ui-utils/id';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     const handleGroupNameChange = useCallback((e, { value: val }) => {
         GrCtx.setGroupName(val);
@@ -32,8 +34,12 @@ function AddGroupModal() {
     const updateGroup = (groupObj, groupId) => {
         axios.post(`http://${backendHost}/groups/update/${groupId}`, groupObj)
             .then((response) => {
+                if ('message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
                 GrCtx.makeGroupsChange();
-        })
+            })
     };
 
     const handleRequestClose = () => {
