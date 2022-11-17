@@ -65,7 +65,7 @@ function Header(){
                             <P>
                                 Collect SNMP data for Splunk Enterprise, Splunk Enterprise Cloud and Splunk
                                 Infrastructure Monitoring. Make any changes to Profiles, Groups and Inventory. Then select
-                                Aply changes to put the changes into effect. Applying changes can only be done every
+                                Apply changes to put the changes into effect. Applying changes can only be done every
                                 5 minutes.
                             </P>
                         </span>
@@ -76,7 +76,7 @@ function Header(){
                         <Button icon={<Plus screenReaderText={null} />} appearance="primary"
                                 label={addButtonLabel[MenuCtx.activeTabId]}
                                 onClick={addButtonHandler[MenuCtx.activeTabId]}/>
-                        <Button label="Apply Changes" onClick={handleApplyChanges}/>
+                        <Button label="Apply changes" onClick={handleApplyChanges}/>
                     </div>
                 </StyledHeaderRight>
             </StyledHeader>)

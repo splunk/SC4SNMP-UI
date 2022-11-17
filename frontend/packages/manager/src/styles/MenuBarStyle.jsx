@@ -7,9 +7,11 @@ const StyledTab = styled(TabBar)`
       height: 44px;
       border-bottom: 0;
       margin: 0;
+
       &::before{
         border: 0;
       }
+
       & > button{
         margin: 0;
         padding: 0;
@@ -18,29 +20,30 @@ const StyledTab = styled(TabBar)`
          outline: none;
          box-shadow: none;
       }
+
       & > button:nth-child(1){
         margin-left: 20px;
       }
       & > button:nth-child(1) > div[class*='TabStyles__StyledLabel']{
-        width: 48px;
+        width: 51px;
       }
 
       & > button:nth-child(2){
         margin-left: 27px;
       }
       & > button:nth-child(2) > div[class*='TabStyles__StyledLabel']{
-        width: 46px;
+        width: 49px;
       }
 
       & > button:nth-child(3){
         margin-left: 27px;
       }
       & > button:nth-child(3) > div[class*='TabStyles__StyledLabel']{
-        width: 58px;
+        width: 63px;
       }
 
       & > button > div[class*='TabStyles__StyledLabel']{
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 400;
         line-height: 39px;
         color: #E1E6EB;
@@ -85,14 +88,14 @@ const StyledMenuBarRight = styled.div`
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        width: 159px;
+        width: 166px;
         margin-right: 20px;
     }
 
     & > div > P{
         font-style: normal;
         font-weight: 400;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 18px;
         color: #FFFFFF;
         margin-bottom: 4px;

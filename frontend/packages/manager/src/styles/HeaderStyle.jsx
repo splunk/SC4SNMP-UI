@@ -12,10 +12,11 @@ const StyledHeaderLeft = styled.div`
     width: 50%;
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
 
     & > div{
         margin-left: 20px;
+        margin-top: 34px;
         width: 600px;
         display: flex;
         justify-content: flex-start;
@@ -43,11 +44,12 @@ const StyledHeaderRight = styled.div`
     width: 50%;
     display: flex;
     justify-content: flex-end;
-    align-items: center;
+    align-items: flex-start;
 
     & > div {
         display: flex;
         margin-right: 20px;
+        margin-top: 34px;
     }
 `;
 
