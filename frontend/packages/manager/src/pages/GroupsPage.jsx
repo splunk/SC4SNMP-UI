@@ -5,19 +5,9 @@ import Button from '@splunk/react-ui/Button';
 import GroupContext from "../store/group-contxt";
 
 function GroupsPage() {
-    const GrCtx = useContext(GroupContext);
-
-    const handleRequestOpen = () => {
-        GrCtx.setAddGroupOpen(true);
-        GrCtx.setIsGroupEdit(false);
-        GrCtx.setGroupName('');
-        GrCtx.setGroupId(null);
-    };
-
 
     return (
         <div>
-            <Button onClick={handleRequestOpen} ref={GrCtx.addGroupModalToggle} label="Add new group" />
             <GroupsList/>
             <AddGroupModal />
         </div>

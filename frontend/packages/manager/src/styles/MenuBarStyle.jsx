@@ -14,6 +14,10 @@ const StyledTab = styled(TabBar)`
         margin: 0;
         padding: 0;
       }
+      & > button:focus {
+         outline: none;
+         box-shadow: none;
+      }
       & > button:nth-child(1){
         margin-left: 20px;
       }
@@ -73,6 +77,26 @@ const StyledMenuBarLeft = styled.div`
 const StyledMenuBarRight = styled.div`
     width: 50%;
     height: 44px;
+    display: flex;
+    justify-content: flex-end;
+
+
+    & > div {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 159px;
+        margin-right: 20px;
+    }
+
+    & > div > P{
+        font-style: normal;
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 18px;
+        color: #FFFFFF;
+        margin-bottom: 4px;
+    }
 `;
 
 export { StyledTab, StyledMenuBar, StyledMenuBarLeft, StyledMenuBarRight };
