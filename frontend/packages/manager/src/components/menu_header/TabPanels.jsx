@@ -12,7 +12,7 @@ function TabPanels(){
     const MenuCtx = useContext(MenuHeaderContxt);
 
     return(
-        <div>
+        <div style={{ width: "100%", paddingLeft: "20px", paddingRight: "20px", boxSizing: "border-box"}}>
             {
                 MenuCtx.activeTabId == "Profiles" ?
                     <ProfilesValidationContxtProvider>

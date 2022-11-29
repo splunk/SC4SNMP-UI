@@ -16,10 +16,12 @@ import { ProfileContxtProvider } from "./store/profile-contxt";
 import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
 
+import { FontStyles } from "./styles/FonstStyles";
 function Uncontrolled() {
     const MenuCtx = useContext(MenuHeaderContxt);
     return (
         <ButtonsContextProvider>
+            <FontStyles/>
             <ErrorsModalContextProvider>
                 <MenuHeaderContxtProvider>
                     <ProfileContxtProvider>

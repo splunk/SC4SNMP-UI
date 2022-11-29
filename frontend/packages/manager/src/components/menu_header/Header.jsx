@@ -3,7 +3,7 @@ import MenuHeaderContxt from '../../store/menu-header-contxt';
 import ProfileContext from "../../store/profile-contxt";
 import GroupContext from "../../store/group-contxt";
 import InventoryContext from "../../store/inventory-contxt";
-import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/HeaderStyle";
+import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/menu_header/HeaderStyle";
 import Button from '@splunk/react-ui/Button';
 import Plus from '@splunk/react-icons/Plus';
 import P from '@splunk/react-ui/Paragraph';
