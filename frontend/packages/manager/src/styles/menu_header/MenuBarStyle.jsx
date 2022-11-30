@@ -16,6 +16,7 @@ const StyledTab = styled(TabBar)`
         margin: 0;
         padding: 0;
       }
+
       & > button:focus {
          outline: none;
          box-shadow: none;
@@ -24,6 +25,7 @@ const StyledTab = styled(TabBar)`
       & > button:nth-child(1){
         margin-left: 20px;
       }
+
       & > button:nth-child(1) > div[class*='TabStyles__StyledLabel']{
         width: 51px;
       }
@@ -56,9 +58,11 @@ const StyledTab = styled(TabBar)`
         bottom: 0;
         width: 100%;
       }
+
       [aria-selected='true'] > div[class*='TabStyles__StyledUnderline']{
         background-color: #5CC05C;
       }
+
       [aria-selected='true'] > div[class*='TabStyles__StyledLabel']{
         color: #FFFFFF;
         font-family: 'Proxima Nova Sbold';
