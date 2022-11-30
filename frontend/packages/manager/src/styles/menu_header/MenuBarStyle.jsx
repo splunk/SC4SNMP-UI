@@ -61,6 +61,7 @@ const StyledTab = styled(TabBar)`
       }
       [aria-selected='true'] > div[class*='TabStyles__StyledLabel']{
         color: #FFFFFF;
+        font-family: 'Proxima Nova Sbold';
         font-weight: 600;
       }
     `;

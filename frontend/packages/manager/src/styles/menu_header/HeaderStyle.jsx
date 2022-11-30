@@ -26,6 +26,7 @@ const StyledHeaderLeft = styled.div`
 
     & > div > #project-title > P{
         font-style: normal;
+        font-family: 'Proxima Nova Bold';
         font-weight: 700;
         font-size: 24px;
         line-height: 24px;

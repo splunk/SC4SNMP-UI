@@ -75,8 +75,10 @@ function Header(){
                     <div>
                         <Button icon={<Plus screenReaderText={null} />} appearance="primary"
                                 label={addButtonLabel[MenuCtx.activeTabId]}
-                                onClick={addButtonHandler[MenuCtx.activeTabId]}/>
-                        <Button label="Apply changes" onClick={handleApplyChanges}/>
+                                onClick={addButtonHandler[MenuCtx.activeTabId]}
+                                style={{ fontFamily: "Proxima Nova Sbold" }}/>
+                        <Button label="Apply changes" onClick={handleApplyChanges}
+                                style={{ fontFamily: "Proxima Nova Sbold" }}/>
                     </div>
                 </StyledHeaderRight>
             </StyledHeader>)
