@@ -2,7 +2,6 @@ import React, {Component, useContext, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
-import ButtonsModal from "../ButtonsModal"
 import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
@@ -218,9 +217,6 @@ class SortableColumns extends Component {
                             ))}
                     </Table.Body>
                 </Table>
-                <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
-                              handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
-                              context={this.context}/>
                 <DeleteModal deleteName={`${this.context.address}:${this.context.port}`}
                              handleDelete={() => (this.deleteModalRequest(this.context))}/>
             </div>

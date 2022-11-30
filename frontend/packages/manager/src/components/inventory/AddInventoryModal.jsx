@@ -1,5 +1,5 @@
 import React, {useRef, useState, Component, useCallback, useEffect, useContext} from 'react';
-import { StyledControlGroup, StyledModalBody } from "../../styles/inventory/InventoryStyle";
+import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Select from '@splunk/react-ui/Select';
@@ -151,7 +151,7 @@ function AddInventoryModal() {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <Modal.Header title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address/Group">
                         <div style={validationGroup}>

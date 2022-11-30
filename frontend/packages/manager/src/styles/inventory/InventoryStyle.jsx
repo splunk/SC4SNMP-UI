@@ -21,6 +21,18 @@ const Pagination = styled.div`
 `;
 
 
+const StyledModalHeader = styled(Modal.Header)`
+    padding-top: 20px;
+    padding-bottom: 20px;
+    & > div > div {
+        font-family: 'Proxima Nova Sbold';
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 22px;
+    }
+`;
+
+
 const StyledModalBody = styled(Modal.Body)`
      padding-left: 24px;
      padding-right: 24px;
@@ -42,4 +54,4 @@ const StyledControlGroup = styled(ControlGroup)`
     line-height: 20px;
 `;
 
-export { Pagination, StyledControlGroup, StyledModalBody };
+export { Pagination, StyledControlGroup, StyledModalBody, StyledModalHeader };
