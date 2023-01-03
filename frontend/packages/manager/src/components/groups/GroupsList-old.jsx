@@ -15,11 +15,6 @@ import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
-import Plus from '@splunk/react-icons/Plus';
-import Trash from '@splunk/react-icons/Trash';
-import Pencil from '@splunk/react-icons/Pencil';
-import { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices } from "../../styles/groups/GroupsStyle";
-
 
 
 function GroupsList() {
@@ -61,13 +56,6 @@ function GroupsList() {
     useEffect(() => {
         setPageNum(1);
     }, [openedGroupId]);
-
-    const handleRequestOpenGroups = () => {
-        GrCtx.setAddGroupOpen(true);
-        GrCtx.setIsGroupEdit(false);
-        GrCtx.setGroupName('');
-        GrCtx.setGroupId(null);
-    };
 
     const editGroupButtonHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
@@ -185,33 +173,63 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup key={createDOMID()}>
-            <P>
-                {group.groupName}
-            </P>
-            <div>
-                <Button style={{ margin: "0" }} onClick={() => console.log("dodaj device")} appearance="pill" icon={<Plus />} />
-                <Button style={{ margin: "0" }} onClick={() => (editGroupButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => (deleteGroupButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Trash />} />
-            </div>
-        </SingleGroup>
-    ));
+        <CollapsiblePanel title={group.groupName} key={createDOMID()} open={openedGroups[group._id]} onRequestOpen={() => {openCollapsible(group._id, 1, DEVICES_PER_PAGE)}}
+          onRequestClose={() => {closeCollapsible(group._id)}}>
+            <Button onClick={() => (newDeviceButtonHandler(group._id, group.groupName))} label="Add new device"/>
+            <Button onClick={() => (editGroupButtonHandler(group._id, group.groupName))} label="Edit group name"/>
+            <Button onClick={() => (deleteGroupButtonHandler(group._id, group.groupName))} label="Delete group"/>
+            <Table stripeRows>
+                <Table.Head>
+                    <Table.HeadCell>Address</Table.HeadCell>
+                    <Table.HeadCell>Port</Table.HeadCell>
+                    <Table.HeadCell>Community</Table.HeadCell>
+                    <Table.HeadCell>Secret</Table.HeadCell>
+                    <Table.HeadCell>Version</Table.HeadCell>
+                    <Table.HeadCell>Security Engine</Table.HeadCell>
+                </Table.Head>
+                <Table.Body>
+                    {GrCtx.devices.map((row) => (
+                        <Table.Row key={createDOMID()} onClick={() => handleRowClick(JSON.parse(JSON.stringify(row)), group._id)}>
+                            <Table.Cell>{row.address}</Table.Cell>
+                            <Table.Cell>{row.port}</Table.Cell>
+                            <Table.Cell>{row.community}</Table.Cell>
+                            <Table.Cell>{row.secret}</Table.Cell>
+                            <Table.Cell>{row.version}</Table.Cell>
+                            <Table.Cell>{row.securityEngine}</Table.Cell>
+                        </Table.Row>
+                    ))}
+
+                </Table.Body>
+            </Table>
+            <Paginator
+                onChange={(event, { page }) => (handlePagination(page, group._id))}
+                current={pageNum}
+                alwaysShowLastPageLink
+                totalPages={totalPages}
+            />
+        </CollapsiblePanel>
+    ))
 
     return (
-        <GroupsContent>
-            <GroupsNames>
-                <GroupsNamesHeader>
-                    <P>Group name</P>
-                    <div>
-                        <Button onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
-                    </div>
-                </GroupsNamesHeader>
-                {groupsList}
-            </GroupsNames>
-            <GroupDevices>
-                TEST
-            </GroupDevices>
-        </GroupsContent>
+        <div>
+            <ControlGroup label={"Number of devices per page"} labelPosition="top">
+                <Select value={devicesPerPage} onChange={handleDevicesPerPage} defaultValue={"3"}>
+                    <Select.Option label="3" value="3" />
+                    <Select.Option label="10" value="10" />
+                    <Select.Option label="50" value="50" />
+                    <Select.Option label="100" value="100" />
+                    <Select.Option label="200" value="200" />
+                </Select>
+            </ControlGroup>
+            {groupsList}
+            <AddDeviceModal />
+            <ButtonsModal handleRequestDelete={() => (buttonsRequestDeleteDevice(GrCtx))}
+                              handleRequestEdit={() => (buttonsRequestEditDevice(GrCtx))}
+                              context={GrCtx}/>
+            <DeleteModal deleteName={GrCtx.deleteName}
+                             handleDelete={() => (deleteModalRequest(GrCtx))}/>
+
+        </div>
     );
 }
 

@@ -10,7 +10,7 @@ import { backendHost } from "../../host";
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
-import { Pagination, StyledRow } from '../../styles/inventory/InventoryStyle';
+import { Pagination } from '../../styles/inventory/InventoryStyle';
 
 
 const columns = [

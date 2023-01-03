@@ -3,7 +3,7 @@ import React, {useState, createContext, useRef, useContext} from 'react';
 const MenuHeaderContxt = createContext();
 
 export function MenuHeaderContxtProvider(props){
-    const [activeTabId, setActiveTabId] = useState('Profiles');
+    const [activeTabId, setActiveTabId] = useState('Groups');
 
     const context = {
         activeTabId: activeTabId,

@@ -7,7 +7,7 @@ import GroupContext from "../store/group-contxt";
 function GroupsPage() {
 
     return (
-        <div>
+        <div style={{ height: "100%"}}>
             <GroupsList/>
             <AddGroupModal />
         </div>

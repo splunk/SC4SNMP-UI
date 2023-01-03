@@ -10,9 +10,10 @@ import { ProfilesValidationContxtProvider } from "../../store/profiles-validatio
 
 function TabPanels(){
     const MenuCtx = useContext(MenuHeaderContxt);
+    let padding = MenuCtx.activeTabId != "Groups" ? "20px" : "0";
 
     return(
-        <div style={{ width: "100%", paddingLeft: "20px", paddingRight: "20px", boxSizing: "border-box"}}>
+        <div style={{ width: "100%", paddingLeft: padding, paddingRight: padding, height: "100vh", boxSizing: "border-box"}}>
             {
                 MenuCtx.activeTabId == "Profiles" ?
                     <ProfilesValidationContxtProvider>
