@@ -177,7 +177,7 @@ class SortableColumns extends Component {
                         alwaysShowLastPageLink
                         totalPages={this.state.totalPages}
                     />
-                    </Pagination>
+                </Pagination>
                 <Table stripeRows resizableFillLayout>
                     <Table.Head>
                         {columns.map((headData) => (

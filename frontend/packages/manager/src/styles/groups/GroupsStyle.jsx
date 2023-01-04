@@ -4,6 +4,7 @@ const GroupsContent = styled.div`
     display: flex;
     border-top: 1px #2B3033 solid;
     height: 100%;
+    width: 100%;
 `;
 
 const GroupsNames = styled.div`
@@ -54,6 +55,28 @@ const SingleGroup = styled.div`
 `;
 
 const GroupDevices = styled.div`
+    width: 100%;
 `;
 
-export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices };
+const Pagination = styled.div`
+    width: 100%;
+    display: flex;
+    height: 53px;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 22px;
+    padding-right: 22px;
+    border-bottom: 1px #2B3033 solid;
+
+    & > button{
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    & > button > span > span:nth-child(1){
+        margin-right: 6px;
+        padding: 0;
+    }
+`;
+
+export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices, Pagination };

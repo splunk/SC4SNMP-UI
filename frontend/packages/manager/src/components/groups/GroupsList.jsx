@@ -11,20 +11,31 @@ import AddDeviceModal from "./AddDeviceModal";
 import ButtonsModal from "../ButtonsModal";
 import DeleteModal from "../DeleteModal";
 import Paginator from '@splunk/react-ui/Paginator';
-import Select from '@splunk/react-ui/Select';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import Plus from '@splunk/react-icons/Plus';
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
-import { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices } from "../../styles/groups/GroupsStyle";
+import { GroupsContent, GroupsNames, GroupsNamesHeader,
+    SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
+import Select from '@splunk/react-ui/Select';
 
 
 
 function GroupsList() {
+    const columns = [
+        {sortKey: 'address', label: 'Address'},
+        {sortKey: 'port', label: 'Port'},
+        {sortKey: 'version', label: 'Version'},
+        {sortKey: 'community', label: 'Community'},
+        {sortKey: 'secret', label: 'Secret'},
+        {sortKey: 'securityEngine', label: 'Security Engine'},
+        {sortKey: `actions`, label: 'Actions'},
+    ];
+
     const [groups, setGroups] = useState([]);
-    const [openedGroups, setOpenedGroups] = useState({});
+    const [selectedGroup, setSelectedGroup] = useState({});
     const GrCtx = useContext(GroupContext);
     const BtnCtx = useContext(ButtonsContext);
     const ErrCtx = useContext(ErrorsModalContext);
@@ -41,16 +52,16 @@ function GroupsList() {
             if (isMounted){
                 setGroups(response.data);
                 let existingGroups = [];
-                let opened = {};
+                let selected = {};
                 for (let group of response.data){
-                    opened[group._id] = false;
+                    selected[group._id] = false;
                     existingGroups.push(group._id);
                 }
                 // If page was reloaded after updating one of devices, open tab of that group
                 if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
-                    openCollapsible(GrCtx.editedGroupId, pageNum);
+                    selectGroup(GrCtx.editedGroupId, GrCtx.groupName, pageNum);
                 }else{
-                    setOpenedGroups(opened);
+                    setSelectedGroup(selected);
                 }
             }
         });
@@ -92,18 +103,18 @@ function GroupsList() {
         GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
     };
 
-    const openCollapsible = (groupId, page) => {
+    const selectGroup = (groupId, groupName, page) => {
         setOpenedGroupId(groupId)
-        const opened = {};
-        opened[groupId] = true;
-        setOpenedGroups(prev => {
+        const selected = {};
+        selected[groupId] = true;
+        setSelectedGroup(prev => {
             for (const prop in prev){
                 prev[prop] = false;
             }
-            return {...prev, ...opened}}
+            return {...prev, ...selected}}
         );
-
-        // If last item from from current page was deleted, page variable
+        GrCtx.setGroupName(groupName)
+        // If last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
         axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
@@ -122,17 +133,19 @@ function GroupsList() {
             });
     }
 
-    const closeCollapsible = (groupId) => {
-        const opened = {};
-        opened[groupId] = false;
-        setOpenedGroups(prev => {return {...prev, ...opened}});
-        GrCtx.setDevices([]);
-    }
+    const paginationHandler = (page, groupId) => {
+        selectGroup(groupId, GrCtx.groupName, page);
+    };
 
-    const handleRowClick = (row, groupId) => {
-        GrCtx.setButtonsOpen(true);
-        GrCtx.setIsDeviceEdit(true);
-        GrCtx.setDeleteName(`${row.address}:${row.port}`)
+    const devicesPerPageHandler = (e, { value }) => {
+        setDevicesPerPage(value);
+        setPageNum(1);
+        GrCtx.makeGroupsChange();
+    };
+
+
+    const deviceEditHandler = (row) => {
+        /*GrCtx.setIsDeviceEdit(true);
         GrCtx.setGroupId(groupId);
         GrCtx.setDeviceId(row._id);
         GrCtx.setAddress(row.address);
@@ -141,61 +154,29 @@ function GroupsList() {
         GrCtx.setCommunity(row.community);
         GrCtx.setSecret(row.secret);
         GrCtx.setSecurityEngine(row.securityEngine);
+        GrCtx.setAddDeviceOpen(true);*/
+        console.log("edit device");
     };
 
-    const handlePagination = (page, groupId) => {
-        openCollapsible(groupId, page);
-    };
-
-    const handleDevicesPerPage = (e, { value }) => {
-        setDevicesPerPage(value);
-        setPageNum(1);
-        GrCtx.makeGroupsChange();
-    };
-
-    const buttonsRequestDeleteDevice = (context) => {
-        context.setButtonsOpen(false);
-        context.setDeleteUrl(`http://${backendHost}/devices/delete/${GrCtx.deviceId}`)
-        context.setDeleteOpen(true);
-    };
-
-    const buttonsRequestEditDevice = (context) => {
-        context.setButtonsOpen(false);
-        context.setAddDeviceOpen(true);
-    };
-
-    const deleteModalRequest = (context) => {
-        axios.post(context.deleteUrl)
-          .then(function (response) {
-            if ('message' in response.data){
-                ErrCtx.setOpen(true);
-                ErrCtx.setMessage(response.data.message);
-            }
-            context.makeGroupsChange();
-          })
-          .catch(function (error) {
-            console.log(error);
-            context.makeGroupsChange();
-          });
-        context.setDeleteOpen(false);
-        context.resetDevice();
-        context.setDeleteUrl('');
-        context.setEditedGroupId(GrCtx.groupId)
-        context.addGroupModalToggle?.current?.focus();
+    const deviceDeleteHandler = (row) => {
+        /*this.setRowData(row);
+        this.context.setDeleteOpen(true);*/
+        console.log("delete device");
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup key={createDOMID()}>
+        <SingleGroup onClick={() => selectGroup(group._id, group.groupName, 1)} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
             <P>
                 {group.groupName}
             </P>
             <div>
-                <Button style={{ margin: "0" }} onClick={() => console.log("dodaj device")} appearance="pill" icon={<Plus />} />
+                <Button style={{ margin: "0" }} onClick={() => (newDeviceButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
                 <Button style={{ margin: "0" }} onClick={() => (editGroupButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => (deleteGroupButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Trash />} />
+                <Button style={{ margin: "0" }} onClick={() => console.log(`Delete group ${group.groupName}`)} appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
+
 
     return (
         <GroupsContent>
@@ -209,8 +190,53 @@ function GroupsList() {
                 {groupsList}
             </GroupsNames>
             <GroupDevices>
-                TEST
+                <div style={{width: '100%' }}>
+                    <Pagination>
+                        <Select appearance="pill" suffixLabel="inventory items per page"
+                                value={devicesPerPage} onChange={devicesPerPageHandler}
+                                defaultValue={"3"}>
+                            <Select.Option label="3" value="3" />
+                            <Select.Option label="10" value="10" />
+                            <Select.Option label="50" value="50" />
+                            <Select.Option label="100" value="100" />
+                            <Select.Option label="200" value="200" />
+                        </Select>
+                        <Paginator
+                            onChange={paginationHandler}
+                            current={pageNum}
+                            alwaysShowLastPageLink
+                            totalPages={totalPages}
+                        />
+                    </Pagination>
+                    <Table stripeRows resizableFillLayout>
+                        <Table.Head>
+                            {columns.map((headData) => (
+                                <Table.HeadCell key={createDOMID()} width={headData.label == "Actions" ? 100 : "auto"}>
+                                    {headData.label}
+                                </Table.HeadCell>
+                            ))}
+                        </Table.Head>
+                        <Table.Body>
+                            {GrCtx.devices
+                                .map((row) => (
+                                    <Table.Row key={createDOMID()} >
+                                        <Table.Cell>{row.address}</Table.Cell>
+                                        <Table.Cell>{row.port}</Table.Cell>
+                                        <Table.Cell>{row.version}</Table.Cell>
+                                        <Table.Cell>{row.community}</Table.Cell>
+                                        <Table.Cell>{row.secret}</Table.Cell>
+                                        <Table.Cell>{row.securityEngine}</Table.Cell>
+                                        <Table.Cell>
+                                            <Button onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                            <Button onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ))}
+                        </Table.Body>
+                    </Table>
+                </div>
             </GroupDevices>
+            <AddDeviceModal />
         </GroupsContent>
     );
 }
