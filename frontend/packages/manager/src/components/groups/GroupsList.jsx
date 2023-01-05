@@ -55,6 +55,7 @@ function GroupsList() {
                 let selected = {};
                 for (let group of response.data){
                     selected[group._id] = false;
+                    GrCtx.setDevices([]);
                     existingGroups.push(group._id);
                 }
                 // If page was reloaded after updating one of devices, open tab of that group
@@ -80,14 +81,14 @@ function GroupsList() {
         GrCtx.setGroupId(null);
     };
 
-    const editGroupButtonHandler = (groupId, groupName) => {
+    const editGroupHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
         GrCtx.setIsGroupEdit(true);
         GrCtx.setAddGroupOpen(true);
     };
 
-    const newDeviceButtonHandler = (groupId, groupName) => {
+    const newDevicenHandler = (groupId, groupName) => {
         GrCtx.setGroupId(groupId);
         GrCtx.setGroupName(groupName);
         GrCtx.setVersion("");
@@ -97,7 +98,7 @@ function GroupsList() {
         GrCtx.resetDevice();
     };
 
-    const deleteGroupButtonHandler = (groupId, groupName) => {
+    const groupDeleteHandler = (groupId, groupName) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
         GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
@@ -105,6 +106,7 @@ function GroupsList() {
 
     const selectGroup = (groupId, groupName, page) => {
         setOpenedGroupId(groupId)
+        GrCtx.setGroupName(groupName);
         const selected = {};
         selected[groupId] = true;
         setSelectedGroup(prev => {
@@ -113,7 +115,6 @@ function GroupsList() {
             }
             return {...prev, ...selected}}
         );
-        GrCtx.setGroupName(groupName)
         // If last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
@@ -134,6 +135,8 @@ function GroupsList() {
     }
 
     const paginationHandler = (page, groupId) => {
+        console.log(page);
+        console.log(groupId);
         selectGroup(groupId, GrCtx.groupName, page);
     };
 
@@ -145,8 +148,7 @@ function GroupsList() {
 
 
     const deviceEditHandler = (row) => {
-        /*GrCtx.setIsDeviceEdit(true);
-        GrCtx.setGroupId(groupId);
+        GrCtx.setGroupId(openedGroupId);
         GrCtx.setDeviceId(row._id);
         GrCtx.setAddress(row.address);
         GrCtx.setPort(row.port);
@@ -154,14 +156,38 @@ function GroupsList() {
         GrCtx.setCommunity(row.community);
         GrCtx.setSecret(row.secret);
         GrCtx.setSecurityEngine(row.securityEngine);
-        GrCtx.setAddDeviceOpen(true);*/
-        console.log("edit device");
+        GrCtx.setIsDeviceEdit(true);
+        GrCtx.setAddDeviceOpen(true);
+        console.log(`edit device ${GrCtx.deviceId} from group ${GrCtx.groupName} - ${openedGroupId}`);
     };
 
     const deviceDeleteHandler = (row) => {
-        /*this.setRowData(row);
-        this.context.setDeleteOpen(true);*/
-        console.log("delete device");
+        GrCtx.setDeleteName(`${row.address}:${row.port}`);
+        GrCtx.setDeviceId(row._id);
+        GrCtx.setGroupId(openedGroupId);
+        GrCtx.setDeleteUrl(`http://${backendHost}/devices/delete/${row._id}`)
+        GrCtx.setDeleteOpen(true);
+        console.log(`remove device ${GrCtx.deviceId} from group ${GrCtx.groupName} - ${openedGroupId}`);
+    };
+
+    const deleteModalRequest = () => {
+        axios.post(GrCtx.deleteUrl)
+          .then(function (response) {
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
+            GrCtx.makeGroupsChange();
+          })
+          .catch(function (error) {
+            console.log(error);
+            GrCtx.makeGroupsChange();
+          });
+        GrCtx.setDeleteOpen(false);
+        GrCtx.resetDevice();
+        GrCtx.setDeleteUrl('');
+        GrCtx.setEditedGroupId(GrCtx.groupId)
+        GrCtx.addGroupModalToggle?.current?.focus();
     };
 
     const groupsList = groups.map((group) => (
@@ -170,9 +196,9 @@ function GroupsList() {
                 {group.groupName}
             </P>
             <div>
-                <Button style={{ margin: "0" }} onClick={() => (newDeviceButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button style={{ margin: "0" }} onClick={() => (editGroupButtonHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => console.log(`Delete group ${group.groupName}`)} appearance="pill" icon={<Trash />} />
+                <Button style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
+                <Button style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
+                <Button style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName))} appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -202,7 +228,7 @@ function GroupsList() {
                             <Select.Option label="200" value="200" />
                         </Select>
                         <Paginator
-                            onChange={paginationHandler}
+                            onChange={(event, { page }) => (paginationHandler(page, openedGroupId))}
                             current={pageNum}
                             alwaysShowLastPageLink
                             totalPages={totalPages}
@@ -237,6 +263,8 @@ function GroupsList() {
                 </div>
             </GroupDevices>
             <AddDeviceModal />
+            <DeleteModal deleteName={GrCtx.deleteName}
+                             handleDelete={() => (deleteModalRequest())}/>
         </GroupsContent>
     );
 }

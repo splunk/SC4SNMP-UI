@@ -66,6 +66,7 @@ const Pagination = styled.div`
     align-items: center;
     padding-left: 22px;
     padding-right: 22px;
+    box-sizing: border-box;
     border-bottom: 1px #2B3033 solid;
 
     & > button{
