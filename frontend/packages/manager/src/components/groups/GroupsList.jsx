@@ -102,9 +102,11 @@ function GroupsList() {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
         GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
+        GrCtx.makeGroupsChange();
     };
 
     const selectGroup = (groupId, groupName, page) => {
+        console.log(`passed ${page}, state ${pageNum}`)
         setOpenedGroupId(groupId)
         GrCtx.setGroupName(groupName);
         const selected = {};
@@ -135,14 +137,13 @@ function GroupsList() {
     }
 
     const paginationHandler = (page, groupId) => {
-        console.log(page);
-        console.log(groupId);
         selectGroup(groupId, GrCtx.groupName, page);
     };
 
     const devicesPerPageHandler = (e, { value }) => {
         setDevicesPerPage(value);
         setPageNum(1);
+        GrCtx.setEditedGroupId(openedGroupId);
         GrCtx.makeGroupsChange();
     };
 
@@ -158,7 +159,6 @@ function GroupsList() {
         GrCtx.setSecurityEngine(row.securityEngine);
         GrCtx.setIsDeviceEdit(true);
         GrCtx.setAddDeviceOpen(true);
-        console.log(`edit device ${GrCtx.deviceId} from group ${GrCtx.groupName} - ${openedGroupId}`);
     };
 
     const deviceDeleteHandler = (row) => {
@@ -167,7 +167,6 @@ function GroupsList() {
         GrCtx.setGroupId(openedGroupId);
         GrCtx.setDeleteUrl(`http://${backendHost}/devices/delete/${row._id}`)
         GrCtx.setDeleteOpen(true);
-        console.log(`remove device ${GrCtx.deviceId} from group ${GrCtx.groupName} - ${openedGroupId}`);
     };
 
     const deleteModalRequest = () => {
@@ -190,8 +189,14 @@ function GroupsList() {
         GrCtx.addGroupModalToggle?.current?.focus();
     };
 
+    const clickGroupHandler = (event, groupId, groupName, page) => {
+        if (event.target === event.currentTarget) {
+          selectGroup(groupId, groupName, page);
+        }
+    };
+
     const groupsList = groups.map((group) => (
-        <SingleGroup onClick={() => selectGroup(group._id, group.groupName, 1)} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+        <SingleGroup onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
             <P>
                 {group.groupName}
             </P>

@@ -114,22 +114,34 @@ def get_groups_list():
 @cross_origin()
 def add_group_record():
     group_obj = request.json
-    group_obj = group_conversion.ui2backend(group_obj)
-    mongo_groups.insert_one(group_obj)
-    return jsonify("success")
+    same_name_groups = list(mongo_groups.find({f"{group_obj['groupName']}": {"$exists": True}}))
+    if len(same_name_groups) > 0:
+        result = jsonify(
+            {"message": f"Group with name {group_obj['groupName']} already exists. Group was not added."}), 400
+    else:
+        group_obj = group_conversion.ui2backend(group_obj)
+        mongo_groups.insert_one(group_obj)
+        result = jsonify("success")
+    return result
 
 
 @ui.route('/groups/update/<group_id>', methods=['POST'])
 @cross_origin()
 def update_group(group_id):
     group_obj = request.json
-    old_group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
-    old_group_name = get_group_name_from_backend(old_group)
-    mongo_groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
+    same_name_groups = list(mongo_groups.find({f"{group_obj['groupName']}": {"$exists": True}}))
+    if len(same_name_groups) > 0:
+        result = jsonify(
+            {"message": f"Group with name {group_obj['groupName']} already exists. Group was not edited."}), 400
+    else:
+        old_group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
+        old_group_name = get_group_name_from_backend(old_group)
+        mongo_groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
 
-    # Rename corresponding group in the inventory
-    mongo_inventory.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
-    return jsonify({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
+        # Rename corresponding group in the inventory
+        mongo_inventory.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
+        result = jsonify({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
+    return result
 
 
 @ui.route('/groups/delete/<group_id>', methods=['POST'])
@@ -177,7 +189,15 @@ def add_device_to_group():
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     device_obj = group_device_conversion.ui2backend(device_obj)
 
+    new_device_port = device_obj.get('port', -1)
     group_name = get_group_name_from_backend(group)
+    for device in group[group_name]:
+        old_device_port = device.get('port', -1)
+        if device["address"] == device_obj["address"] and old_device_port == new_device_port:
+            return jsonify(
+                {"message": f"Device {device_obj['address']}:{device_obj.get('port', '')} already exists. "
+                            f"Record was not added"}), 400
+
     group[group_name].append(device_obj)
     new_values = {"$set": group}
     mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)

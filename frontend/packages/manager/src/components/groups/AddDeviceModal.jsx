@@ -12,11 +12,13 @@ import P from '@splunk/react-ui/Paragraph';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function AddDeviceModal(){
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         GrCtx.setAddress(val);
@@ -48,6 +50,10 @@ function AddDeviceModal(){
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
+        .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            })
     };
 
     const updateDevice = (deviceObj, deviceId) => {
@@ -56,6 +62,10 @@ function AddDeviceModal(){
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
+        .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            })
     };
 
     const handleRequestClose = () => {
