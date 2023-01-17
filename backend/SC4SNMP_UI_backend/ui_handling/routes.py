@@ -31,6 +31,27 @@ def get_profile_names():
             profiles_list.append(converted)
     return jsonify([el["profileName"] for el in profiles_list])
 
+@ui.route('/profiles/count')
+@cross_origin()
+def get_profiles_count():
+    total_count = mongo_profiles.count_documents({})
+    return jsonify(total_count)
+
+@ui.route('/profiles/<page_num>/<prof_per_page>')
+@cross_origin()
+def get_profiles_list(page_num, prof_per_page):
+    page_num = int(page_num)
+    prof_per_page = int(prof_per_page)
+    skips = prof_per_page * (page_num - 1)
+
+    profiles = list(mongo_profiles.find().skip(skips).limit(prof_per_page))
+    profiles_list = []
+    for pr in profiles:
+        converted = profile_conversion.backend2ui(pr)
+        if converted['conditions']['condition'] not in ['mandatory']:
+            profiles_list.append(converted)
+    return jsonify(profiles_list)
+
 
 @ui.route('/profiles')
 @cross_origin()

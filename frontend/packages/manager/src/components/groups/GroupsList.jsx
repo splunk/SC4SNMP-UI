@@ -1,25 +1,22 @@
 import React, {useState, useContext, useEffect} from 'react';
 import P from '@splunk/react-ui/Paragraph';
-import GroupContext from "../../store/group-contxt";
-import ButtonsContext from "../../store/buttons-contx";
-import axios from "axios";
-import CollapsiblePanel from '@splunk/react-ui/CollapsiblePanel';
-import Table from "@splunk/react-ui/Table";
-import { createDOMID } from '@splunk/ui-utils/id';
-import Button from '@splunk/react-ui/Button';
-import AddDeviceModal from "./AddDeviceModal";
-import ButtonsModal from "../ButtonsModal";
-import DeleteModal from "../DeleteModal";
-import Paginator from '@splunk/react-ui/Paginator';
-import ControlGroup from '@splunk/react-ui/ControlGroup';
-import { backendHost } from "../../host";
-import ErrorsModalContext from "../../store/errors-modal-contxt";
+import Select from '@splunk/react-ui/Select';
 import Plus from '@splunk/react-icons/Plus';
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
+import Paginator from '@splunk/react-ui/Paginator';
+import Button from '@splunk/react-ui/Button';
+import Table from "@splunk/react-ui/Table";
+import { createDOMID } from '@splunk/ui-utils/id';
+import axios from "axios";
+import ButtonsContext from "../../store/buttons-contx";
+import GroupContext from "../../store/group-contxt";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
+import AddDeviceModal from "./AddDeviceModal";
+import DeleteModal from "../DeleteModal";
+import { backendHost } from "../../host";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
-import Select from '@splunk/react-ui/Select';
 
 
 
@@ -43,7 +40,6 @@ function GroupsList() {
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
     const [devicesPerPage, setDevicesPerPage] = useState('3');
-    const DEVICES_PER_PAGE = 3;
 
     useEffect(() => {
         let isMounted = true;
@@ -51,11 +47,13 @@ function GroupsList() {
         .then((response) => {
             if (isMounted){
                 setGroups(response.data);
-                let existingGroups = [];
-                let selected = {};
-                for (let group of response.data){
+                const existingGroups = [];
+                const selected = {};
+                for (const group of response.data){
+                    // eslint-disable-next-line no-underscore-dangle
                     selected[group._id] = false;
                     GrCtx.setDevices([]);
+                    // eslint-disable-next-line no-underscore-dangle
                     existingGroups.push(group._id);
                 }
                 // If page was reloaded after updating one of devices, open tab of that group
@@ -123,7 +121,7 @@ function GroupsList() {
         axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(devicesPerPage));
-                if (maxPages === 0) maxPages = 1;
+                if (maxPages === 0) {maxPages = 1;}
                 if (page > maxPages){
                     page = maxPages;
                 };
@@ -225,7 +223,7 @@ function GroupsList() {
                     <Pagination>
                         <Select appearance="pill" suffixLabel="inventory items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
-                                defaultValue={"3"}>
+                                defaultValue="3">
                             <Select.Option label="3" value="3" />
                             <Select.Option label="10" value="10" />
                             <Select.Option label="50" value="50" />
@@ -242,7 +240,7 @@ function GroupsList() {
                     <Table stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
-                                <Table.HeadCell key={createDOMID()} width={headData.label == "Actions" ? 100 : "auto"}>
+                                <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
                                     {headData.label}
                                 </Table.HeadCell>
                             ))}

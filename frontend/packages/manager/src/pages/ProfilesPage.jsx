@@ -1,15 +1,14 @@
 import React, {useContext} from 'react';
 import ProfilePanel from "../components/profiles/ProfilePanel"
 import AddProfileModal from "../components/profiles/AddProfileModal"
-import Button from '@splunk/react-ui/Button';
-import ProfileContext from "../store/profile-contxt";
+import ProfilesList from "../components/profiles/ProfilesList";
 
 function ProfilesPage(){
 
     return (
         <div>
             <AddProfileModal />
-            <ProfilePanel />
+            <ProfilesList />
         </div>
     );
 }

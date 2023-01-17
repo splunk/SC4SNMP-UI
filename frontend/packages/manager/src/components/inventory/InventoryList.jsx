@@ -47,7 +47,6 @@ class SortableColumns extends Component {
     }
 
     getFetchInventoryRows(page) {
-        let currentRecords = this.state.allInventoryRecords;
         const urlCount = this.BASE_URL_GET_ALL+"count"
         axios.get(urlCount)
             .then((response) => {
@@ -158,7 +157,6 @@ class SortableColumns extends Component {
         const sortDir = this.state.sortDir;
         const allInventoryRecords = this.state.allInventoryRecords;
 
-        console.log(this.state)
         return (
             <div style={{width: '100%' }}>
                 <Pagination>
