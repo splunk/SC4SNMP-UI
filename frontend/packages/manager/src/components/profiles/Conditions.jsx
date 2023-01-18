@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import Select from '@splunk/react-ui/Select';
-import ControlGroup from "@splunk/react-ui/ControlGroup";
 import Text from "@splunk/react-ui/Text";
 import PatternsCreator from "./PatternsCreator";
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
+import { StyledControlGroup } from "../../styles/inventory/InventoryStyle";
 
 class Conditions extends Component {
     constructor(props) {
@@ -43,7 +43,7 @@ class Conditions extends Component {
     render() {
         return (
             <div>
-                <ControlGroup label="Condition"
+                <StyledControlGroup label="Condition"
                     labelFor="customized-select-after">
                 <Select value={this.state.condition} onChange={this.handleChange} filter>
                     <Select.Option label="None" value="None"/>
@@ -51,21 +51,21 @@ class Conditions extends Component {
                     <Select.Option label="field" value="field"/>
                     <Select.Option label="walk" value="walk"/>
                 </Select>
-                </ControlGroup>
+                </StyledControlGroup>
                 {this.state.condition === 'field' ? (
                 <div>
-                    <ControlGroup label="field">
+                    <StyledControlGroup label="field">
                         <div className={this.props.validationGroup}>
                             <Text value={this.state.field} onChange={this.handleFieldChange} error={((this.props.errorField) ? true : false)}/>
                             {((this.props.errorField) ? this.props.errorField.map((el) =>
                                 <P key={createDOMID()} style={this.props.validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
-                    <ControlGroup label="patterns">
+                    </StyledControlGroup>
+                    <StyledControlGroup label="patterns">
                         <PatternsCreator onPatternsCreator={this.handlePatterns} value={this.state.patterns} newSubmit={this.props.newSubmit}
                                          error={this.props.errorPatterns} setError={this.props.setErrorPatterns}
                         validationGroup={this.props.validationGroup} validationMessage={this.props.validationMessage}/>
-                    </ControlGroup>
+                    </StyledControlGroup>
                 </div>
                 ) : <div/>}
             </div>)

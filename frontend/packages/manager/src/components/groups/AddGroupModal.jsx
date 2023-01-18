@@ -28,7 +28,11 @@ function AddGroupModal() {
         axios.post(`http://${backendHost}/groups/add`, groupObj)
             .then((response) => {
                 GrCtx.makeGroupsChange();
-        })
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            })
     };
 
     const updateGroup = (groupObj, groupId) => {
@@ -40,6 +44,10 @@ function AddGroupModal() {
                 }
                 GrCtx.makeGroupsChange();
             })
+            .catch((error) => {
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(error.response.data.message);
+                })
     };
 
     const handleRequestClose = () => {

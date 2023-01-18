@@ -2,13 +2,15 @@ import React, {Component, useContext, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
 import InventoryContext from "../../store/inventory-contxt";
-import ButtonsModal from "../ButtonsModal"
 import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
-import ControlGroup from '@splunk/react-ui/ControlGroup';
 import { backendHost } from "../../host";
+import Trash from '@splunk/react-icons/Trash';
+import Pencil from '@splunk/react-icons/Pencil';
+import Button from '@splunk/react-ui/Button';
+import { Pagination } from '../../styles/inventory/InventoryStyle';
 
 
 const columns = [
@@ -21,6 +23,7 @@ const columns = [
     {sortKey: 'walkInterval', label: 'Walk Interval'},
     {sortKey: 'profiles', label: 'Profiles'},
     {sortKey: 'smartProfiles', label: 'Smart Profiles'},
+    {sortKey: `actions`, label: 'Actions'},
 ];
 
 
@@ -44,7 +47,6 @@ class SortableColumns extends Component {
     }
 
     getFetchInventoryRows(page) {
-        let currentRecords = this.state.allInventoryRecords;
         const urlCount = this.BASE_URL_GET_ALL+"count"
         axios.get(urlCount)
             .then((response) => {
@@ -73,6 +75,30 @@ class SortableColumns extends Component {
         this.context.setWalkInterval(row.walkInterval);
         this.context.setProfiles(row.profiles);
         this.context.setSmartProfiles(row.smartProfiles);
+    };
+
+    setRowData = (row) => {
+        this.context.setInventoryId(row._id);
+        this.context.setAddress(row.address);
+        this.context.setPort(row.port);
+        this.context.setVersion(row.version);
+        this.context.setCommunity(row.community);
+        this.context.setSecret(row.secret);
+        this.context.setSecurityEngine(row.securityEngine);
+        this.context.setWalkInterval(row.walkInterval);
+        this.context.setProfiles(row.profiles);
+        this.context.setSmartProfiles(row.smartProfiles);
+    };
+
+    handleEdit = (row) => {
+        this.context.setIsEdit(true);
+        this.setRowData(row);
+        this.context.setAddOpen(true);
+    };
+
+    handleDelete = (row) => {
+        this.setRowData(row);
+        this.context.setDeleteOpen(true);
     };
 
     buttonsRequestEdit(context) {
@@ -131,22 +157,29 @@ class SortableColumns extends Component {
         const sortDir = this.state.sortDir;
         const allInventoryRecords = this.state.allInventoryRecords;
 
-        console.log(this.state)
         return (
-            <div>
-                <ControlGroup label={"Number of inventory items per page"} labelPosition="top">
-                    <Select value={this.state.devicesPerPage} onChange={this.handleDevicesPerPage} defaultValue={"3"}>
+            <div style={{width: '100%' }}>
+                <Pagination>
+                    <Select appearance="pill" suffixLabel="inventory items per page"
+                            value={this.state.devicesPerPage} onChange={this.handleDevicesPerPage}
+                            defaultValue={"3"}>
                         <Select.Option label="3" value="3" />
                         <Select.Option label="10" value="10" />
                         <Select.Option label="50" value="50" />
                         <Select.Option label="100" value="100" />
                         <Select.Option label="200" value="200" />
                     </Select>
-                </ControlGroup>
-                <Table stripeRows>
+                    <Paginator
+                        onChange={this.handlePagination}
+                        current={this.state.pageNum}
+                        alwaysShowLastPageLink
+                        totalPages={this.state.totalPages}
+                    />
+                </Pagination>
+                <Table stripeRows resizableFillLayout>
                     <Table.Head>
                         {columns.map((headData) => (
-                            <Table.HeadCell key={createDOMID()}>
+                            <Table.HeadCell key={createDOMID()} width={headData.label == "Actions" ? 100 : "auto"}>
                                 {headData.label}
                             </Table.HeadCell>
                         ))}
@@ -164,8 +197,7 @@ class SortableColumns extends Component {
                                 return 0;
                             })
                             .map((row) => (
-                                <Table.Row key={createDOMID()} elementRef={this.context.rowToggle}
-                                           onClick={() => this.handleRowClick(JSON.parse(JSON.stringify(row)))}>
+                                <Table.Row key={createDOMID()} elementRef={this.context.rowToggle}>
                                     <Table.Cell>{row.address}</Table.Cell>
                                     <Table.Cell>{row.port}</Table.Cell>
                                     <Table.Cell>{row.version}</Table.Cell>
@@ -175,19 +207,14 @@ class SortableColumns extends Component {
                                     <Table.Cell>{row.walkInterval}</Table.Cell>
                                     <Table.Cell>{row.profiles.toString()}</Table.Cell>
                                     <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
+                                    <Table.Cell>
+                                        <Button onClick={() => this.handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                        <Button onClick={() => this.handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    </Table.Cell>
                                 </Table.Row>
                             ))}
                     </Table.Body>
                 </Table>
-                <Paginator
-                    onChange={this.handlePagination}
-                    current={this.state.pageNum}
-                    alwaysShowLastPageLink
-                    totalPages={this.state.totalPages}
-                />
-                <ButtonsModal handleRequestDelete={() => (this.buttonsRequestDelete(this.context))}
-                              handleRequestEdit={() => (this.buttonsRequestEdit(this.context))}
-                              context={this.context}/>
                 <DeleteModal deleteName={`${this.context.address}:${this.context.port}`}
                              handleDelete={() => (this.deleteModalRequest(this.context))}/>
             </div>

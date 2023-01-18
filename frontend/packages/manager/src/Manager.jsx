@@ -1,44 +1,40 @@
-import React from 'react';
-import TabLayout from '@splunk/react-ui/TabLayout';
-import ProfilesPage from "./pages/ProfilesPage";
-import InventoryPage from "./pages/InventoryPage";
-import GroupsPage from "./pages/GroupsPage";
+import React, {useCallback, useContext, useState} from 'react';
+import { Link, Route, Routes, Switch } from 'react-router-dom';
+
 import ErrorsModal from "./components/ErrorsModal";
+import Menu from "./components/menu_header/Menu";
+import Header from "./components/menu_header/Header";
+import TabPanels from "./components/menu_header/TabPanels";
+import MenuHeaderContxt from './store/menu-header-contxt';
+
+
+import { ButtonsContextProvider } from "./store/buttons-contx";
+import { ErrorsModalContextProvider } from "./store/errors-modal-contxt";
+import { MenuHeaderContxtProvider } from "./store/menu-header-contxt";
+
 import { ProfileContxtProvider } from "./store/profile-contxt";
 import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
-import { ButtonsContextProvider } from "./store/buttons-contx";
-import { InventoryDevicesValidationContxtProvider } from "./store/inventory-devices-validation-contxt";
-import { ProfilesValidationContxtProvider } from "./store/profiles-validation-contxt";
-import { ErrorsModalContextProvider } from "./store/errors-modal-contxt";
 
+import { FontStyles } from "./styles/FonstStyles";
 function Uncontrolled() {
+    const MenuCtx = useContext(MenuHeaderContxt);
     return (
         <ButtonsContextProvider>
+            <FontStyles/>
             <ErrorsModalContextProvider>
-                <TabLayout defaultActivePanelId="one">
-                    <TabLayout.Panel label="Profiles" panelId="one">
-                        <ProfileContxtProvider>
-                            <ProfilesValidationContxtProvider>
-                                <ProfilesPage />
-                            </ProfilesValidationContxtProvider>
-                        </ProfileContxtProvider>
-                    </TabLayout.Panel>
-                    <TabLayout.Panel label="Groups" panelId="two">
+                <MenuHeaderContxtProvider>
+                    <ProfileContxtProvider>
                         <GroupContextProvider>
-                            <InventoryDevicesValidationContxtProvider>
-                                <GroupsPage />
-                            </InventoryDevicesValidationContxtProvider>
+                            <InventoryContextProvider>
+                                <Menu/>
+                                <Header/>
+                                <TabPanels/>
+                            </InventoryContextProvider>
                         </GroupContextProvider>
-                    </TabLayout.Panel>
-                    <TabLayout.Panel label="Inventory" panelId="three">
-                        <InventoryContextProvider>
-                            <InventoryDevicesValidationContxtProvider>
-                                <InventoryPage />
-                            </InventoryDevicesValidationContxtProvider>
-                        </InventoryContextProvider>
-                    </TabLayout.Panel>
-                </TabLayout>
+                    </ProfileContxtProvider>
+
+                </MenuHeaderContxtProvider>
                 <ErrorsModal />
             </ErrorsModalContextProvider>
         </ButtonsContextProvider>

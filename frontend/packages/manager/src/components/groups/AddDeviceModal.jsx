@@ -1,6 +1,5 @@
 import React, {useCallback, useContext, useState} from 'react';
 import Button from '@splunk/react-ui/Button';
-import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
@@ -12,11 +11,14 @@ import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
+import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 
 function AddDeviceModal(){
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         GrCtx.setAddress(val);
@@ -48,6 +50,10 @@ function AddDeviceModal(){
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
+        .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            })
     };
 
     const updateDevice = (deviceObj, deviceId) => {
@@ -56,6 +62,10 @@ function AddDeviceModal(){
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
+        .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            })
     };
 
     const handleRequestClose = () => {
@@ -107,25 +117,25 @@ function AddDeviceModal(){
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={GrCtx.addDeviceOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add new device to group ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
-                <Modal.Body>
-                    <ControlGroup label="IP address">
+                <StyledModalHeader title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add new device to group ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
+                <StyledModalBody>
+                    <StyledControlGroup labelWidth={140} label="IP address">
                         <div style={validationGroup}>
                             <Text value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
-                    <ControlGroup label="Port" >
+                    </StyledControlGroup>
+                    <StyledControlGroup labelWidth={140} label="Port" >
                         <div style={validationGroup}>
                             <Text value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup
+                    <StyledControlGroup
                     label="SNMP version"
                     labelFor="customized-select-after"
-                    help="Clicking the label will focus/activate the Select rather than the default first Text."
+                    labelWidth={140}
                     >
                         <Select defaultValue={GrCtx.version} inputId="customized-select-after" value={GrCtx.version} onChange={handleChangeVersion}>
                             <Select.Option label="From inventory" value=""/>
@@ -133,30 +143,30 @@ function AddDeviceModal(){
                             <Select.Option label="2c" value="2c"/>
                             <Select.Option label="3" value="3"/>
                         </Select>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Community">
+                    <StyledControlGroup labelWidth={140} label="Community">
                         <div style={validationGroup}>
                             <Text value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
                             {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Secret">
+                    <StyledControlGroup labelWidth={140} label="Secret">
                         <div style={validationGroup}>
                             <Text value={GrCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
                             {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Security Engine">
+                    <StyledControlGroup labelWidth={140} label="Security Engine">
                         <div style={validationGroup}>
                             <Text value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
                             {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                </Modal.Body>
+                </StyledModalBody>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
                     <Button appearance="primary" label="Submit" onClick={handleApply} />

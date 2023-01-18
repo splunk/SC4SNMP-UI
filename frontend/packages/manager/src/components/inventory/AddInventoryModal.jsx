@@ -1,5 +1,5 @@
 import React, {useRef, useState, Component, useCallback, useEffect, useContext} from 'react';
-import ControlGroup from '@splunk/react-ui/ControlGroup';
+import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Select from '@splunk/react-ui/Select';
@@ -78,8 +78,6 @@ function AddInventoryModal() {
             .catch((error) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setMessage(error.response.data.message);
-                console.log(error.response.data);
-                console.log(error.response.status);
             })
     };
 
@@ -91,8 +89,6 @@ function AddInventoryModal() {
             .catch((error) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setMessage(error.response.data.message);
-                console.log(error.response.data);
-                console.log(error.response.status);
             })
     };
 
@@ -150,79 +146,79 @@ function AddInventoryModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
-                <Modal.Body>
-                    <ControlGroup label="IP address/Group">
+            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
+                <StyledModalBody>
+                    <StyledControlGroup labelWidth={140} label="IP address/Group">
                         <div style={validationGroup}>
                             <Text value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
-                    <ControlGroup label="Port">
+                    </StyledControlGroup>
+                    <StyledControlGroup labelWidth={140} label="Port">
                         <div style={validationGroup}>
                             <Text value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup
+                    <StyledControlGroup
                     label="SNMP version"
                     labelFor="customized-select-after"
-                    help="Clicking the label will focus/activate the Select rather than the default first Text."
+                    labelWidth={140}
                     >
                         <Select defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
                             <Select.Option label="1" value="1"/>
                             <Select.Option label="2c" value="2c"/>
                             <Select.Option label="3" value="3"/>
                         </Select>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Community">
+                    <StyledControlGroup label="Community" labelWidth={140}>
                         <div style={validationGroup}>
                             <Text value={InvCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
                             {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Secret">
+                    <StyledControlGroup label="Secret" labelWidth={140}>
                         <div style={validationGroup}>
                             <Text value={InvCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
                             {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Security Engine">
+                    <StyledControlGroup label="Security Engine" labelWidth={140}>
                         <div style={validationGroup}>
                             <Text value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
                             {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Walk Interval">
+                    <StyledControlGroup label="Walk Interval" labelWidth={140}>
                         <div style={validationGroup}>
                             <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
                             {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Profiles">
+                    <StyledControlGroup label="Profiles" labelWidth={140}>
                         <div style={validationGroup}>
                             <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles} error={((ValCtx.profilesErrors) ? true : false)}>
                                 {initProfiles.map((v) => (<Multiselect.Option key={createDOMID()} label={v} value={v} />))}
                             </Multiselect>
                             {((ValCtx.profilesErrors) ? ValCtx.profilesErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Smart Profiles enabled">
+                    <StyledControlGroup label="Smart Profiles enabled" labelWidth={140}>
                         <RadioBar value={InvCtx.smartProfiles} onChange={handleChangeSmartProfiles}>
                             <RadioBar.Option value={true} label="true"/>
                             <RadioBar.Option value={false} label="false"/>
                         </RadioBar>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                </Modal.Body>
+                </StyledModalBody>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
                     <Button appearance="primary" label="Submit" onClick={handleApply} />

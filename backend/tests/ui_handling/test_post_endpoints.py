@@ -250,7 +250,10 @@ def test_update_group(m_find, m_update, client):
         call({"address": "group_1"}, {"$set": {"address": 'group_1_edit'}})
     ]
 
-    m_find.return_value = [backend_group_old]
+    m_find.side_effect = [
+        [],
+        [backend_group_old]
+    ]
 
     response = client.post(f"/groups/update/{common_id}", json=ui_group_new)
     m_update.assert_has_calls(calls_update)

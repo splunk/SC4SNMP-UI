@@ -1,6 +1,5 @@
 import React, {useState, useRef, useCallback, useContext} from 'react';
 import Button from '@splunk/react-ui/Button';
-import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
@@ -15,6 +14,7 @@ import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
+import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
 
 
 function AddProfileModal(props) {
@@ -54,8 +54,13 @@ function AddProfileModal(props) {
             .then((response) => {
                 console.log(response);
                 ProfCtx.makeProfilesChange();
-        })
-    }
+            })
+            .catch((error) => {
+                console.log(error);
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            });
+    };
 
     const updateProfile = (profileObj, profileId) => {
         axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
@@ -65,8 +70,12 @@ function AddProfileModal(props) {
                     ErrCtx.setOpen(true);
                     ErrCtx.setMessage(response.data.message);
                 }
-        })
-    }
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            });
+    };
 
    const handleRequestClose = useCallback(
     (e) => {
@@ -122,35 +131,35 @@ function AddProfileModal(props) {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")}
+                <StyledModalHeader title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")}
                               onRequestClose={handleRequestClose} />
-                <Modal.Body>
+                <StyledModalBody>
 
-                    <ControlGroup label="Profile name">
+                    <StyledControlGroup label="Profile name">
                         <div style={validationGroup}>
                             <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
                             {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                    <ControlGroup label="Frequency of polling" >
+                    <StyledControlGroup label="Frequency of polling" >
                         <div style={validationGroup}>
                             <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
                             {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </div>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
                     <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={ValCtx.conditionFieldErrors}
                                 errorPatterns={ValCtx.conditionPatternsErrors} setErrorPatterns={ValCtx.setConditionPatternsErrors}
                                 validationMessage={validationMessage} validationGroup={validationGroup} newSubmit={newSubmitPatterns}/>
 
-                    <ControlGroup label="VarBinds">
+                    <StyledControlGroup label="VarBinds">
                         <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={ValCtx.varBindsErrors} setError={ValCtx.setVarBindsErrors}
                                          validationMessage={validationMessage} validationGroup={validationGroup}
                         newSubmit={newSubmitVarBinds}/>
-                    </ControlGroup>
+                    </StyledControlGroup>
 
-                </Modal.Body>
+                </StyledModalBody>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
                     <Button appearance="primary" label="Submit" onClick={handleApply} />

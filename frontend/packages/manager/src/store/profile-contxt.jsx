@@ -8,7 +8,6 @@ export function ProfileContxtProvider(props) {
 
     // data for DeleteProfileModal
     const [profileId, setProfileId] = useState(null);
-    const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteModalToggle = useRef(null);
 
     // data for AddProfileModal
@@ -30,27 +29,27 @@ export function ProfileContxtProvider(props) {
     }
 
     const context = {
-        profileId: profileId,
-        setProfileId: setProfileId,
+        profileId,
+        setProfileId,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
-        deleteModalToggle: deleteModalToggle,
-        profilesChange: profilesChange,
+        deleteModalToggle,
+        profilesChange,
         makeProfilesChange: profilesChangeHandler,
-        addOpen: addOpen,
-        setAddOpen: setAddOpen,
-        addModalToggle: addModalToggle,
+        addOpen,
+        setAddOpen,
+        addModalToggle,
 
-        profileName: profileName,
-        setProfileName: setProfileName,
-        frequency: frequency,
-        setFrequency: setFrequency,
-        varBinds: varBinds,
-        setVarBinds: setVarBinds,
-        conditions: conditions,
-        setConditions: setConditions,
-        isEdit: isEdit,
-        setIsEdit: setIsEdit
+        profileName,
+        setProfileName,
+        frequency,
+        setFrequency,
+        varBinds,
+        setVarBinds,
+        conditions,
+        setConditions,
+        isEdit,
+        setIsEdit
     };
 
     return(
