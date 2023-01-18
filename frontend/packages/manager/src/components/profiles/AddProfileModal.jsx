@@ -54,8 +54,13 @@ function AddProfileModal(props) {
             .then((response) => {
                 console.log(response);
                 ProfCtx.makeProfilesChange();
-        })
-    }
+            })
+            .catch((error) => {
+                console.log(error);
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            });
+    };
 
     const updateProfile = (profileObj, profileId) => {
         axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
@@ -65,8 +70,12 @@ function AddProfileModal(props) {
                     ErrCtx.setOpen(true);
                     ErrCtx.setMessage(response.data.message);
                 }
-        })
-    }
+            })
+            .catch((error) => {
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(error.response.data.message);
+            });
+    };
 
    const handleRequestClose = useCallback(
     (e) => {

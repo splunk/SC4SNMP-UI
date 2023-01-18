@@ -78,8 +78,6 @@ function AddInventoryModal() {
             .catch((error) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setMessage(error.response.data.message);
-                console.log(error.response.data);
-                console.log(error.response.status);
             })
     };
 
@@ -91,8 +89,6 @@ function AddInventoryModal() {
             .catch((error) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setMessage(error.response.data.message);
-                console.log(error.response.data);
-                console.log(error.response.status);
             })
     };
 

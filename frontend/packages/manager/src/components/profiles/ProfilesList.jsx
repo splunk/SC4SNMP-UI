@@ -12,6 +12,40 @@ import ErrorsModalContext from "../../store/errors-modal-contxt";
 import {backendHost} from "../../host";
 import {Pagination} from "../../styles/groups/GroupsStyle";
 import DeleteModal from "../DeleteModal";
+import P from "@splunk/react-ui/Paragraph";
+
+
+function getExpansionRow(row) {
+    return (
+        <Table.Row key={`${row._id}-expansion`}>
+            <Table.Cell>{/* Empty cell */}</Table.Cell>
+            <Table.Cell>{/* Empty cell */}</Table.Cell>
+            <Table.Cell>{/* Empty cell */}</Table.Cell>
+            <Table.Cell>{row.conditions.field}</Table.Cell>
+            <Table.Cell>{row.conditions.patterns && row.conditions.patterns.map(value =>
+                                <P key={createDOMID()}>{value.pattern}</P>)}</Table.Cell>
+            <Table.Cell>
+                {row.varBinds.map((value) => (
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.family}</P>
+                ))}
+            </Table.Cell>
+
+            <Table.Cell>
+                {row.varBinds.map((value) => (
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.category}</P>
+                ))}
+            </Table.Cell>
+
+            <Table.Cell>
+                {row.varBinds.map((value) => (
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.index}</P>
+                ))}
+            </Table.Cell>
+
+            <Table.Cell />
+        </Table.Row>
+    );
+}
 
 function ProfilesList() {
 
@@ -31,6 +65,7 @@ function ProfilesList() {
     const [pageNum, setPageNum] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [profilesRecords, setProfilesRecords] = useState([]);
+    const [expandedRowId, setExpandedRowId] = useState(null);
     const ProfCtx = useContext(ProfileContext);
     const ErrCtx = useContext(ErrorsModalContext);
 
@@ -102,6 +137,14 @@ function ProfilesList() {
         ProfCtx.addModalToggle?.current?.focus();
     };
 
+    const handleRowExpansion = (rowId) => {
+        if (expandedRowId === rowId) {
+            setExpandedRowId(null);
+        } else {
+            setExpandedRowId(rowId);
+        }
+    };
+
     return (
         <div style={{width: '100%' }}>
             <Pagination>
@@ -132,7 +175,12 @@ function ProfilesList() {
                 <Table.Body>
                     {profilesRecords
                         .map((row) => (
-                            <Table.Row key={createDOMID()}>
+                            <Table.Row
+                                key={row._id}
+                                expansionRow={getExpansionRow(row)}
+                                onExpansion={() => handleRowExpansion(row._id)}
+                                expanded={row._id === expandedRowId}
+                            >
                                 <Table.Cell>{row.profileName}</Table.Cell>
                                 <Table.Cell>{row.frequency}</Table.Cell>
                                 <Table.Cell>{row.conditions.condition}</Table.Cell>

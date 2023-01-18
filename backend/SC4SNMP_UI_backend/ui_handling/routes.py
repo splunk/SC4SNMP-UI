@@ -69,10 +69,15 @@ def get_all_profiles_list():
 @cross_origin()
 def add_profile_record():
     profile_obj = request.json
-    profile_obj = profile_conversion.ui2backend(profile_obj)
-    mongo_profiles.insert_one(profile_obj)
-    return jsonify("success")
-
+    same_name_profiles = list(mongo_profiles.find({f"{profile_obj['profileName']}": {"$exists": True}}))
+    if len(same_name_profiles) > 0:
+        result = jsonify(
+            {"message": f"Profile with name {profile_obj['profileName']} already exists. Profile was not added."}), 400
+    else:
+        profile_obj = profile_conversion.ui2backend(profile_obj)
+        mongo_profiles.insert_one(profile_obj)
+        result = jsonify("success")
+    return result
 
 @ui.route('/profiles/delete/<profile_id>', methods=['POST'])
 @cross_origin()
@@ -96,6 +101,12 @@ def delete_profile_record(profile_id):
 def update_profile_record(profile_id):
     profile_obj = request.json
     new_profile_name = profile_obj['profileName']
+
+    same_name_profiles = list(mongo_profiles.find({f"{new_profile_name}": {"$exists": True}}))
+    if len(same_name_profiles) > 0:
+        return jsonify(
+            {"message": f"Profile with name {new_profile_name} already exists. Profile was not edited."}), 400
+
     profile_obj = profile_conversion.ui2backend(profile_obj)
 
     old_profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
