@@ -91,6 +91,13 @@ function ProfilesList() {
     useEffect(() => {
         let isMounted = true;
         console.log(`backend host address: ${backendHost}`);
+
+        // delete below get
+        const urlGet = `http://${backendHost}/test`;
+        axios.get(urlGet)
+                    .then((response) => {
+                        console.log(response);
+                    })
         getProfileRows(pageNum);
         return () => { isMounted = false }
     }, [ProfCtx.profilesChange]);
