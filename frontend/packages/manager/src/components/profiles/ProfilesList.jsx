@@ -90,7 +90,7 @@ function ProfilesList() {
 
     useEffect(() => {
         let isMounted = true;
-        console.log(backendHost);
+        console.log(`backend host address: ${backendHost}`);
         getProfileRows(pageNum);
         return () => { isMounted = false }
     }, [ProfCtx.profilesChange]);
