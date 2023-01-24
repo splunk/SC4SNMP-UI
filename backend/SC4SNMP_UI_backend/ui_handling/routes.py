@@ -22,7 +22,7 @@ mongo_inventory = mongo_client.sc4snmp.inventory_ui
 # @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @ui.route('/test')
 @cross_origin()
-def get_profile_names():
+def get_testing():
     return "IT IS WORKING !!!"
 
 
