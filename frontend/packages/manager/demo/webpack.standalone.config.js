@@ -14,6 +14,7 @@ module.exports = webpackMerge(baseConfig, {
         new webpack.DefinePlugin({
               'process.env':{
                 'REACT_APP_FLASK_PORT': JSON.stringify(process.env.REACT_APP_FLASK_PORT || 5000),
+                'REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || "not_reading_env")
             }
         })
     ],
