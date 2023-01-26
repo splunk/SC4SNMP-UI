@@ -102,7 +102,7 @@ def update_profile_record(profile_id):
     profile_obj = request.json
     new_profile_name = profile_obj['profileName']
 
-    same_name_profiles = list(mongo_profiles.find({f"{new_profile_name}": {"$exists": True}}))
+    same_name_profiles = list(mongo_profiles.find({f"{new_profile_name}": {"$exists": True}, "_id": {"$ne": ObjectId(profile_id)}}))
     if len(same_name_profiles) > 0:
         return jsonify(
             {"message": f"Profile with name {new_profile_name} already exists. Profile was not edited."}), 400
