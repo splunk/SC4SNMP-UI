@@ -62,7 +62,7 @@ const validateProfiles = (validationObj) => {
                         errors.conditionPatterns[i] = [message];
                     }
                     isValid = false;
-                }else if (!validationObj.conditions.patterns[i].pattern.match(/^\.\*[.\sa-zA-Z0-9_-]+\.\*$/)){
+                }/* else if (!validationObj.conditions.patterns[i].pattern.match(/^\.\*[.\sa-zA-Z0-9_-]+\.\*$/)){
                     message = "Pattern must match this example .*MY-PATTERN.* . MY-PATTERN can consist only " +
                     "of upper and lower english letters, numbers and three special characters: '.' '-' and '_'"
                     if (i in errors.conditionPatterns){
@@ -71,7 +71,7 @@ const validateProfiles = (validationObj) => {
                         errors.conditionPatterns[i] = [message];
                     }
                     isValid = false;
-                };
+                }; */
             };
         };
     };

@@ -143,7 +143,7 @@ function AddProfileModal(props) {
                         </div>
                     </StyledControlGroup>
 
-                    <StyledControlGroup label="Frequency of polling" >
+                    <StyledControlGroup label="Frequency of polling (s)" >
                         <div style={validationGroup}>
                             <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
                             {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}

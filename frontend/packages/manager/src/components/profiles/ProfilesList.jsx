@@ -21,7 +21,7 @@ function getExpansionRow(row) {
             <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{row.conditions.field}</Table.Cell>
+            <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>{row.conditions.patterns && row.conditions.patterns.map(value =>
                                 <P key={createDOMID()}>{value.pattern}</P>)}</Table.Cell>
             <Table.Cell>
@@ -184,7 +184,7 @@ function ProfilesList() {
                                 <Table.Cell>{row.profileName}</Table.Cell>
                                 <Table.Cell>{row.frequency}</Table.Cell>
                                 <Table.Cell>{row.conditions.condition}</Table.Cell>
-                                <Table.Cell>{/* Condition field is empty in this view */}</Table.Cell>
+                                <Table.Cell>{row.conditions.field}</Table.Cell>
                                 <Table.Cell>{/* Condition patterns is empty in this view */}</Table.Cell>
                                 <Table.Cell>{(row.varBinds.length === 1) ? `1 MIB family` :
                                     `${row.varBinds.length} MIB families`}</Table.Cell>

@@ -26,35 +26,35 @@ function AddInventoryModal() {
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         InvCtx.setAddress(val);
-    }, [InvCtx.setAddress]);
+    }, [InvCtx]);
 
     const handleChangePort = useCallback((e, { value: val }) => {
         InvCtx.setPort(val);
-    }, [InvCtx.setPort]);
+    }, [InvCtx]);
 
     const handleChangeVersion = useCallback((e, { value: val }) => {
         InvCtx.setVersion(val);
-    }, [InvCtx.setVersion]);
+    }, [InvCtx]);
 
     const handleChangeCommunity = useCallback((e, { value: val }) => {
         InvCtx.setCommunity(val);
-    }, [InvCtx.setCommunity]);
+    }, [InvCtx]);
 
     const handleChangeSecret = useCallback((e, { value: val }) => {
         InvCtx.setSecret(val);
-    }, [InvCtx.setSecret]);
+    }, [InvCtx]);
 
     const handleChangeSecurityEngine = useCallback((e, { value: val }) => {
         InvCtx.setSecurityEngine(val);
-    }, [InvCtx.setSecurityEngine]);
+    }, [InvCtx]);
 
     const handleChangeWalkInterval = useCallback((e, { value: val }) => {
         InvCtx.setWalkInterval(val);
-    }, [InvCtx.setWalkInterval]);
+    }, [InvCtx]);
 
     const handleChangeSmartProfiles = useCallback((e, { value: val }) => {
         InvCtx.setSmartProfiles(val);
-    }, [InvCtx.setSmartProfiles]);
+    }, [InvCtx]);
 
     const handleChange = (e, { values }) => {
         InvCtx.setProfiles(values);
@@ -64,8 +64,9 @@ function AddInventoryModal() {
         let isMounted = true;
         axios.get(`http://${backendHost}/profiles/names`)
         .then((response) => {
-            if (isMounted)
+            if (isMounted) {
                 setInitProfiles(response.data);
+            }
         })
         return () => { isMounted = false }
     }, []);
@@ -73,6 +74,10 @@ function AddInventoryModal() {
     const postInventory = (inventoryObj) => {
         axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
             .then((response) => {
+                if (response.data !== "success" && 'message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
@@ -84,6 +89,11 @@ function AddInventoryModal() {
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
+                console.log(response.data)
+                if (response.data !== "success" && 'message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
@@ -100,7 +110,7 @@ function AddInventoryModal() {
     };
 
     const handleApply = useCallback(
-    (e) => {
+    () => {
         const inventoryObj = {
                 address: InvCtx.address,
                 port: InvCtx.port,
@@ -147,7 +157,7 @@ function AddInventoryModal() {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device/group` : "Add a new device/group")} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address/Group">
                         <div style={validationGroup}>
@@ -195,7 +205,7 @@ function AddInventoryModal() {
                         </div>
                     </StyledControlGroup>
 
-                    <StyledControlGroup label="Walk Interval" labelWidth={140}>
+                    <StyledControlGroup label="Walk Interval (s)" labelWidth={140}>
                         <div style={validationGroup}>
                             <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
                             {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}

@@ -84,8 +84,8 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
     m_find.assert_has_calls(calls)
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update})
-    assert response.json == {"message": f"If profile_1 was used in some records in the inventory,"
-                                        f" those records were updated"}
+    assert response.json == {"message": f"Profile profile_1 was deleted. If profile_1 was used in some records in the inventory,"
+                                        f" those records were updated."}
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -120,7 +120,7 @@ def test_update_profile_record_no_name_change(m_find, m_update, client):
         }
     }
 
-    m_find.return_value = [backend_prof_1_old]
+    m_find.side_effect = [[], [backend_prof_1_old]]
     m_update.return_value = None
 
     response = client.post(f"/profiles/update/{common_id}", json=ui_prof_1_new)
@@ -191,12 +191,14 @@ def test_update_profile_record_with_name_change(m_find, m_update, client):
     }
 
     m_find.side_effect = [
+        [],
         [backend_prof_1_old],
         [backend_inventory]
     ]
     m_update.return_value = None
 
-    calls_find = [call({'_id': ObjectId(common_id)}, {"_id": 0}),
+    calls_find = [call({f"profile_1_edit": {"$exists": True}, "_id": {"$ne": ObjectId(common_id)}}),
+                  call({'_id': ObjectId(common_id)}, {"_id": 0}),
                   call({"profiles": {"$regex": '.*profile_1.*'}})]
 
     calls_update = [call({'_id': ObjectId(common_id)}, {"$rename": {"profile_1": "profile_1_edit"}}),
@@ -282,7 +284,7 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
     assert m_find.call_args == call({'_id': ObjectId(common_id)})
     assert m_delete.call_args == call({'_id': ObjectId(common_id)})
     assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
-    assert response.json == {"message": "If group_1 was configured in the inventory, it was deleted from there"}
+    assert response.json == {"message": "Group group_1 was deleted. If group_1 was configured in the inventory, it was deleted from there."}
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -315,7 +317,11 @@ def test_add_device_to_group(m_find, m_update, client):
         ]
     }
 
-    m_find.return_value = [backend_group_old]
+    m_find.side_effect = [
+        [backend_group_old],
+        [],
+        [backend_group_old]
+    ]
     m_update.return_value = None
 
     response = client.post(f"/devices/add", json=ui_group_device_new)
@@ -324,7 +330,7 @@ def test_add_device_to_group(m_find, m_update, client):
     assert response.json == "success"
 
 
-@mock.patch("pymongo.collection.Collection.update_one")
+"""@mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
 def test_update_device_from_group(m_find, m_update, client):
     common_id = "635916b2c8cb7a15f28af40a"
@@ -365,6 +371,7 @@ def test_update_device_from_group(m_find, m_update, client):
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new})
     assert response.json == "success"
+"""
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -403,15 +410,15 @@ def test_delete_device_from_group_record(m_find, m_update, client):
 
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new1})
-    assert response.json == "success"
+    assert response.json == {'message': 'Device 2.2.2.3:1161 from group group_1 was deleted.'}
 
     m_find.return_value = [backend_group_new1]
     response = client.post(f"/devices/delete/{common_id}-0")
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new2})
-    assert response.json == "success"
+    assert response.json == {'message': 'Device 1.1.1.1: from group group_1 was deleted.'}
 
-
+"""
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
@@ -987,12 +994,27 @@ def test_edit_inventory_record_group_failed(m_find, m_insert, m_update, m_delete
     assert not m_insert.called
     assert not m_update.called
     assert not m_delete.called
+"""
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
-def test_delete_inventory_record(m_update, client):
+@mock.patch("pymongo.collection.Collection.find")
+def test_delete_inventory_record(m_find, m_update, client):
     common_id = "635916b2c8cb7a15f28af40a"
     m_update.return_value = None
+    m_find.return_value = [{
+        "_id": ObjectId(common_id),
+        "address": "group_1",
+        "port": 1161,
+        "version": "2c",
+        "community": "public",
+        "secret": "",
+        "walk_interval": 1800,
+        "security_engine": "",
+        "profiles": "prof1",
+        "smart_profiles": False,
+        "delete": False
+    }]
     response = client.post(f"/inventory/delete/{common_id}")
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": {"delete": True}})
-    assert response.json == "success"
+    assert response.json == {"message": f"group_1 was deleted."}

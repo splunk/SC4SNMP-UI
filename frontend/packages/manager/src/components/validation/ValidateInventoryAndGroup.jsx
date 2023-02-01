@@ -34,11 +34,11 @@ const validateInventoryAndGroup = (validationObj) => {
     // Validate address
     if (validationObj.hasOwnProperty("address")){
         if (validationObj.address.length === 0){
-            let err = ((validationObj.hasOwnProperty("inGroupConfig")) ? "Address is required" : "Address or Group is required")
+            const err = ((validationObj.hasOwnProperty("inGroupConfig")) ? "Address is required" : "Address or Group is required")
             errors.address.push(err);
             isValid = false;
         }else if (Number.isInteger(Number(validationObj.address.charAt(0))) || validationObj.hasOwnProperty("inGroupConfig")){
-            let doesMatch = validationObj.address.match(/^(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))$/);
+            const doesMatch = validationObj.address.match(/^(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))\.(([1-9]{1}[0-9]{0,2})|(0))$/);
             let octetsValid = true;
             if (doesMatch){
                 let octets = validationObj.address.split(".");
