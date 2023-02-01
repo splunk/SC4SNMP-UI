@@ -1,15 +1,16 @@
-import React, {Component, useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
 import axios from "axios";
-import InventoryContext from "../../store/inventory-contxt";
-import DeleteModal from "../DeleteModal";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
-import { backendHost } from "../../host";
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
+import { backendHost } from "../../host";
+import DeleteModal from "../DeleteModal";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
+import InventoryContext from "../../store/inventory-contxt";
 import { Pagination } from '../../styles/inventory/InventoryStyle';
 
 
@@ -27,199 +28,147 @@ const columns = [
 ];
 
 
-class SortableColumns extends Component {
-    static contextType = InventoryContext;
+function InventoryList() {
+    const InvCtx = useContext(InventoryContext);
+    const ErrCtx = useContext(ErrorsModalContext);
 
-    constructor(props) {
-        super(props);
+    const [allInventoryRecords, setAllInventoryRecords] = useState([]);
+    const [pageNum, setPageNum] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [devicesPerPage, setDevicesPerPage] = useState("3");
 
-        this.state = {
-            allInventoryRecords: [],
-            pageNum: 1,
-            totalPages: 1,
-            devicesPerPage: "3",
-        };
+    const BASE_URL_GET_ALL = `http://${backendHost}/inventory/`;
+    const BASE_URL_DELETE = `http://${backendHost}/inventory/delete/`;
 
-        this.reload = true;
-        this.BASE_URL_GET_ALL = `http://${backendHost}/inventory/`
-        this.BASE_URL_DELETE = `http://${backendHost}/inventory/delete/`
-        this.inventoryChange = this.props.inventoryChange;
-    }
-
-    getFetchInventoryRows(page) {
-        const urlCount = this.BASE_URL_GET_ALL+"count"
+    const getFetchInventoryRows = (page) => {
+        const urlCount = `${BASE_URL_GET_ALL}count`
         axios.get(urlCount)
             .then((response) => {
-                let maxPages = Math.ceil(response.data/Number(this.state.devicesPerPage));
-                if (maxPages === 0) maxPages = 1;
+                let maxPages = Math.ceil(response.data/Number(devicesPerPage));
+                if (maxPages === 0) {maxPages = 1;}
                 if (page > maxPages){
                     page = maxPages;
                 };
-                const urlGet = this.BASE_URL_GET_ALL+page.toString()+"/"+this.state.devicesPerPage.toString()
+                const urlGet = `${BASE_URL_GET_ALL+page.toString()}/${devicesPerPage.toString()}`
                 axios.get(urlGet)
                     .then((response2) => {
-                        this.setState({allInventoryRecords: response2.data, pageNum: page, totalPages: maxPages})
+                        setAllInventoryRecords(response2.data);
+                        setPageNum(page);
+                        setTotalPages(maxPages);
                     })
             });
     };
 
-    handleRowClick = (row) => {
-        this.context.setButtonsOpen(true);
-        this.context.setInventoryId(row._id);
-        this.context.setAddress(row.address);
-        this.context.setPort(row.port);
-        this.context.setVersion(row.version);
-        this.context.setCommunity(row.community);
-        this.context.setSecret(row.secret);
-        this.context.setSecurityEngine(row.securityEngine);
-        this.context.setWalkInterval(row.walkInterval);
-        this.context.setProfiles(row.profiles);
-        this.context.setSmartProfiles(row.smartProfiles);
+    useEffect(() => {
+        getFetchInventoryRows(pageNum);
+    }, [InvCtx.inventoryChange]);
+
+    const setRowData = (row) => {
+        InvCtx.setInventoryId(row._id);
+        InvCtx.setAddress(row.address);
+        InvCtx.setPort(row.port);
+        InvCtx.setVersion(row.version);
+        InvCtx.setCommunity(row.community);
+        InvCtx.setSecret(row.secret);
+        InvCtx.setSecurityEngine(row.securityEngine);
+        InvCtx.setWalkInterval(row.walkInterval);
+        InvCtx.setProfiles(row.profiles);
+        InvCtx.setSmartProfiles(row.smartProfiles);
     };
 
-    setRowData = (row) => {
-        this.context.setInventoryId(row._id);
-        this.context.setAddress(row.address);
-        this.context.setPort(row.port);
-        this.context.setVersion(row.version);
-        this.context.setCommunity(row.community);
-        this.context.setSecret(row.secret);
-        this.context.setSecurityEngine(row.securityEngine);
-        this.context.setWalkInterval(row.walkInterval);
-        this.context.setProfiles(row.profiles);
-        this.context.setSmartProfiles(row.smartProfiles);
+    const handleEdit = (row) => {
+        InvCtx.setIsEdit(true);
+        setRowData(row);
+        InvCtx.setAddOpen(true);
     };
 
-    handleEdit = (row) => {
-        this.context.setIsEdit(true);
-        this.setRowData(row);
-        this.context.setAddOpen(true);
+    const handleDelete = (row) => {
+        setRowData(row);
+        InvCtx.setDeleteOpen(true);
     };
 
-    handleDelete = (row) => {
-        this.setRowData(row);
-        this.context.setDeleteOpen(true);
-    };
-
-    buttonsRequestEdit(context) {
-       context.setButtonsOpen(false);
-       context.setIsEdit(true);
-       context.setAddOpen(true);
-    };
-
-    buttonsRequestDelete(context) {
-        context.setButtonsOpen(false);
-        context.setDeleteOpen(true);
-    }
-
-    deleteModalRequest(context) {
-        let url = this.BASE_URL_DELETE+`${context.inventoryId.toString()}`;
+    const deleteModalRequest = () => {
+        const url = `${BASE_URL_DELETE}${InvCtx.inventoryId.toString()}`;
         axios.post(url)
           .then(function (response) {
-            console.log(response);
-            context.makeInventoryChange();
+            if ('message' in response.data){
+                ErrCtx.setOpen(true);
+                ErrCtx.setMessage(response.data.message);
+            }
+            InvCtx.makeInventoryChange();
           })
           .catch(function (error) {
             console.log(error);
-            context.makeInventoryChange();
+            InvCtx.makeInventoryChange();
           });
-        context.setDeleteOpen(false);
-        context.resetFormData();
-        context.addModalToggle?.current?.focus();
+        InvCtx.setDeleteOpen(false);
+        InvCtx.resetFormData();
+        InvCtx.addModalToggle?.current?.focus();
     };
 
-    handlePagination = (event, { page }) => {
-        this.getFetchInventoryRows(page);
+    const handlePagination = (event, { page }) => {
+        getFetchInventoryRows(page);
     };
 
-    handleDevicesPerPage = (e, { value }) => {
-        this.setState({ devicesPerPage: `${value}`, pageNum: 1 });
-        this.reload = true;
+    const handleDevicesPerPage = (e, { value }) => {
+        setDevicesPerPage(`${value}`);
+        setPageNum(1);
+        InvCtx.makeInventoryChange();
     };
 
-    componentDidMount() {
-        this.getFetchInventoryRows(1);
-    }
-
-    componentDidUpdate() {
-        if (this.reload){
-            this.reload = false;
-            this.getFetchInventoryRows(this.state.pageNum);
-        }
-    }
-
-    render() {
-        if (this.props.inventoryChange != this.inventoryChange){
-            this.inventoryChange = this.props.inventoryChange;
-            this.reload = true;
-        }
-        const sortKey = this.state.sortKey;
-        const sortDir = this.state.sortDir;
-        const allInventoryRecords = this.state.allInventoryRecords;
-
-        return (
-            <div style={{width: '100%' }}>
-                <Pagination>
-                    <Select appearance="pill" suffixLabel="inventory items per page"
-                            value={this.state.devicesPerPage} onChange={this.handleDevicesPerPage}
-                            defaultValue={"3"}>
-                        <Select.Option label="3" value="3" />
-                        <Select.Option label="10" value="10" />
-                        <Select.Option label="50" value="50" />
-                        <Select.Option label="100" value="100" />
-                        <Select.Option label="200" value="200" />
-                    </Select>
-                    <Paginator
-                        onChange={this.handlePagination}
-                        current={this.state.pageNum}
-                        alwaysShowLastPageLink
-                        totalPages={this.state.totalPages}
-                    />
-                </Pagination>
-                <Table stripeRows resizableFillLayout>
-                    <Table.Head>
-                        {columns.map((headData) => (
-                            <Table.HeadCell key={createDOMID()} width={headData.label == "Actions" ? 100 : "auto"}>
-                                {headData.label}
-                            </Table.HeadCell>
+    return (
+        <div style={{width: '100%' }}>
+            <Pagination>
+                <Select appearance="pill" suffixLabel="inventory items per page"
+                        value={devicesPerPage} onChange={handleDevicesPerPage}
+                        defaultValue="3">
+                    <Select.Option label="3" value="3" />
+                    <Select.Option label="10" value="10" />
+                    <Select.Option label="50" value="50" />
+                    <Select.Option label="100" value="100" />
+                    <Select.Option label="200" value="200" />
+                </Select>
+                <Paginator
+                    onChange={handlePagination}
+                    current={pageNum}
+                    alwaysShowLastPageLink
+                    totalPages={totalPages}
+                />
+            </Pagination>
+            <Table stripeRows resizableFillLayout>
+                <Table.Head>
+                    {columns.map((headData) => (
+                        <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
+                            {headData.label}
+                        </Table.HeadCell>
+                    ))}
+                </Table.Head>
+                <Table.Body>
+                    {allInventoryRecords
+                        .map((row) => (
+                            <Table.Row key={createDOMID()} elementRef={InvCtx.rowToggle}>
+                                <Table.Cell>{row.address}</Table.Cell>
+                                <Table.Cell>{row.port}</Table.Cell>
+                                <Table.Cell>{row.version}</Table.Cell>
+                                <Table.Cell>{row.community}</Table.Cell>
+                                <Table.Cell>{row.secret}</Table.Cell>
+                                <Table.Cell>{row.securityEngine}</Table.Cell>
+                                <Table.Cell>{row.walkInterval}</Table.Cell>
+                                <Table.Cell>{row.profiles.toString()}</Table.Cell>
+                                <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
+                                <Table.Cell>
+                                    <Button onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                    <Button onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                </Table.Cell>
+                            </Table.Row>
                         ))}
-                    </Table.Head>
-                    <Table.Body>
-                        {allInventoryRecords
-                            .sort((rowA, rowB) => {
-                                if (sortDir === 'asc') {
-                                    return rowA[sortKey] > rowB[sortKey] ? 1 : -1;
-                                }
-                                if (sortDir === 'desc') {
-                                    return rowB[sortKey] > rowA[sortKey] ? 1 : -1;
-                                }
-
-                                return 0;
-                            })
-                            .map((row) => (
-                                <Table.Row key={createDOMID()} elementRef={this.context.rowToggle}>
-                                    <Table.Cell>{row.address}</Table.Cell>
-                                    <Table.Cell>{row.port}</Table.Cell>
-                                    <Table.Cell>{row.version}</Table.Cell>
-                                    <Table.Cell>{row.community}</Table.Cell>
-                                    <Table.Cell>{row.secret}</Table.Cell>
-                                    <Table.Cell>{row.securityEngine}</Table.Cell>
-                                    <Table.Cell>{row.walkInterval}</Table.Cell>
-                                    <Table.Cell>{row.profiles.toString()}</Table.Cell>
-                                    <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
-                                    <Table.Cell>
-                                        <Button onClick={() => this.handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                        <Button onClick={() => this.handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
-                                    </Table.Cell>
-                                </Table.Row>
-                            ))}
-                    </Table.Body>
-                </Table>
-                <DeleteModal deleteName={`${this.context.address}:${this.context.port}`}
-                             handleDelete={() => (this.deleteModalRequest(this.context))}/>
-            </div>
-        );
-    }
+                </Table.Body>
+            </Table>
+            <DeleteModal deleteName={`${InvCtx.address}:${InvCtx.port}`}
+                         handleDelete={deleteModalRequest}/>
+        </div>
+    );
 }
 
-export default SortableColumns;
+export default InventoryList;
+

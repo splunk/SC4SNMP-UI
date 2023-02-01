@@ -147,7 +147,7 @@ function AddInventoryModal() {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device` : "Add a new device")} onRequestClose={handleRequestClose} />
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device/group` : "Add a new device/group")} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address/Group">
                         <div style={validationGroup}>

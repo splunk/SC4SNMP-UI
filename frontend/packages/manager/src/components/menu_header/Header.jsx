@@ -43,7 +43,7 @@ function Header(){
     const addButtonLabel = {
         Profiles: "Add new profile",
         Groups: "Add new group",
-        Inventory: "Add new device"
+        Inventory: "Add new device/group"
     };
 
     const addButtonHandler = {

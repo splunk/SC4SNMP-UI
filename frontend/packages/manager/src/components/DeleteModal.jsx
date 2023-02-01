@@ -1,7 +1,6 @@
-import React, { useCallback, useState, useRef, useContext } from 'react';
+import React, { useCallback, useState, useContext } from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
-import axios from "axios";
 import P from '@splunk/react-ui/Paragraph';
 import ButtonsContext from "../store/buttons-contx";
 
@@ -28,8 +27,8 @@ function DeleteModal(props) {
                     <P>Are you sure you want to delete {props.deleteName} ?</P>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="primary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="secondary" onClick={props.handleDelete} label="Delete" />
+                    <Button appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
+                    <Button appearance="primary" onClick={props.handleDelete} label="Delete" />
                 </Modal.Footer>
             </Modal>
         </div>
