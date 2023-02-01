@@ -7,6 +7,8 @@ import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/
 import Button from '@splunk/react-ui/Button';
 import Plus from '@splunk/react-icons/Plus';
 import P from '@splunk/react-ui/Paragraph';
+import axios from "axios";
+import {backendHost} from "../../host";
 
 function Header(){
     const MenuCtx = useContext(MenuHeaderContxt);
@@ -38,6 +40,7 @@ function Header(){
 
     const handleApplyChanges = () => {
         console.log("Applying changes")
+        axios.post(`http://${backendHost}/apply-changes`)
     };
 
     const addButtonLabel = {
