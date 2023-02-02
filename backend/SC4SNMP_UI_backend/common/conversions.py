@@ -210,7 +210,10 @@ class InventoryConversion(Conversion):
 
     def _backend2ui_map(self, document: dict, **kwargs):
         profiles_mongo = document['profiles']
-        profiles = profiles_mongo.split(";")
+        if len(profiles_mongo) > 0:
+            profiles = profiles_mongo.split(";")
+        else:
+            profiles = []
         result = {
             '_id': str(document["_id"]),
             'address': document['address'],

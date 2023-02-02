@@ -2,13 +2,15 @@ from bson import ObjectId
 from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
-from SC4SNMP_UI_backend.common.conversions import GroupConversion, GroupDeviceConversion, get_group_name_from_backend
+from SC4SNMP_UI_backend.common.conversions import GroupConversion, GroupDeviceConversion, InventoryConversion, \
+    get_group_name_from_backend
 from copy import copy
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
 group_conversion = GroupConversion()
 group_device_conversion = GroupDeviceConversion()
+inventory_conversion = InventoryConversion()
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
@@ -91,6 +93,17 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
         devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
     devices_list = devices_list[skips:skips+dev_per_page]
     return jsonify(devices_list)
+
+
+@groups_blueprint.route('/group/inventory/<group_name>')
+@cross_origin()
+def get_group_config_from_inventory(group_name):
+    group_from_inventory = list(mongo_inventory.find({"address": group_name, "delete": False}))
+    if len(group_from_inventory) > 0:
+        result = jsonify(inventory_conversion.backend2ui(group_from_inventory[0])), 200
+    else:
+        result = "", 204
+    return result
 
 
 @groups_blueprint.route('/devices/add', methods=['POST'])

@@ -26,35 +26,35 @@ function AddInventoryModal() {
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         InvCtx.setAddress(val);
-    }, [InvCtx.setAddress]);
+    }, [InvCtx]);
 
     const handleChangePort = useCallback((e, { value: val }) => {
         InvCtx.setPort(val);
-    }, [InvCtx.setPort]);
+    }, [InvCtx]);
 
     const handleChangeVersion = useCallback((e, { value: val }) => {
         InvCtx.setVersion(val);
-    }, [InvCtx.setVersion]);
+    }, [InvCtx]);
 
     const handleChangeCommunity = useCallback((e, { value: val }) => {
         InvCtx.setCommunity(val);
-    }, [InvCtx.setCommunity]);
+    }, [InvCtx]);
 
     const handleChangeSecret = useCallback((e, { value: val }) => {
         InvCtx.setSecret(val);
-    }, [InvCtx.setSecret]);
+    }, [InvCtx]);
 
     const handleChangeSecurityEngine = useCallback((e, { value: val }) => {
         InvCtx.setSecurityEngine(val);
-    }, [InvCtx.setSecurityEngine]);
+    }, [InvCtx]);
 
     const handleChangeWalkInterval = useCallback((e, { value: val }) => {
         InvCtx.setWalkInterval(val);
-    }, [InvCtx.setWalkInterval]);
+    }, [InvCtx]);
 
     const handleChangeSmartProfiles = useCallback((e, { value: val }) => {
         InvCtx.setSmartProfiles(val);
-    }, [InvCtx.setSmartProfiles]);
+    }, [InvCtx]);
 
     const handleChange = (e, { values }) => {
         InvCtx.setProfiles(values);
@@ -64,15 +64,16 @@ function AddInventoryModal() {
         let isMounted = true;
         axios.get(`http://${backendHost}/profiles/names`)
         .then((response) => {
-            if (isMounted)
+            if (isMounted) {
                 setInitProfiles(response.data);
+            }
         })
         return () => { isMounted = false }
     }, []);
 
     const postInventory = (inventoryObj) => {
         axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
-            .then((response) => {
+            .then(() => {
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
@@ -83,7 +84,7 @@ function AddInventoryModal() {
 
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
-            .then((response) => {
+            .then(() => {
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
@@ -100,7 +101,7 @@ function AddInventoryModal() {
     };
 
     const handleApply = useCallback(
-    (e) => {
+    () => {
         const inventoryObj = {
                 address: InvCtx.address,
                 port: InvCtx.port,
@@ -195,7 +196,7 @@ function AddInventoryModal() {
                         </div>
                     </StyledControlGroup>
 
-                    <StyledControlGroup label="Walk Interval" labelWidth={140}>
+                    <StyledControlGroup label="Walk Interval (s)" labelWidth={140}>
                         <div style={validationGroup}>
                             <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
                             {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}

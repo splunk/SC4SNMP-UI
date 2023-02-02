@@ -104,7 +104,6 @@ function GroupsList() {
     };
 
     const selectGroup = (groupId, groupName, page) => {
-        console.log(`passed ${page}, state ${pageNum}`)
         setOpenedGroupId(groupId)
         GrCtx.setGroupName(groupName);
         const selected = {};
@@ -115,7 +114,7 @@ function GroupsList() {
             }
             return {...prev, ...selected}}
         );
-        // If last item from the current page was deleted, page variable
+        // If the last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
         axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
@@ -130,6 +129,32 @@ function GroupsList() {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
                         setTotalPages(maxPages);
+                        let inventoryRecord = {
+                                        port: "",
+                                        version: "",
+                                        community: "",
+                                        secret: "",
+                                        securityEngine: ""
+                                    };
+                        axios.get(`http://${backendHost}/group/inventory/${groupName}`)
+                            .then((response3) => {
+                                if (response3.status === 200){
+                                    inventoryRecord = response3.data;
+                                    Object.keys(inventoryRecord).forEach((key) => {
+                                        if (`${inventoryRecord[key]}`.length > 0){
+                                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
+                                        }else{
+                                            inventoryRecord[key] = "";
+                                        }
+                                    })
+                                    GrCtx.setInventoryConfig(inventoryRecord);
+                                }else{
+                                    GrCtx.setInventoryConfig(inventoryRecord);
+                                }
+                            })
+                            .catch(() => {
+                                GrCtx.setInventoryConfig(inventoryRecord);
+                            })
                     })
             });
     }
@@ -250,11 +275,11 @@ function GroupsList() {
                                 .map((row) => (
                                     <Table.Row key={createDOMID()} >
                                         <Table.Cell>{row.address}</Table.Cell>
-                                        <Table.Cell>{row.port}</Table.Cell>
-                                        <Table.Cell>{row.version}</Table.Cell>
-                                        <Table.Cell>{row.community}</Table.Cell>
-                                        <Table.Cell>{row.secret}</Table.Cell>
-                                        <Table.Cell>{row.securityEngine}</Table.Cell>
+                                        <Table.Cell>{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
+                                        <Table.Cell>{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
+                                        <Table.Cell>{(row.community === '') ? GrCtx.inventoryConfig.community  : row.community}</Table.Cell>
+                                        <Table.Cell>{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
+                                        <Table.Cell>{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
                                         <Table.Cell>
                                             <Button onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
                                             <Button onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />

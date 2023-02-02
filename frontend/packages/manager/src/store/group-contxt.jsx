@@ -22,6 +22,13 @@ export function GroupContextProvider(props){
     const [groupName, setGroupName] = useState('');
     const [devices, setDevices] = useState([]);
     const [groupId, setGroupId] = useState(null);
+    const [inventoryConfig, setInventoryConfig] = useState({
+                                        port: "",
+                                        version: "",
+                                        community: "",
+                                        secret: "",
+                                        securityEngine: ""
+                                    });
 
     // Variables for device
     const [deviceId, setDeviceId] = useState(null);
@@ -80,6 +87,8 @@ export function GroupContextProvider(props){
         setGroupName,
         devices,
         setDevices,
+        inventoryConfig,
+        setInventoryConfig,
 
         // Variables for device
         deviceId,
