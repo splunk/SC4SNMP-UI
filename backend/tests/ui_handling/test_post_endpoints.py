@@ -84,8 +84,8 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
     m_find.assert_has_calls(calls)
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update})
-    assert response.json == {"message": f"If profile_1 was used in some records in the inventory,"
-                                        f" those records were updated"}
+    assert response.json == {"message": f"Profile profile_1 was deleted. If profile_1 was used in some records in the inventory,"
+                                        f" those records were updated."}
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -282,7 +282,7 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
     assert m_find.call_args == call({'_id': ObjectId(common_id)})
     assert m_delete.call_args == call({'_id': ObjectId(common_id)})
     assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
-    assert response.json == {"message": "If group_1 was configured in the inventory, it was deleted from there"}
+    assert response.json == {"message": "Group group_1 was deleted. If group_1 was configured in the inventory, it was deleted from there."}
 
 
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -403,13 +403,13 @@ def test_delete_device_from_group_record(m_find, m_update, client):
 
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new1})
-    assert response.json == "success"
+    assert response.json == {'message': 'Device 2.2.2.3:1161 from group group_1 was deleted.'}
 
     m_find.return_value = [backend_group_new1]
     response = client.post(f"/devices/delete/{common_id}-0")
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new2})
-    assert response.json == "success"
+    assert response.json == {'message': 'Device 1.1.1.1: from group group_1 was deleted.'}
 
 
 @mock.patch("pymongo.collection.Collection.delete_one")

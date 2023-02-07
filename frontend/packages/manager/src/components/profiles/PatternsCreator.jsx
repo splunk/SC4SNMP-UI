@@ -43,7 +43,7 @@ class PatternsCreator extends Component {
                 <FormRows.Row index={internal_id} key={keyID} onRequestRemove={this.handleRequestRemove}>
                     <div style={this.props.validationGroup}>
                         <Text defaultValue={value.pattern} onChange={e => this.handleItemValue(indexes[`${keyID}`], e)}
-                        error={((this.props.error && indexes[`${keyID}`] in this.props.error) ? true : false)}/>
+                        error={((this.props.error && indexes[`${keyID}`] in this.props.error))}/>
                         {((this.props.error && indexes[`${keyID}`] in this.props.error) ?
                             this.props.error[indexes[`${keyID}`]].map((el) =>
                                 <P key={createDOMID()} style={this.props.validationMessage}>{el}</P>) : <P/>)}
@@ -57,7 +57,6 @@ class PatternsCreator extends Component {
     };
 
     handlePatternChange = () => {
-        let patterns = this.patterns;
         this.props.onPatternsCreator(this.patterns);
     }
 
