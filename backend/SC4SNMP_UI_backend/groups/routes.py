@@ -142,11 +142,6 @@ def update_device_from_group(device_id):
         result = jsonify({"message": message}), 400
     return result
 
-    group[group_name][int(device_id)] = device_obj
-    new_values = {"$set": group}
-    mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)
-    return jsonify("success")
-
 
 @groups_blueprint.route('/devices/delete/<device_id>', methods=['POST'])
 @cross_origin()
