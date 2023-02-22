@@ -11,7 +11,6 @@
     "start": "lerna run start --stream --no-sort --concurrency 100",
     "test": "lerna run test --stream --no-sort"
   },
-  "proxy": "http://localhost:5000",
   "devDependencies": {
     "lerna": "^2.9.0",
     "prettier": "^2.0.5"
