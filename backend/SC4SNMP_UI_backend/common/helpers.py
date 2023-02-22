@@ -1,97 +1,16 @@
 from SC4SNMP_UI_backend import mongo_client
 from enum import Enum
-from collections import defaultdict
 from typing import Callable
 from bson import ObjectId
-from flask import jsonify
-from SC4SNMP_UI_backend.common.conversions import InventoryConversion, get_group_name_from_backend
+from SC4SNMP_UI_backend.common.conversions import InventoryConversion
 
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 inventory_conversion = InventoryConversion()
 
-class InventoryAddEdit(Enum):
-    ADD = 1
-    EDIT = 2
-
-class DeviceAddEdit(Enum):
-    ADD = 1
-    EDIT = 2
-
-class ChangeCollection(Enum):
-    GROUPS = 1
-    INVENTORY = 2
-
-class ChangeHostGroup(Enum):
-    HOST = 1
+class HostConfiguration(Enum):
+    SINGLE = 1
     GROUP = 2
-
-class ChangeType(Enum):
-    ADD = 1
-    EDIT = 2
-
-def check_if_inventory_can_be_added(inventory_obj, change_type: InventoryAddEdit, inventory_id):
-    """
-    Before updating or adding new inventory check if it can be done. For example users shouldn't add new
-    inventory if the same inventory already exists.
-
-    :param inventory_obj: new inventory object to be added/updated
-    :param change_type: InventoryAddEdit.EDIT or InventoryAddEdit.ADD
-    :param inventory_id: id of the inventory to be edited
-    :return:
-    """
-
-    address = inventory_obj['address']
-    port = inventory_obj['port']
-    message = "added" if change_type == InventoryAddEdit.ADD else "edited"
-    inventory_id = ObjectId(inventory_id) if change_type == InventoryAddEdit.EDIT else None
-
-    check_duplicates = False
-    if address[0].isdigit():
-        # record is a single host
-        existing_inventory_record = list(mongo_inventory.find({'address': address, 'port': port, "delete": False}))
-
-        # check if there is any record for this device which has been assigned to be deleted
-        deleted_inventory_record = list(mongo_inventory.find({'address': address, 'port': port, "delete": True}))
-        identifier = f"{address}:{port}"
-        check_duplicates = True
-    else:
-        # record is a group
-        existing_inventory_record = list(mongo_inventory.find({'address': address, "delete": False}))
-
-        # check if there is any record for this group which has been assigned to be deleted
-        deleted_inventory_record = list(mongo_inventory.find({'address': address, "delete": True}))
-        identifier = address
-        group = list(mongo_groups.find({address: {"$exists": 1}}))
-        if len(group) == 0:
-            result = jsonify({"message": f"There is no group {address} configured. Record was not {message}."}), 400
-        else:
-            check_duplicates = True
-
-    if check_duplicates:
-        # check if the same record already exist in the inventory
-        if len(existing_inventory_record) == 0:
-            make_change = True
-        elif existing_inventory_record[0]["_id"] == inventory_id and change_type == InventoryAddEdit.EDIT:
-            make_change = True
-        else:
-            make_change = False
-
-        if make_change:
-            if change_type == InventoryAddEdit.ADD:
-                mongo_inventory.insert_one(inventory_obj)
-            else:
-                mongo_inventory.update_one({"_id": inventory_id}, {"$set": inventory_obj})
-
-            if len(deleted_inventory_record) > 0:
-                mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
-            result = jsonify("success"), 200
-        else:
-            result = jsonify(
-                {"message": f"Inventory record for {identifier} already exists. Record was not {message}."}), 400
-
-    return result
-
 
 def update_profiles_in_inventory(profile_to_search: str, process_record: Callable, **kwargs):
     """
@@ -113,13 +32,13 @@ def update_profiles_in_inventory(profile_to_search: str, process_record: Callabl
         mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
 
 
-class ValidateNewDevices:
+class HandleNewDevice:
     def __init__(self, mongo_groups, mongo_inventory):
         self._mongo_groups = mongo_groups
         self._mongo_inventory = mongo_inventory
 
     def _is_host_in_group(self, address, port) -> (bool, str, str):
-        groups_from_inventory = list(self._mongo_inventory.find({"address": {"$regex": "/^[a-zA-Z].*/"}, "delete": False}))
+        groups_from_inventory = list(self._mongo_inventory.find({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}))
         break_occurred = False
 
         host_in_group = False
@@ -148,8 +67,8 @@ class ValidateNewDevices:
         return host_in_group, group_id, device_id, group_name
 
     def _is_host_configured(self, address: str, port: str):
-        existing_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': port, "delete": False}))
-        deleted_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': port, "delete": True}))
+        existing_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": False}))
+        deleted_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": True}))
 
         host_configured = False
         host_configuration = None
@@ -174,14 +93,14 @@ class ValidateNewDevices:
             self._is_host_configured(address, port)
         if host_configured:
             host_location_message = "as a single host in the inventory." if host_configuration == HostConfiguration.SINGLE else \
-                f"in group {group_name}."
+                f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not added."
             host_added = False
         else:
-            if len(deleted_inventory_record) > 0:
-                self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
             if add and device_object is not None:
                 self._mongo_inventory.insert_one(device_object)
+                if len(deleted_inventory_record) > 0:
+                    self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
             message = None
             host_added = True
         return host_added, message
@@ -191,53 +110,79 @@ class ValidateNewDevices:
             self._is_host_configured(address, port)
 
         if not host_configured or (host_configured and host_id == existing_id_string):
-            if len(deleted_inventory_record) > 0:
-                self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
-            if edit and device_object is not None:
-                self._mongo_inventory.update_one({"_id": host_id}, {"$set": device_object})
             message = None
             host_edited = True
+            if edit and device_object is not None:
+                host_id = ObjectId(host_id)
+                previous_device_object = list(self._mongo_inventory.find({"_id": host_id}))[0]
+                if int(port) != int(previous_device_object["port"]) or address != previous_device_object["address"]:
+                    host_added, add_message = self.add_single_host(address, port, device_object, True)
+                    if not host_added:
+                        host_edited = False
+                        message = add_message
+                    else:
+                        self._mongo_inventory.update_one({"_id": ObjectId(host_id)}, {"$set": {"delete": True}})
+                        message = "Address or port was edited which resulted in deleting the old device and creating " \
+                                  "the new one at the end of the list."
+                else:
+                    self._mongo_inventory.update_one({"_id": host_id}, {"$set": device_object})
+                    if len(deleted_inventory_record) > 0:
+                        self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
         else:
             host_location_message = "as a single host in the inventory." if host_configuration == HostConfiguration.SINGLE else \
-                f"in group {group_name}."
+                f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not edited."
             host_edited = False
         return host_edited, message
 
-    def add_group_host(self, group_name: str, group_id: ObjectId, address: str, port: str = ""):
+    def add_group_host(self, group_name: str, group_id: ObjectId, device_object: dict):
         group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
+        group = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}))
+        group = group[0]
+        address = device_object["address"]
+        port = str(device_object.get("port", ""))
         if len(group_from_inventory) > 0:
             device_port = port if len(port)>0 else str(group_from_inventory[0]["port"])
             host_added, message = self.add_single_host(address, device_port, add=False)
         else:
-            group = list(self._mongo_groups.find({"_id": group_id}))
+            print(port, type(port))
             new_device_port = int(port) if len(port) > 0 else -1
             host_added = True
             message = None
-            for device in group[0][group_name]:
+            for device in group[group_name]:
                 old_device_port = device.get('port', -1)
                 if device["address"] == address and old_device_port == new_device_port:
                     message = f"Host {address}:{port} already exists in group {group_name}. Record was not added."
                     host_added = False
+        if host_added:
+            group[group_name].append(device_object)
+            new_values = {"$set": group}
+            self._mongo_groups.update_one({"_id": group_id}, new_values)
         return host_added, message
 
-    def edit_group_host(self, group_name: str, group_id: str, device_id: str, address: str, port: str = ""):
-        group_id = ObjectId(group_id)
+    def edit_group_host(self, group_name: str, group_id: ObjectId, device_id: str, device_object: dict):
         group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
+        group = list(self._mongo_groups.find({"_id": group_id}))
+        group = group[0]
+        address = device_object["address"]
+        port = str(device_object.get("port", ""))
         if len(group_from_inventory) > 0:
             device_port = port if len(port) > 0 else str(group_from_inventory[0]["port"])
             host_edited, message = self.edit_single_host(address, device_port, device_id, edit=False)
         else:
-            group = list(self._mongo_groups.find({"_id": group_id}))
             new_device_port = int(port) if len(port) > 0 else -1
             host_edited = True
             message = None
-            for i, device in enumerate(group[0][group_name]):
+            for i, device in enumerate(group[group_name]):
                 old_device_port = device.get('port', -1)
-                old_device_id = f"{group_id}-{i}"
+                old_device_id = f"{i}"
                 if device["address"] == address and old_device_port == new_device_port and old_device_id != device_id:
                     message = f"Host {address}:{port} already exists in group {group_name}. Record was not edited."
                     host_edited = False
+        if host_edited:
+            group[group_name][int(device_id)] = device_object
+            new_values = {"$set": group}
+            mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)
         return host_edited, message
 
     def add_group_to_inventory(self, group_name: str, group_port: str, group_object=None, add: bool = True):
@@ -245,7 +190,6 @@ class ValidateNewDevices:
         message = None
         existing_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": False}))
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
-
         group = list(self._mongo_groups.find({group_name: {"$exists": 1}}))
         if len(group) == 0:
             group_added = False
@@ -256,7 +200,7 @@ class ValidateNewDevices:
         else:
             group = group[0]
             devices_in_group = dict()
-            for i, device in group[group_name]:
+            for i, device in enumerate(group[group_name]):
                 device_port = str(device.get("port", group_port))
                 address = device["address"]
                 device_added, message = self.add_single_host(address, device_port, add=False)
@@ -266,17 +210,16 @@ class ValidateNewDevices:
                     break
                 else:
                     if f"{address}:{device_port}" in devices_in_group:
-                        message = f"Can't add group {group_name}. Device {address}:{device_port} was configured twice in this group. Record was not added."
+                        message = f"Can't add group {group_name}. Device {address}:{device_port} was configured multiple times in this group. Record was not added."
                         group_added = False
                         break
                     else:
                         devices_in_group[f"{address}:{device_port}"] = 1
 
-        if group_added:
+        if group_added and add and group_object is not None:
             if len(deleted_inventory_record) > 0:
                 self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
-            if add and group_object is not None:
-                self._mongo_inventory.insert_one(group_object)
+            self._mongo_inventory.insert_one(group_object)
         return group_added, message
 
     def edit_group_in_inventory(self, group_name: str, group_id: str, group_object=None, edit: bool = True):
@@ -284,12 +227,26 @@ class ValidateNewDevices:
         existing_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": False}))
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
 
-        # while editing group name or port in the inventory, mark previous group as deleted. Same for single hosts
-        raise NotImplemented
+        if len(existing_inventory_record) == 0 or (len(existing_inventory_record) > 0 and existing_inventory_record[0]["_id"] == group_id):
+            message = "success"
+            group_edited = True
+            if edit and group_object is not None:
+                previous_group_object = list(self._mongo_inventory.find({"_id": group_id}))[0]
+                if group_name != previous_group_object["address"]:
+                    group_added, add_message = self.add_group_to_inventory(group_name, str(group_object["port"]), group_object, True)
+                    if not group_added:
+                        group_edited = False
+                        message = add_message
+                    else:
+                        self._mongo_inventory.update_one({"_id": ObjectId(group_id)}, {"$set": {"delete": True}})
+                        message = "Group name was edited which resulted in deleting the old group and creating new " \
+                                  "one at the end of the list."
+                else:
+                    self._mongo_inventory.update_one({"_id": group_id}, {"$set": group_object})
+                    if len(deleted_inventory_record) > 0:
+                        self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
+        else:
+            message = f"Group wit name {group_name} already exists. Record was not edited."
+            group_edited = False
 
-
-
-
-class HostConfiguration(Enum):
-    SINGLE = 1
-    GROUP = 2
+        return group_edited, message

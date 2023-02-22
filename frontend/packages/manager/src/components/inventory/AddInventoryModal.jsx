@@ -73,7 +73,11 @@ function AddInventoryModal() {
 
     const postInventory = (inventoryObj) => {
         axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
-            .then(() => {
+            .then((response) => {
+                if (response.data !== "success" && 'message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
@@ -84,7 +88,12 @@ function AddInventoryModal() {
 
     const updateInventory = (inventoryObj, inventoryId) => {
         axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
-            .then(() => {
+            .then((response) => {
+                console.log(response.data)
+                if (response.data !== "success" && 'message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {

@@ -3,7 +3,7 @@ from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.conversions import InventoryConversion
-from SC4SNMP_UI_backend.common.helpers import check_if_inventory_can_be_added, InventoryAddEdit
+from SC4SNMP_UI_backend.common.helpers import HandleNewDevice
 
 inventory_blueprint = Blueprint('inventory_blueprint', __name__)
 
@@ -38,7 +38,18 @@ def get_inventory_count():
 def add_inventory_record():
     inventory_obj = request.json
     inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
-    return check_if_inventory_can_be_added(inventory_obj, InventoryAddEdit.ADD, None)
+    handler = HandleNewDevice(mongo_groups, mongo_inventory)
+    if inventory_obj["address"][0].isdigit():
+        record_added, message = handler.add_single_host(inventory_obj["address"], str(inventory_obj["port"]),
+                                                        inventory_obj, True)
+    else:
+        record_added, message = handler.add_group_to_inventory(inventory_obj["address"], str(inventory_obj["port"]),
+                                                        inventory_obj, True)
+    if record_added:
+        result = jsonify("success"), 200
+    else:
+        result = jsonify({"message": message}), 400
+    return result
 
 
 @inventory_blueprint.route('/inventory/delete/<inventory_id>', methods=['POST'])
@@ -56,4 +67,25 @@ def delete_inventory_record(inventory_id):
 def update_inventory_record(inventory_id):
     inventory_obj = request.json
     inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
-    return check_if_inventory_can_be_added(inventory_obj, InventoryAddEdit.EDIT, inventory_id)
+    current_inventory = list(mongo_inventory.find({"_id": ObjectId(inventory_id)}))[0]
+    handler = HandleNewDevice(mongo_groups, mongo_inventory)
+
+    is_current_a_single_host = current_inventory["address"][0].isdigit()
+    is_new_a_single_host = inventory_obj["address"][0].isdigit()
+    if is_current_a_single_host != is_new_a_single_host:
+        result = jsonify({"message": "Can't edit single host to the group or group to the single host"}), 400
+    else:
+        if is_new_a_single_host:
+            record_edited, message = handler.edit_single_host(inventory_obj["address"], str(inventory_obj["port"]),
+                                                              str(inventory_id), inventory_obj, True)
+        else:
+            record_edited, message = handler.edit_group_in_inventory(inventory_obj["address"], str(inventory_id), inventory_obj, True)
+        if record_edited:
+            if message == "success":
+                print(message)
+                result = jsonify("success"), 200
+            else:
+                result = jsonify({"message": message}), 200
+        else:
+            result = jsonify({"message": message}), 400
+    return result

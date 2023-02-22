@@ -5,6 +5,7 @@ from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.conversions import GroupConversion, GroupDeviceConversion, InventoryConversion, \
     get_group_name_from_backend
 from copy import copy
+from SC4SNMP_UI_backend.common.helpers import HandleNewDevice
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
@@ -112,21 +113,15 @@ def add_device_to_group():
     device_obj = request.json
     group_id = device_obj["groupId"]
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
-    device_obj = group_device_conversion.ui2backend(device_obj)
-
-    new_device_port = device_obj.get('port', -1)
     group_name = get_group_name_from_backend(group)
-    for device in group[group_name]:
-        old_device_port = device.get('port', -1)
-        if device["address"] == device_obj["address"] and old_device_port == new_device_port:
-            return jsonify(
-                {"message": f"Device {device_obj['address']}:{device_obj.get('port', '')} already exists. "
-                            f"Record was not added"}), 400
-
-    group[group_name].append(device_obj)
-    new_values = {"$set": group}
-    mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)
-    return jsonify("success")
+    device_obj = group_device_conversion.ui2backend(device_obj)
+    handler = HandleNewDevice(mongo_groups, mongo_inventory)
+    host_added, message = handler.add_group_host(group_name, ObjectId(group_id), device_obj)
+    if host_added:
+        result = jsonify("success"), 200
+    else:
+        result = jsonify({"message": message}), 400
+    return result
 
 
 @groups_blueprint.route('/devices/update/<device_id>', methods=['POST'])
@@ -137,8 +132,16 @@ def update_device_from_group(device_id):
     device_id = device_id.split("-")[1]
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     device_obj = group_device_conversion.ui2backend(device_obj)
-
     group_name = get_group_name_from_backend(group)
+    handler = HandleNewDevice(mongo_groups, mongo_inventory)
+
+    host_edited, message = handler.edit_group_host(group_name, ObjectId(group_id), device_id, device_obj, )
+    if host_edited:
+        result = jsonify("success"), 200
+    else:
+        result = jsonify({"message": message}), 400
+    return result
+
     group[group_name][int(device_id)] = device_obj
     new_values = {"$set": group}
     mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)
