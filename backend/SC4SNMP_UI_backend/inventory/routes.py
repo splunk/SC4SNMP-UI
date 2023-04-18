@@ -81,7 +81,7 @@ def update_inventory_record(inventory_id):
         else:
             record_edited, message = handler.edit_group_in_inventory(inventory_obj["address"], str(inventory_id), inventory_obj, True)
         if record_edited:
-            if message == "success":
+            if message == "success" or message is None:
                 print(message)
                 result = jsonify("success"), 200
             else:

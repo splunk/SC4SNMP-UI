@@ -7,6 +7,10 @@ MarkupSafe==2.1.1
 pymongo==4.1.1
 six==1.16.0
 Werkzeug==2.2.3
-pytest
+pytest~=7.2.0
 gunicorn
-kubernetes
+kubernetes~=26.1.0
+python-dotenv~=0.21.0
+PyYAML~=6.0
+celery==5.2.7
+redis==4.5.5
