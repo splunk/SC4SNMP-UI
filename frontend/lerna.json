@@ -1,8 +1,9 @@
 {
-  "lerna": "2.0.0",
-  "commands": {
+  "lerna": "^6.6.2",
+  "version": "0.0.1",
+  "command": {
     "publish": {
-      "ignore": ["*.md"]
+      "ignoreChanges": ["*.md"]
     }
   },
   "npmClient": "yarn",
