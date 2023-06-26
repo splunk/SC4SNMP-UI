@@ -7,7 +7,7 @@ const validateInventoryAndGroup = (validationObj) => {
      Each property is a list of errors for the respective field.
      */
 
-    let errors = {
+    const errors = {
         groupName: [],
         address: [],
         port: [],
@@ -53,13 +53,11 @@ const validateInventoryAndGroup = (validationObj) => {
                 isValid = false;
                 errors.address.push("Provided address isn't a valid IPv4 address")
             }
-        }else{
-            if (!validationObj.address.match(/^[a-zA-Z0-9_-]+$/)){
+        }else if (!validationObj.address.match(/^[.a-zA-Z0-9_\-]+$/)){
                 isValid = false;
-                errors.address.push("Group name can consist only of upper and lower english letters, " +
-                "numbers and two special characters: '-' and '_'. No spaces are allowed.");
+                errors.address.push("Group or host name can consist only of upper and lower english letters, " +
+                "numbers and three special characters: '-', '.' and '_'. No spaces are allowed.");
             }
-        }
     }
 
     // Validate port

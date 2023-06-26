@@ -10,7 +10,7 @@ const validateProfiles = (validationObj) => {
      varBinds: {0: ["message1", "message2"], 3: ["message3"]} -> key indicates index of a varBind. Each varBind has its own list of errors
      */
 
-    let errors = {
+    const errors = {
         profileName: [],
         frequency: [],
         conditionField: [],
@@ -77,7 +77,6 @@ const validateProfiles = (validationObj) => {
     };
 
     // Validate VarBinds
-    let varBindsCategoryValid;
     if (validationObj.hasOwnProperty("varBinds")){
         for (let i = 0; i < validationObj.varBinds.length; i++){
             if (validationObj.varBinds[i].family.length === 0){
@@ -90,7 +89,7 @@ const validateProfiles = (validationObj) => {
                 isValid = false;
 
             }else if (!validationObj.varBinds[i].family.match(/^[a-zA-Z0-9_-]+$/)){
-                let message = "MIB-Component can consist only of upper and lower english letters, " +
+                message = "MIB-Component can consist only of upper and lower english letters, " +
                 "numbers and two special characters: '-' and '_'. No spaces are allowed."
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
@@ -100,7 +99,6 @@ const validateProfiles = (validationObj) => {
                 isValid = false;
             };
 
-            varBindsCategoryValid = true;
             if (validationObj.varBinds[i].category.length > 0){
                 if (!validationObj.varBinds[i].category.match(/^[a-zA-Z0-9_-]+$/)){
                     message = "MIB object can consist only of upper and lower english letters, " +
@@ -111,20 +109,11 @@ const validateProfiles = (validationObj) => {
                         errors.varBinds[i] = [message];
                     };
                     isValid = false;
-                    varBindsCategoryValid = false;
                 };
             };
 
             if (validationObj.varBinds[i].index.length > 0){
-                if (!(Number.isInteger(Number(validationObj.varBinds[i].index)) && Number(validationObj.varBinds[i].index) >= 0)){
-                    message = "MIB index number must be a integer greater or equal 0";
-                    if (i in errors.varBinds){
-                        errors.varBinds[i].push(message);
-                    }else{
-                        errors.varBinds[i] = [message];
-                    };
-                    isValid = false;
-                }else if (validationObj.varBinds[i].category.length == 0){
+                if (validationObj.varBinds[i].category.length === 0){
                     message = "MIB object is required when MIB index is specified";
                     if (i in errors.varBinds){
                         errors.varBinds[i].push(message);
@@ -133,6 +122,15 @@ const validateProfiles = (validationObj) => {
                     };
                     isValid = false;
                 };
+                if (!validationObj.varBinds[i].index.match(/^[^\s]+$/)){
+                    message = "Index can't include white spaces";
+                    if (i in errors.varBinds){
+                        errors.varBinds[i].push(message);
+                    }else{
+                        errors.varBinds[i] = [message];
+                    };
+                    isValid = false;
+                }
             };
         };
     };

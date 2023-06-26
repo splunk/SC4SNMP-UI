@@ -109,7 +109,9 @@ function ProfilesList() {
         ProfCtx.setProfileName(row.profileName);
         ProfCtx.setFrequency(row.frequency);
         ProfCtx.setVarBinds(row.varBinds);
-        ProfCtx.setConditions(row.conditions);
+        ProfCtx.setCondition(row.conditions.condition);
+        ProfCtx.setConditionField(row.conditions.field);
+        ProfCtx.setConditionPatterns(row.conditions.patterns);
         ProfCtx.setIsEdit(true);
         ProfCtx.setAddOpen(true);
     };

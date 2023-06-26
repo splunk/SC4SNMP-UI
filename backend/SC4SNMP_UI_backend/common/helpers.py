@@ -192,8 +192,8 @@ class HandleNewDevice:
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
         group = list(self._mongo_groups.find({group_name: {"$exists": 1}}))
         if len(group) == 0:
-            group_added = False
-            message = f"There is no group {group_name} configured. Record was not added."
+            group_added = True
+            message = f"Group {group_name} doesn't exist in the configuration. Treating {group_name} as a hostname."
         elif len(existing_inventory_record) > 0:
             group_added = False
             message = f"Group {group_name} has already been added to the inventory. Record was not added."

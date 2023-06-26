@@ -61,7 +61,7 @@ class ProfileConversion(Conversion):
                 new_vb = {
                     "family": vb[0],
                     "category": vb[1] if len(vb) >= 2 else "",
-                    "index": str(vb[2]) if len(vb) == 3 else "",
+                    "index": '.'.join(vb[2:]) if len(vb) >= 3 else "",
                 }
                 var_binds.append(new_vb)
 
@@ -70,7 +70,7 @@ class ProfileConversion(Conversion):
                 condition_type = backend_condition["type"]
                 field = backend_condition["field"] if condition_type == "field" else ""
                 patterns = [{"pattern": p} for p in backend_condition["patterns"]] \
-                    if condition_type == "field" else None
+                    if condition_type == "field" else []
                 conditions = {
                     "condition": condition_type,
                     "field": field,
@@ -80,7 +80,7 @@ class ProfileConversion(Conversion):
                 conditions = {
                     "condition": "None",
                     "field": "",
-                    "patterns": None
+                    "patterns": []
                 }
             result = {
                 "_id": str(document["_id"]),
@@ -110,7 +110,7 @@ class ProfileConversion(Conversion):
             if len(var_b['category']) > 0:
                 single_var_bind.append(var_b['category'])
                 if len(var_b['index']) > 0:
-                    single_var_bind.append(int(var_b['index']))
+                    single_var_bind += var_b['index'].split(".")
             var_binds.append(single_var_bind)
 
         item = {

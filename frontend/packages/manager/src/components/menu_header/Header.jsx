@@ -21,8 +21,10 @@ function Header(){
     const handleRequestOpenProfile = () => {
         ProfCtx.setProfileName("");
         ProfCtx.setFrequency(1);
-        ProfCtx.setVarBinds(null);
-        ProfCtx.setConditions(null);
+        ProfCtx.setVarBinds([]);
+        ProfCtx.setCondition("None");
+        ProfCtx.setConditionField("");
+        ProfCtx.setConditionPatterns([]);
         ProfCtx.setAddOpen(true);
         ProfCtx.setIsEdit(false);
     };
