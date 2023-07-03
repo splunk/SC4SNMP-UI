@@ -8,6 +8,7 @@ import P from "@splunk/react-ui/Paragraph";
 import FieldPatterns from "./FieldPatterns";
 import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import Conditional from "./Conditional";
 
 function Condition(props){
     const ProfCtx = useContext(ProfileContext);
@@ -23,35 +24,49 @@ function Condition(props){
 
     return(
         <div>
-            <StyledControlGroup label="Condition"
+            <StyledControlGroup label="Profile type"
                 labelFor="customized-select-after">
             <Select value={ProfCtx.condition} onChange={handleChange} filter>
-                <Select.Option label="None" value="None"/>
+                <Select.Option label="standard" value="standard"/>
                 <Select.Option label="base" value="base"/>
-                <Select.Option label="field" value="field"/>
+                <Select.Option label="smart" value="smart"/>
                 <Select.Option label="walk" value="walk"/>
                 <Select.Option label="conditional" value="conditional"/>
             </Select>
             </StyledControlGroup>
             {
-                ProfCtx.condition === 'field' ? (
+                ProfCtx.condition === 'smart' ? (
                     <div>
-                        <StyledControlGroup label="field">
+                        <StyledControlGroup label="Field">
                             <div style={validationGroup}>
                                 <Text value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
                                 {((ValCtx.conditionFieldErrors) ? ValCtx.conditionFieldErrors.map((el) =>
                                     <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                             </div>
                         </StyledControlGroup>
-                        <StyledControlGroup label="patterns">
-                            <FieldPatterns newSubmit={props.newSubmit}/>
+                        <StyledControlGroup label="Patterns">
+                            <div style={validationGroup}>
+                                <FieldPatterns newSubmit={props.newSubmit}/>
+                                {((ValCtx.patternsExistErrors) ?
+                                <P key={createDOMID()} style={validationMessage}>{ValCtx.patternsExistErrors}</P>
+                                : null)}
+                            </div>
                         </StyledControlGroup>
                     </div>) : null
             }
 
-            {ProfCtx.condition === 'conditional' ? (
-            <div />
-            ) : null}
+            {
+                ProfCtx.condition === 'conditional' ? (
+                    <StyledControlGroup label="Conditions">
+                        <div style={validationGroup}>
+                            <Conditional newSubmit={props.newSubmit}/>
+                            {((ValCtx.conditionalExistErrors) ?
+                            <P key={createDOMID()} style={validationMessage}>{ValCtx.conditionalExistErrors}</P>
+                            : null)}
+                        </div>
+                    </StyledControlGroup>
+                ) : null
+            }
         </div>
     )
 }

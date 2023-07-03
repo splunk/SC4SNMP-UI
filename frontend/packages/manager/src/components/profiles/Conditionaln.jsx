@@ -7,7 +7,7 @@ import ProfileContext from "../../store/profile-contxt";
 import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 
-function FieldPatterns(props){
+function ConditionalIn(props){
     const ProfCtx = useContext(ProfileContext);
     const ValCtx = useContext(ProfilesValidationContxt);
     const [indices, setIndices] = useState({});
@@ -17,8 +17,8 @@ function FieldPatterns(props){
     const handleRequestRemove = (e, { index }) => {
         const indicesCopy = {...indices};
         let keyToDelete;
-        const patternsCopy = ProfCtx.conditionPatterns;
-        patternsCopy.splice(index, 1);
+        const conditionalCopy = ProfCtx.conditional;
+        conditionalCopy[props.conditionIndex].value.splice(index, 1);
 
         const indicesKeys = Object.keys(indices)
         indicesKeys.forEach((keyID) => {
@@ -32,8 +32,9 @@ function FieldPatterns(props){
         delete indicesCopy[`${keyToDelete}`];
 
         // Update errors indexes after deleting an element
-        const error = ValCtx.conditionPatternsErrors;
-        if (error){
+        const errors = ValCtx.conditionalValuesErrors;
+        if (errors && errors.hasOwnProperty(props.conditionIndex)){
+            const error = errors[props.conditionIndex]
             const errorKeys = Object.keys(error);
             errorKeys.forEach((errorID) => {
                 if (Number(errorID) === index){delete error[Number(errorID)];}
@@ -42,36 +43,37 @@ function FieldPatterns(props){
                     delete error[Number(errorID)]
                 }
             })
-            ValCtx.setConditionPatternsErrors(error);
+            errors[props.conditionIndex] = error
+            ValCtx.setConditionalValuesErrors(errors);
         }
         setRowItems((prev) => FormRows.removeRow(index, prev));
         setIndices(indicesCopy);
-        ProfCtx.setConditionPatterns(patternsCopy);
+        ProfCtx.setConditional(conditionalCopy);
         setReload((prev)=>{return !prev});
     };
 
     const handleItemValue = (index, e) => {
-        const patternsCopy = ProfCtx.conditionPatterns;
-        patternsCopy[index].pattern = e.target.value
-        ProfCtx.setConditionPatterns(patternsCopy);
+        const conditionalCopy = ProfCtx.conditional;
+        conditionalCopy[props.conditionIndex].value[index] = e.target.value
+        ProfCtx.setConditional(conditionalCopy);
     }
 
     const handleRequestAdd = () => {
         const indicesCopy = indices;
         const newIndex = rowItems.length;
         const keyID = createDOMID();
-        const patternsCopy = ProfCtx.conditionPatterns;
-        patternsCopy.push({pattern: ""});
+        const conditionalCopy = ProfCtx.conditional;
+        conditionalCopy[props.conditionIndex].value.push("");
         indicesCopy[`${keyID}`] = newIndex;
         setIndices(indicesCopy);
-        ProfCtx.setConditionPatterns(patternsCopy);
+        ProfCtx.setConditionPatterns(conditionalCopy);
         setReload((prev)=>{return !prev});
     };
 
     const loadFormRows = () => {
         let index = -1;
         const newIndices = {}
-        const items = ProfCtx.conditionPatterns.map(value => {
+        const items = ProfCtx.conditional[props.conditionIndex].value.map(value => {
             index += 1;
             const indexCopy = index;
             const keyID = createDOMID();
@@ -79,11 +81,13 @@ function FieldPatterns(props){
             return (
                 <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <div style={validationGroup}>
-                        <Text defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
-                              error={((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors))}/>
-                        {((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors) ?
-                            ValCtx.conditionPatternsErrors[newIndices[`${keyID}`]].map((el) =>
-                                <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                        <Text defaultValue={value} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                              error={((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors)) &&
+                        newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]}/>
+                        {((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors
+                         && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]) ?
+                                    ValCtx.conditionalValuesErrors[props.conditionIndex][newIndices[`${keyID}`]].map((el) =>
+                                        <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                     </div>
                 </FormRows.Row>
             );
@@ -101,12 +105,12 @@ function FieldPatterns(props){
     return (
         <FormRows
                 onRequestAdd={handleRequestAdd}
-                style={{ width: 300 }}
-                addLabel="Add pattern"
+                style={{ width: "100%" }}
+                addLabel="Add value"
             >
                 {rowItems}
         </FormRows>
     )
 }
 
-export default FieldPatterns;
+export default ConditionalIn;

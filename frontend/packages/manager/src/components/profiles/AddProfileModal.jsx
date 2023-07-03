@@ -81,7 +81,8 @@ function AddProfileModal(props) {
             conditions: {
                 condition: ProfCtx.condition,
                 field: ProfCtx.conditionField,
-                patterns: ProfCtx.conditionPatterns
+                patterns: ProfCtx.conditionPatterns,
+                conditions: ProfCtx.conditional
             }
         };
 
@@ -140,7 +141,12 @@ function AddProfileModal(props) {
                     <Condition newSubmit={newSubmit}/>
 
                     <StyledControlGroup label="VarBinds">
-                        <VarBinds newSubmit={newSubmit}/>
+                        <div style={validationGroup}>
+                            <VarBinds newSubmit={newSubmit}/>
+                            {((ValCtx.varBindsExistErrors) ?
+                            <P key={createDOMID()} style={validationMessage}>{ValCtx.varBindsExistErrors}</P>
+                            : null)}
+                        </div>
                     </StyledControlGroup>
 
                 </StyledModalBody>

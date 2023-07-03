@@ -75,30 +75,6 @@ function VarBinds(props){
         const varBindsCopy = ProfCtx.varBinds;
         varBindsCopy.push({family: "", category: "", index: ""});
         indicesCopy[`${keyID}`] = newIndex;
-        setRowItems((prev) =>
-          FormRows.addRow(
-            <FormRows.Row index={newIndex} key={createDOMID()} onRequestRemove={handleRequestRemove}>
-                <div style={validationGroup}>
-                     <div style={{display: 'flex'}}>
-                        <Text defaultValue="" placeholder="Mib family"
-                              onChange={e => handleItemValueFamily(indices[`${keyID}`], e)}
-                              error={((ValCtx.varBindsErrors && indices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                        <Text defaultValue="" placeholder="Mib category"
-                              onChange={e => handleItemValueCategory(indices[`${keyID}`], e)}
-                              error={((ValCtx.varBindsErrors && indices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                        <Text defaultValue="" placeholder="Mib index"
-                              onChange={e => handleItemValueIndex(indices[`${keyID}`], e)}
-                              error={((ValCtx.varBindsErrors && indices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                    </div>
-                    {((ValCtx.varBindsErrors && indices[`${keyID}`] in ValCtx.varBindsErrors) ?
-                        ValCtx.varBindsErrors[indices[`${keyID}`]].map((el) => <P key={createDOMID()}
-                                                                             style={validationMessage}>{el}</P>) :
-                        <P/>)}
-                </div>
-            </FormRows.Row>,
-            prev
-          )
-        );
         setIndices(indicesCopy);
         ProfCtx.setVarBinds(varBindsCopy);
         setReload((prev)=>{return !prev});
@@ -116,13 +92,13 @@ function VarBinds(props){
                 <FormRows.Row index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
                     <div style={validationGroup}>
                          <div style={{display: 'flex'}}>
-                            <Text defaultValue={value.family} placeholder="Mib family"
+                            <Text defaultValue={value.family} placeholder="MIB family"
                                   onChange={e => handleItemValueFamily(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.category} placeholder="Mib category"
+                            <Text defaultValue={value.category} placeholder="MIB category"
                                   onChange={e => handleItemValueCategory(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.index} placeholder="Mib index"
+                            <Text defaultValue={value.index} placeholder="MIB index"
                                   onChange={e => handleItemValueIndex(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>

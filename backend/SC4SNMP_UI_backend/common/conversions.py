@@ -46,6 +46,29 @@ class Conversion:
 class ProfileConversion(Conversion):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__backend2ui_conditional_operations = {
+            "lt": "less than",
+            "gt": "greater than",
+            "equal": "equal",
+            "in": "in"
+        }
+        self.__ui2backend_conditional_operations = {}
+        for key, value in self.__backend2ui_conditional_operations.items():
+            self.__ui2backend_conditional_operations[value] = key
+
+        self.__backend2ui_profile_types = {
+            "field": "smart"
+        }
+        self.__ui2backend_profile_types = {}
+        for key, value in self.__backend2ui_profile_types.items():
+            self.__ui2backend_profile_types[value] = key
+
+    def __string_value_to_numeric(self, value: str):
+        if value.isnumeric():
+            value = int(value)
+        elif value.replace(".", "").isnumeric():
+            value = float(value)
+        return value
 
     def _backend2ui_map(self, document: dict, **kwargs):
         profile_name = None
@@ -67,20 +90,42 @@ class ProfileConversion(Conversion):
 
             if "condition" in document[profile_name]:
                 backend_condition = document[profile_name]["condition"]
-                condition_type = backend_condition["type"]
-                field = backend_condition["field"] if condition_type == "field" else ""
+                condition_type = self.__backend2ui_profile_types[backend_condition["type"]]
+                field = backend_condition["field"] if backend_condition["type"] == "field" else ""
                 patterns = [{"pattern": p} for p in backend_condition["patterns"]] \
-                    if condition_type == "field" else []
+                    if backend_condition["type"] == "field" else []
                 conditions = {
                     "condition": condition_type,
                     "field": field,
-                    "patterns": patterns
+                    "patterns": patterns,
+                    "conditions": []
+                }
+            elif "conditions" in document[profile_name]:
+                conditional = []
+                for back_condition in document[profile_name]["conditions"]:
+                    field = back_condition["field"]
+                    operation = self.__backend2ui_conditional_operations[back_condition["operation"]]
+                    value = []
+                    if operation == "in":
+                        for v in back_condition["value"]:
+                            value.append(str(v))
+                    else:
+                        value.append(str(back_condition["value"]))
+                    conditional.append(
+                        {"field": field, "operation": operation, "value": value}
+                    )
+                conditions = {
+                    "condition": "conditional",
+                    "field": "",
+                    "patterns": [],
+                    "conditions": conditional
                 }
             else:
                 conditions = {
-                    "condition": "None",
+                    "condition": "standard",
                     "field": "",
-                    "patterns": []
+                    "patterns": [],
+                    "conditions": []
                 }
             result = {
                 "_id": str(document["_id"]),
@@ -92,16 +137,30 @@ class ProfileConversion(Conversion):
             return result
 
     def _ui2backend_map(self, document: dict, **kwargs):
-        if document['conditions']['condition'] == "field":
-            conditions = {
+        conditions = None
+        condition = None
+        if document['conditions']['condition'] == "smart":
+            condition = {
                 'type': 'field',
                 'field': document['conditions']['field'],
                 'patterns': [el['pattern'] for el in document['conditions']['patterns']]
             }
-        elif document['conditions']['condition'] == "None":
-            conditions = None
-        else:
-            conditions = {
+        elif document['conditions']['condition'] == "conditional":
+            conditions = []
+            for ui_condition in document['conditions']['conditions']:
+                field = ui_condition["field"]
+                operation = self.__ui2backend_conditional_operations[ui_condition["operation"]]
+                if operation == "in":
+                    value = []
+                    for v in ui_condition["value"]:
+                        value.append(self.__string_value_to_numeric(v))
+                else:
+                    value = self.__string_value_to_numeric(ui_condition["value"][0])
+                conditions.append(
+                    {"field": field, "operation": operation, "value": value}
+                )
+        elif document['conditions']['condition'] != "standard":
+            condition = {
                 'type': document['conditions']['condition']
             }
         var_binds = []
@@ -119,8 +178,10 @@ class ProfileConversion(Conversion):
                 'varBinds': var_binds
             }
         }
+        if condition is not None:
+            item[document['profileName']].update({'condition': condition})
         if conditions is not None:
-            item[document['profileName']].update({'condition': conditions})
+            item[document['profileName']].update({'conditions': conditions})
         return item
 
 

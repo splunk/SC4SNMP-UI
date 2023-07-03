@@ -21,9 +21,6 @@ function getExpansionRow(row) {
             <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{row.conditions.patterns && row.conditions.patterns.map(value =>
-                                <P key={createDOMID()}>{value.pattern}</P>)}</Table.Cell>
             <Table.Cell>
                 {row.varBinds.map((value) => (
                     <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.family}</P>
@@ -52,12 +49,10 @@ function ProfilesList() {
     const columns = [
         {sortKey: 'profileName', label: 'Profile name'},
         {sortKey: 'frequency', label: 'Frequency'},
-        {sortKey: 'condition', label: 'Condition'},
-        {sortKey: 'field', label: 'Field'},
-        {sortKey: 'patterns', label: 'Patterns'},
+        {sortKey: 'profileType', label: 'Profile type'},
         {sortKey: `mibFamily`, label: 'MIB family'},
         {sortKey: `mibCategory`, label: 'MIB category'},
-        {sortKey: `index`, label: 'Index'},
+        {sortKey: `index`, label: 'MIB Index'},
         {sortKey: `actions`, label: 'Actions'},
     ];
 
@@ -112,6 +107,7 @@ function ProfilesList() {
         ProfCtx.setCondition(row.conditions.condition);
         ProfCtx.setConditionField(row.conditions.field);
         ProfCtx.setConditionPatterns(row.conditions.patterns);
+        ProfCtx.setConditional(row.conditions.conditions);
         ProfCtx.setIsEdit(true);
         ProfCtx.setAddOpen(true);
     };
@@ -186,8 +182,6 @@ function ProfilesList() {
                                 <Table.Cell>{row.profileName}</Table.Cell>
                                 <Table.Cell>{row.frequency}</Table.Cell>
                                 <Table.Cell>{row.conditions.condition}</Table.Cell>
-                                <Table.Cell>{row.conditions.field}</Table.Cell>
-                                <Table.Cell>{/* Condition patterns is empty in this view */}</Table.Cell>
                                 <Table.Cell>{(row.varBinds.length === 1) ? `1 MIB family` :
                                     `${row.varBinds.length} MIB families`}</Table.Cell>
                                 <Table.Cell>{/* MIB category is empty in this view */}</Table.Cell>

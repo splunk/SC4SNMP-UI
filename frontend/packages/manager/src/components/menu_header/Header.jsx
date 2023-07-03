@@ -25,6 +25,7 @@ function Header(){
         ProfCtx.setCondition("None");
         ProfCtx.setConditionField("");
         ProfCtx.setConditionPatterns([]);
+        ProfCtx.setConditional([]);
         ProfCtx.setAddOpen(true);
         ProfCtx.setIsEdit(false);
     };
