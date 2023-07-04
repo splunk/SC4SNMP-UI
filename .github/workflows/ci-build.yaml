@@ -14,7 +14,7 @@
 #    limitations under the License.
 #   ########################################################################
 
-name: ci-build-backend
+name: ci-build
 on:
   pull_request:
     branches:
@@ -71,7 +71,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: frontend
-          push: true
+          push: false
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
@@ -121,7 +121,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: backend
-          push: true
+          push: false
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
