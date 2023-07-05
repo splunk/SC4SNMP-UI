@@ -44,8 +44,8 @@
           },
           {
             "files": ["frontend/packages/manager/package.json"],
-            "from": "  \"version\" ?=.*",
-            "to": "  \"version\" = \"${nextRelease.version}\",",
+            "from": "\\s{2}\"version\" ?=.*",
+            "to": "\\s{2}\"version\" = \"${nextRelease.version}\",",
             "results": [
               {
                 "file": "frontend/packages/manager/package.json",
@@ -58,8 +58,8 @@
           },
           {
             "files": ["frontend/lerna.json"],
-            "from": "  \"version\" ?=.*",
-            "to": "  \"version\" = \"${nextRelease.version}\",",
+            "from": "\\s{2}\"version\" ?=.*",
+            "to": "\\s{2}\"version\" = \"${nextRelease.version}\",",
             "results": [
               {
                 "file": "frontend/lerna.json",
