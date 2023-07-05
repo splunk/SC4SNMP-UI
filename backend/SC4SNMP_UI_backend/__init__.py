@@ -10,7 +10,7 @@ try:
 except:
     pass
 
-__version__ = "0.0.1"
+__version__ = "1.0.0-beta.1"
 
 MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
