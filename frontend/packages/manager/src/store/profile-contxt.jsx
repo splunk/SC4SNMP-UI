@@ -21,7 +21,7 @@ export function ProfileContxtProvider(props) {
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState([]);
-    const [condition, setCondition] = useState("None");
+    const [condition, setCondition] = useState("standard");
     const [conditionField, setConditionField] = useState("");
     const [conditionPatterns, setConditionPatterns] = useState([]);
     const [conditional, setConditional] = useState([]);

@@ -176,7 +176,7 @@ def run_job():
         try_creating = True
         iteration = 0
         while try_creating and iteration < JOB_CREATION_RETRIES:
-            # Try creating new job. If the previous job is still present in the namespace,
+            # Try creating a new job. If the previous job is still present in the namespace,
             # ApiException will we be raised. In that happens wait for 10 seconds and try creating the job again
             try:
                 create_job(batch_v1, job, JOB_NAMESPACE)

@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend.apply_changes.handle_changes import ApplyChanges
-from SC4SNMP_UI_backend import mongo_client
 
 apply_changes_blueprint = Blueprint('common_blueprint', __name__)
 

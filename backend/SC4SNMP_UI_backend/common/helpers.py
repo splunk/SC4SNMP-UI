@@ -92,7 +92,7 @@ class HandleNewDevice:
         host_configured, deleted_inventory_record, host_configuration, existing_id_string, group_name = \
             self._is_host_configured(address, port)
         if host_configured:
-            host_location_message = "as a single host in the inventory." if host_configuration == HostConfiguration.SINGLE else \
+            host_location_message = "as a single host in the inventory" if host_configuration == HostConfiguration.SINGLE else \
                 f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not added."
             host_added = False
@@ -129,7 +129,7 @@ class HandleNewDevice:
                     if len(deleted_inventory_record) > 0:
                         self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
         else:
-            host_location_message = "as a single host in the inventory." if host_configuration == HostConfiguration.SINGLE else \
+            host_location_message = "as a single host in the inventory" if host_configuration == HostConfiguration.SINGLE else \
                 f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not edited."
             host_edited = False
@@ -145,7 +145,6 @@ class HandleNewDevice:
             device_port = port if len(port)>0 else str(group_from_inventory[0]["port"])
             host_added, message = self.add_single_host(address, device_port, add=False)
         else:
-            print(port, type(port))
             new_device_port = int(port) if len(port) > 0 else -1
             host_added = True
             message = None
@@ -191,9 +190,12 @@ class HandleNewDevice:
         existing_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": False}))
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
         group = list(self._mongo_groups.find({group_name: {"$exists": 1}}))
-        if len(group) == 0:
+        if len(group) == 0 and len(existing_inventory_record) == 0:
             group_added = True
             message = f"Group {group_name} doesn't exist in the configuration. Treating {group_name} as a hostname."
+        elif len(group) == 0 and len(existing_inventory_record) > 0:
+            group_added = False
+            message = f"{group_name} has already been configured. Record was not added."
         elif len(existing_inventory_record) > 0:
             group_added = False
             message = f"Group {group_name} has already been added to the inventory. Record was not added."

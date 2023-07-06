@@ -53,9 +53,10 @@ def test_get_all_profiles_list(m_client, client):
         "profileName": "profile_1",
         "frequency": 10,
         "conditions": {
-            "condition": "None",
+            "condition": "standard",
+            "conditions": [],
             "field": "",
-            "patterns": None
+            "patterns": []
         },
         "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                      {"family": "IF-MIB", "category": "", "index": ""},
@@ -67,7 +68,8 @@ def test_get_all_profiles_list(m_client, client):
         "profileName": "profile_2",
         "frequency": 30,
         "conditions": {
-            "condition": "field",
+            "condition": "smart",
+            "conditions": [],
             "field": "SNMPv2-MIB.sysObjectID",
             "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}]
         },

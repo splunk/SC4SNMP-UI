@@ -76,7 +76,7 @@ def create_pod_spec(spec: dict):
     volumes = [create_volume(v) for v in spec["volumes"]]
     restart_policy = spec["restartPolicy"]
     secrets = None
-    if ["imagePullSecrets"] in spec:
+    if "imagePullSecrets" in spec:
         secrets = []
         for secret in spec["imagePullSecrets"]:
             new_secret = client.V1LocalObjectReference(name=secret["name"])
