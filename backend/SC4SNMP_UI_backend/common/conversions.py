@@ -64,11 +64,13 @@ class ProfileConversion(Conversion):
             self.__ui2backend_profile_types[value] = key
 
     def __string_value_to_numeric(self, value: str):
-        if value.isnumeric():
-            value = int(value)
-        elif value.replace(".", "").isnumeric():
-            value = float(value)
-        return value
+        try:
+            if value.isnumeric():
+                return int(value)
+            elif value.replace(".", "").isnumeric():
+                return float(value)
+        except ValueError:
+            return value
 
     def _backend2ui_map(self, document: dict, **kwargs):
         profile_name = None
