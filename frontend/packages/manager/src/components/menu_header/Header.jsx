@@ -3,16 +3,20 @@ import MenuHeaderContxt from '../../store/menu-header-contxt';
 import ProfileContext from "../../store/profile-contxt";
 import GroupContext from "../../store/group-contxt";
 import InventoryContext from "../../store/inventory-contxt";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/menu_header/HeaderStyle";
 import Button from '@splunk/react-ui/Button';
 import Plus from '@splunk/react-icons/Plus';
 import P from '@splunk/react-ui/Paragraph';
+import axios from "axios";
+import {backendHost} from "../../host";
 
 function Header(){
     const MenuCtx = useContext(MenuHeaderContxt);
     const ProfCtx = useContext(ProfileContext);
     const GrCtx = useContext(GroupContext);
     const InvCtx = useContext(InventoryContext);
+    const ErrCtx = useContext(ErrorsModalContext);
 
     const handleRequestOpenProfile = () => {
         ProfCtx.setProfileName("");
@@ -38,6 +42,13 @@ function Header(){
 
     const handleApplyChanges = () => {
         console.log("Applying changes")
+        axios.post(`http://${backendHost}/apply-changes`)
+        .then((response) => {
+                if ('message' in response.data){
+                    ErrCtx.setOpen(true);
+                    ErrCtx.setMessage(response.data.message);
+                }
+            })
     };
 
     const addButtonLabel = {

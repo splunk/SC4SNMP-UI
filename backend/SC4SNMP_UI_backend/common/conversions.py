@@ -15,7 +15,6 @@ def snake_case2camel_case(txt):
             to_upper = False
         elif txt[i] == "_" and i < len(txt) - 1:
             to_upper = True
-            continue
 
     return ''.join(result)
 
@@ -86,7 +85,7 @@ class ProfileConversion(Conversion):
             result = {
                 "_id": str(document["_id"]),
                 "profileName": profile_name,
-                "frequency": document[profile_name]["frequency"],
+                "frequency": document[profile_name].get("frequency", 0),
                 "conditions": conditions,
                 "varBinds": var_binds
             }

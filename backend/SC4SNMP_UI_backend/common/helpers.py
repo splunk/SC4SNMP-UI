@@ -110,7 +110,7 @@ class HandleNewDevice:
             self._is_host_configured(address, port)
 
         if not host_configured or (host_configured and host_id == existing_id_string):
-            message = None
+            message = "success"
             host_edited = True
             if edit and device_object is not None:
                 host_id = ObjectId(host_id)
