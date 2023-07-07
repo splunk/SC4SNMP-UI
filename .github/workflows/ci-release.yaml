@@ -141,7 +141,7 @@ jobs:
           node-version: "16"
       - name: Semantic Release
         id: version
-        uses: cycjimmy/semantic-release-action@v3.4.2
+        uses: cycjimmy/semantic-release-action@v3.2.0
         with:
           semantic_version: 17
           extra_plugins: |
