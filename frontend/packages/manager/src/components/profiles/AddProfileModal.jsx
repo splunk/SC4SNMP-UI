@@ -5,8 +5,8 @@ import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
-import VarbindsCreator from "./VarbindsCreator";
-import Conditions from "./Conditions";
+import VarBinds from "./VarBinds";
+import Condition from "./Condition";
 import axios from "axios";
 import ProfileContext from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
@@ -21,16 +21,7 @@ function AddProfileModal(props) {
     const ProfCtx = useContext(ProfileContext);
     const ValCtx = useContext(ProfilesValidationContxt);
     const ErrCtx = useContext(ErrorsModalContext);
-    const [newSubmitPatterns, setNewSubmitPatterns] = useState(false);
-    const [newSubmitVarBinds, setNewSubmitVarBinds] = useState(false);
-
-    const newSubmitPatternsHandler = () =>{
-        setNewSubmitPatterns(!newSubmitPatterns);
-    };
-
-    const newSubmitVarBindsHandler = () =>{
-        setNewSubmitVarBinds(!newSubmitVarBinds);
-    };
+    const [newSubmit, setNewSubmit] = useState(false);
 
 
     const handleProfileName = useCallback((e, { value: val }) => {
@@ -40,14 +31,6 @@ function AddProfileModal(props) {
     const handleFrequency = useCallback((e, { value: val }) => {
         ProfCtx.setFrequency(val);
     }, []);
-
-    const handleVarBinds = (value) => {
-        ProfCtx.setVarBinds(value);
-    }
-
-    const handleConditions = (value) => {
-        ProfCtx.setConditions(value);
-    }
 
     const postProfile = (profileObj) => {
         axios.post(`http://${backendHost}/profiles/add`, profileObj)
@@ -91,11 +74,16 @@ function AddProfileModal(props) {
     const handleApply = useCallback(
     (e) => {
 
-        let profileObj = {
+        const profileObj = {
             profileName: ProfCtx.profileName,
             frequency: ProfCtx.frequency,
             varBinds: ProfCtx.varBinds,
-            conditions: ProfCtx.conditions
+            conditions: {
+                condition: ProfCtx.condition,
+                field: ProfCtx.conditionField,
+                patterns: ProfCtx.conditionPatterns,
+                conditions: ProfCtx.conditional
+            }
         };
 
         const validation = validateProfiles(profileObj);
@@ -112,16 +100,16 @@ function AddProfileModal(props) {
             ProfCtx.addModalToggle?.current?.focus();
         }else{
             // form is invalid
-            setNewSubmitPatterns(prevNewSubmitPatterns => {return !prevNewSubmitPatterns;});
-            setNewSubmitVarBinds(prevNewSubmitVarBinds => {return !prevNewSubmitVarBinds;});
+            setNewSubmit(prevNewSubmitPatterns => {return !prevNewSubmitPatterns;});
             const errors = validation[1];
-            for (const property in errors) {
-                if (errors[property].length > 0 || Object.keys(errors[property]).length > 0){
-                    ValCtx.setErrors(property, errors[property]);
+            const errorKeys = Object.keys(errors);
+            errorKeys.forEach((errorKey) => {
+                if (errors[errorKey].length > 0 || Object.keys(errors[errorKey]).length > 0){
+                    ValCtx.setErrors(errorKey, errors[errorKey]);
                 }else {
-                    ValCtx.resetErrors(property);
+                    ValCtx.resetErrors(errorKey);
                 };
-            };
+            })
         };
 
         },
@@ -150,14 +138,15 @@ function AddProfileModal(props) {
                         </div>
                     </StyledControlGroup>
 
-                    <Conditions onConditionsCreator={handleConditions} value={ProfCtx.conditions} errorField={ValCtx.conditionFieldErrors}
-                                errorPatterns={ValCtx.conditionPatternsErrors} setErrorPatterns={ValCtx.setConditionPatternsErrors}
-                                validationMessage={validationMessage} validationGroup={validationGroup} newSubmit={newSubmitPatterns}/>
+                    <Condition newSubmit={newSubmit}/>
 
                     <StyledControlGroup label="VarBinds">
-                        <VarbindsCreator onVarbindsCreator={handleVarBinds} value={ProfCtx.varBinds} error={ValCtx.varBindsErrors} setError={ValCtx.setVarBindsErrors}
-                                         validationMessage={validationMessage} validationGroup={validationGroup}
-                        newSubmit={newSubmitVarBinds}/>
+                        <div style={validationGroup}>
+                            <VarBinds newSubmit={newSubmit}/>
+                            {((ValCtx.varBindsExistErrors) ?
+                            <P key={createDOMID()} style={validationMessage}>{ValCtx.varBindsExistErrors}</P>
+                            : null)}
+                        </div>
                     </StyledControlGroup>
 
                 </StyledModalBody>

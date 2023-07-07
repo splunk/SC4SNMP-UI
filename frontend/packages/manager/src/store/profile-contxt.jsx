@@ -20,8 +20,11 @@ export function ProfileContxtProvider(props) {
     // data for editing in AddProfileModal
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
-    const [varBinds, setVarBinds] = useState(null);
-    const [conditions, setConditions] = useState(null);
+    const [varBinds, setVarBinds] = useState([]);
+    const [condition, setCondition] = useState("None");
+    const [conditionField, setConditionField] = useState("");
+    const [conditionPatterns, setConditionPatterns] = useState([]);
+    const [conditional, setConditional] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
 
     function profilesChangeHandler() {
@@ -46,8 +49,14 @@ export function ProfileContxtProvider(props) {
         setFrequency,
         varBinds,
         setVarBinds,
-        conditions,
-        setConditions,
+        condition,
+        setCondition,
+        conditionField,
+        setConditionField,
+        conditionPatterns,
+        setConditionPatterns,
+        conditional,
+        setConditional,
         isEdit,
         setIsEdit
     };
