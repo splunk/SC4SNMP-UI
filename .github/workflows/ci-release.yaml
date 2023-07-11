@@ -147,7 +147,7 @@ jobs:
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
-            semantic-release-replace-plugin@1.2.4
+            @google/semantic-release-replace-plugin@1.2.5
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
 
