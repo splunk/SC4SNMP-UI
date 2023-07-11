@@ -25,7 +25,7 @@
   [
     "@semantic-release/commit-analyzer",
     [
-      "@google/semantic-release-replace-plugin@1.2.5",
+      "@google/semantic-release-replace-plugin@1.2.0",
       {
         "replacements": [
           {
