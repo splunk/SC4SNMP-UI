@@ -138,16 +138,16 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "14"
       - name: Semantic Release
         id: version
-        uses: cycjimmy/semantic-release-action@v3.4.2
+        uses: cycjimmy/semantic-release-action@v3.2.0
         with:
-          semantic_version: 20
+          semantic_version: 17
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
-            semantic-release-replace-plugin
+            @jpoehnelt/semantic-release-replace-plugin@v1.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
 

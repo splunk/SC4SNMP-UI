@@ -25,7 +25,7 @@
   [
     "@semantic-release/commit-analyzer",
     [
-      "semantic-release-replace-plugin",
+      "@jpoehnelt/semantic-release-replace-plugin@v1.2.0",
       {
         "replacements": [
           {
