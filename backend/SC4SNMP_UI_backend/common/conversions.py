@@ -49,7 +49,7 @@ class ProfileConversion(Conversion):
         self.__backend2ui_conditional_operations = {
             "lt": "less than",
             "gt": "greater than",
-            "equal": "equal",
+            "equals": "equals",
             "in": "in"
         }
         self.__ui2backend_conditional_operations = {}
@@ -57,7 +57,9 @@ class ProfileConversion(Conversion):
             self.__ui2backend_conditional_operations[value] = key
 
         self.__backend2ui_profile_types = {
-            "field": "smart"
+            "field": "smart",
+            "base": "base",
+            "walk": "walk"
         }
         self.__ui2backend_profile_types = {}
         for key, value in self.__backend2ui_profile_types.items():
@@ -69,6 +71,8 @@ class ProfileConversion(Conversion):
                 return int(value)
             elif value.replace(".", "").isnumeric():
                 return float(value)
+            else:
+                return value
         except ValueError:
             return value
 
@@ -86,7 +90,7 @@ class ProfileConversion(Conversion):
                 new_vb = {
                     "family": vb[0],
                     "category": vb[1] if len(vb) >= 2 else "",
-                    "index": '.'.join(vb[2:]) if len(vb) >= 3 else "",
+                    "index": '.'.join(map(str, vb[2:])) if len(vb) >= 3 else "",
                 }
                 var_binds.append(new_vb)
 

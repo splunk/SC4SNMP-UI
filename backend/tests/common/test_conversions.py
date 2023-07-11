@@ -13,6 +13,7 @@ class TestConversions(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.maxDiff = None
         common_id = "635916b2c8cb7a15f28af40a"
 
         cls.ui_prof_1 = {
@@ -20,11 +21,13 @@ class TestConversions(TestCase):
             "profileName": "profile_1",
             "frequency": 10,
             "conditions": {
-                "condition": "None",
+                "condition": "standard",
                 "field": "",
-                "patterns": None
+                "patterns": [],
+                "conditions": []
             },
-            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
+            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1.test.2"},
+                         {"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
                          {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
         }
@@ -36,7 +39,8 @@ class TestConversions(TestCase):
             "conditions": {
                 "condition": "base",
                 "field": "",
-                "patterns": None
+                "patterns": [],
+                "conditions": []
             },
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
@@ -48,9 +52,30 @@ class TestConversions(TestCase):
             "profileName": "profile_3",
             "frequency": 30,
             "conditions": {
-                "condition": "field",
+                "condition": "smart",
                 "field": "SNMPv2-MIB.sysObjectID",
-                "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}]
+                "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}],
+                "conditions": []
+            },
+            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
+                         {"family": "IF-MIB", "category": "", "index": ""},
+                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+        }
+
+        cls.ui_prof_4 = {
+            "_id": common_id,
+            "profileName": "profile_4",
+            "frequency": 30,
+            "conditions": {
+                "condition": "conditional",
+                "field": "",
+                "patterns": [],
+                "conditions": [
+                    {"field": "field: IF-MIB.ifAdminStatus", "operation": "in", "value":["0", "down"]},
+                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": ["up"]},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "less than", "value": ["3"]},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "greater than", "value": ["5"]}
+                ]
             },
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
@@ -61,7 +86,10 @@ class TestConversions(TestCase):
             "_id": ObjectId(common_id),
             "profile_1": {
                 "frequency": 10,
-                "varBinds": [["IF-MIB", "ifInDiscards", 1], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
+                "varBinds": [["IF-MIB", "ifInDiscards", "1", "test", "2"],
+                             ["IF-MIB", "ifInDiscards", "1"],
+                             ["IF-MIB"],
+                             ["IF-MIB", "ifOutErrors"]]
             }
         }
 
@@ -70,7 +98,7 @@ class TestConversions(TestCase):
             "profile_2": {
                 "frequency": 20,
                 "condition": {"type": "base"},
-                "varBinds": [["IF-MIB", "ifInDiscards", 1], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
+                "varBinds": [["IF-MIB", "ifInDiscards", "1"], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
             }
         }
 
@@ -81,7 +109,21 @@ class TestConversions(TestCase):
                 "condition": {"type": "field",
                               "field": "SNMPv2-MIB.sysObjectID",
                               "patterns": ["^MIKROTIK", "^MIKROTIK2"]},
-                "varBinds": [["IF-MIB", "ifInDiscards", 1], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
+                "varBinds": [["IF-MIB", "ifInDiscards", "1"], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
+            }
+        }
+
+        cls.backend_prof_4 = {
+            "_id": ObjectId(common_id),
+            "profile_4": {
+                "frequency": 30,
+                "conditions": [
+                    {"field": "field: IF-MIB.ifAdminStatus", "operation": "in", "value": [0, "down"]},
+                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": "up"},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "lt", "value": 3},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "gt", "value": 5}
+                ],
+                "varBinds": [["IF-MIB", "ifInDiscards", "1"], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
             }
         }
 
@@ -202,6 +244,7 @@ class TestConversions(TestCase):
         self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_1), self.ui_prof_1)
         self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_2), self.ui_prof_2)
         self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_3), self.ui_prof_3)
+        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_4), self.ui_prof_4)
 
     def test_profile_ui_to_backend(self):
         back_pr1 = self.backend_prof_1
@@ -212,9 +255,14 @@ class TestConversions(TestCase):
 
         back_pr3 = self.backend_prof_3
         del back_pr3["_id"]
+
+        back_pr4 = self.backend_prof_4
+        del back_pr4["_id"]
+
         self.assertDictEqual(profile_conversion.ui2backend(self.ui_prof_1), back_pr1)
         self.assertDictEqual(profile_conversion.ui2backend(self.ui_prof_2), back_pr2)
         self.assertDictEqual(profile_conversion.ui2backend(self.ui_prof_3), back_pr3)
+        self.assertDictEqual(profile_conversion.ui2backend(self.ui_prof_4), back_pr4)
 
     def test_group_backend_to_ui(self):
         self.assertDictEqual(group_conversion.backend2ui(self.backend_group), self.ui_group)

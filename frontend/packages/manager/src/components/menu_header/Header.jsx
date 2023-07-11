@@ -22,7 +22,7 @@ function Header(){
         ProfCtx.setProfileName("");
         ProfCtx.setFrequency(1);
         ProfCtx.setVarBinds([]);
-        ProfCtx.setCondition("None");
+        ProfCtx.setCondition("standard");
         ProfCtx.setConditionField("");
         ProfCtx.setConditionPatterns([]);
         ProfCtx.setConditional([]);

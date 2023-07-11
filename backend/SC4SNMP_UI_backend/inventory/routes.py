@@ -45,7 +45,9 @@ def add_inventory_record():
     else:
         record_added, message = handler.add_group_to_inventory(inventory_obj["address"], str(inventory_obj["port"]),
                                                         inventory_obj, True)
-    if record_added:
+    if record_added and message is not None:
+        result = jsonify({"message": message}), 200
+    elif record_added:
         result = jsonify("success"), 200
     else:
         result = jsonify({"message": message}), 400

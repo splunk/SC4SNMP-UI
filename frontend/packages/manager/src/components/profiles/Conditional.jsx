@@ -121,7 +121,7 @@ function Conditional(props){
                             <div style={validationGroup}>
                                 <Select value={condition.operation} onChange={(e, { value }) =>
                                     handleOperation(newIndices[`${keyID}`], value)} filter>
-                                    <Select.Option label="equal" value="equal"/>
+                                    <Select.Option label="equals" value="equals"/>
                                     <Select.Option label="less than" value="less than"/>
                                     <Select.Option label="greater than" value="greater than"/>
                                     <Select.Option label="in" value="in"/>
