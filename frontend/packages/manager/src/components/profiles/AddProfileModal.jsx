@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useContext} from 'react';
+import React, {useState, useCallback, useContext} from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
@@ -8,19 +8,20 @@ import P from '@splunk/react-ui/Paragraph';
 import VarBinds from "./VarBinds";
 import Condition from "./Condition";
 import axios from "axios";
-import ProfileContext from "../../store/profile-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
-import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
-import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
+import { validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
-import ErrorsModalContext from "../../store/errors-modal-contxt";
+import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
+import ValidationGroup from "../validation/ValidationGroup";
 
 
 function AddProfileModal(props) {
-    const ProfCtx = useContext(ProfileContext);
-    const ValCtx = useContext(ProfilesValidationContxt);
-    const ErrCtx = useContext(ErrorsModalContext);
+    const ProfCtx = useProfileContext();
+    const ValCtx = useProfilesValidationContxt();
+    const ErrCtx = useErrorsModalContext();
     const [newSubmit, setNewSubmit] = useState(false);
 
 
@@ -125,28 +126,28 @@ function AddProfileModal(props) {
                 <StyledModalBody>
 
                     <StyledControlGroup label="Profile name">
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Text value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
                             {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Frequency of polling (s)" >
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Number value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
                             {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <Condition newSubmit={newSubmit}/>
 
                     <StyledControlGroup label="VarBinds">
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <VarBinds newSubmit={newSubmit}/>
                             {((ValCtx.varBindsExistErrors) ?
                             <P key={createDOMID()} style={validationMessage}>{ValCtx.varBindsExistErrors}</P>
                             : null)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                 </StyledModalBody>

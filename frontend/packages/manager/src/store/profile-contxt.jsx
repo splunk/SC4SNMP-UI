@@ -68,4 +68,5 @@ export function ProfileContxtProvider(props) {
     )
 }
 
+export const useProfileContext = () => useContext(ProfileContext);
 export default ProfileContext;

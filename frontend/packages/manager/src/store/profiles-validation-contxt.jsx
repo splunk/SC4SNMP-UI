@@ -1,4 +1,4 @@
-import React, {useState, createContext} from 'react';
+import React, {useState, createContext, useContext} from 'react';
 
 const ProfilesValidationContxt = createContext();
 
@@ -155,4 +155,5 @@ export function ProfilesValidationContxtProvider(props){
     )
 };
 
+export const useProfilesValidationContxt = () => useContext(ProfilesValidationContxt);
 export default ProfilesValidationContxt;

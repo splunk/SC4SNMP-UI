@@ -1,8 +1,6 @@
-import React, {useState, createContext, useContext} from 'react';
-
-const InventoryDevicesValidationContxt = createContext();
-
-export function InventoryDevicesValidationContxtProvider(props){
+import React, {useState} from 'react';
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
+export function MockInventoryValidationContextProvider(props){
     const [groupNameErrors, setGroupNameErrors] = useState(null);
     const [addressErrors, setAddressErrors] = useState(null);
     const [portErrors, setPortErrors] = useState(null);
@@ -99,6 +97,4 @@ export function InventoryDevicesValidationContxtProvider(props){
         </InventoryDevicesValidationContxt.Provider>
     )
 };
-
-export const useInventoryDevicesValidationContxt = () => useContext(InventoryDevicesValidationContxt);
-export default InventoryDevicesValidationContxt;
+export default MockInventoryValidationContextProvider;

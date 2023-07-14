@@ -1,10 +1,10 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
-import ButtonsContext from "./buttons-contx";
+import { useButtonsContext } from "./buttons-contx";
 
 const GroupContext = createContext();
 
 export function GroupContextProvider(props){
-    const BtnCtx = useContext(ButtonsContext);
+    const BtnCtx = useButtonsContext();
 
     // Controling Modals
     const [addGroupOpen, setAddGroupOpen] = useState(false);
@@ -121,5 +121,6 @@ export function GroupContextProvider(props){
     )
 };
 
+export const useGroupContext = () => useContext(GroupContext);
 export default GroupContext;
 

@@ -3,13 +3,13 @@ import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
 import FormRows from "@splunk/react-ui/FormRows";
-import ProfileContext from "../../store/profile-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
 import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
-import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 
 function ConditionalIn(props){
-    const ProfCtx = useContext(ProfileContext);
-    const ValCtx = useContext(ProfilesValidationContxt);
+    const ProfCtx = useProfileContext();
+    const ValCtx = useProfilesValidationContxt();
     const [indices, setIndices] = useState({});
     const [reload, setReload] = useState(true);
     const [rowItems, setRowItems] = useState([]);

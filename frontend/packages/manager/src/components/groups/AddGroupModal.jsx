@@ -11,9 +11,10 @@ import axios from "axios";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
-import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
+import ValidationGroup from "../validation/ValidationGroup";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
@@ -91,10 +92,10 @@ function AddGroupModal() {
                 <Modal.Header title="Add a new group" onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <ControlGroup label="Group Name">
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Text value={GrCtx.groupName} onChange={handleGroupNameChange} error={((ValCtx.groupNameErrors) ? true : false)}/>
                             {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </ControlGroup>
                 </Modal.Body>
                 <Modal.Footer>
