@@ -40,7 +40,7 @@ function Condition(props){
                     <div>
                         <StyledControlGroup label="Field">
                             <ValidationGroup>
-                                <Text value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
+                                <Text data-test="form:condition-field-input" value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
                                 {((ValCtx.conditionFieldErrors) ? ValCtx.conditionFieldErrors.map((el) =>
                                     <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                             </ValidationGroup>

@@ -122,13 +122,13 @@ function AddDeviceModal(){
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address">
                         <ValidationGroup>
-                            <Text value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
+                            <Text data-test='form:ip-input' value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
                     <StyledControlGroup labelWidth={140} label="Port" >
                         <ValidationGroup>
-                            <Text value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                            <Text data-test="form:port-input" value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
@@ -148,7 +148,7 @@ function AddDeviceModal(){
 
                     <StyledControlGroup labelWidth={140} label="Community">
                         <ValidationGroup>
-                            <Text value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
+                            <Text data-test="form:community-input" value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
                             {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
@@ -162,7 +162,7 @@ function AddDeviceModal(){
 
                     <StyledControlGroup labelWidth={140} label="Security Engine">
                         <ValidationGroup>
-                            <Text value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
+                            <Text data-test="form:security-engine-input" value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
                             {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
@@ -170,7 +170,7 @@ function AddDeviceModal(){
                 </StyledModalBody>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="primary" label="Submit" onClick={handleApply} />
+                    <Button data-test="form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>
         </div>

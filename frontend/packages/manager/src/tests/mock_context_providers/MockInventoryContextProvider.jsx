@@ -87,5 +87,3 @@ export function MockInventoryContextProvider(props){
         </InventoryContext.Provider>
     )
 };
-
-export default MockInventoryContextProvider;

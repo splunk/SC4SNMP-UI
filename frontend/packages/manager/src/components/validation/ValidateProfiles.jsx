@@ -70,7 +70,7 @@ const validateProfiles = (validationObj) => {
             }
             // Check if patterns exist
             if ( validationObj.conditions.patterns.length === 0){
-                errors.patternsExist = "At least one patter must be specified.";
+                errors.patternsExist = "At least one pattern must be specified.";
                 isValid = false;
             }
             // Validate each pattern

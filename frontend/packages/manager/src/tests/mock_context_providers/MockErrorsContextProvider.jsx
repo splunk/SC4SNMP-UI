@@ -17,5 +17,3 @@ export function MockErrorsContextProvider(props){
         </ErrorsModalContext.Provider>
     )
 };
-
-export default MockErrorsContextProvider;

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
+
 export function MockInventoryValidationContextProvider(props){
     const [groupNameErrors, setGroupNameErrors] = useState(null);
     const [addressErrors, setAddressErrors] = useState(null);
@@ -97,4 +98,3 @@ export function MockInventoryValidationContextProvider(props){
         </InventoryDevicesValidationContxt.Provider>
     )
 };
-export default MockInventoryValidationContextProvider;

@@ -14,7 +14,7 @@
     "start:app": "webpack --watch --config demo/webpack.splunkapp.config.js",
     "start:demo": "webpack-dev-server --config demo/webpack.standalone.config.js --port ${DEMO_PORT-8080} --host 0.0.0.0",
     "stylelint": "stylelint \"src/**/*.{js,jsx}\" --config stylelint.config.js",
-    "test": "jest",
+    "test": "DEBUG_PRINT_LIMIT=1000000 jest",
     "test:ci": "JEST_JUNIT_OUTPUT_DIR=./test-reports JEST_JUNIT_OUTPUT_NAME=unit-results.xml JEST_JUNIT_CLASSNAME=unit yarn run test --ci --reporters=default jest-junit --coverage --coverageDirectory=coverage_report/coverage_maps_unit --coverageReporters=cobertura",
     "test:watch": "jest --watch"
   },

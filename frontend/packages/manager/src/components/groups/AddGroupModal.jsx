@@ -3,14 +3,12 @@ import Button from '@splunk/react-ui/Button';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
-import Select from '@splunk/react-ui/Select';
-import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
-import GroupContext from "../../store/group-contxt";
 import axios from "axios";
+import { createDOMID } from '@splunk/ui-utils/id';
+import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
-import { createDOMID } from '@splunk/ui-utils/id';
 import { validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
@@ -93,14 +91,14 @@ function AddGroupModal() {
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <ValidationGroup>
-                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange} error={((ValCtx.groupNameErrors) ? true : false)}/>
+                            <Text data-test="form:group-name-input" value={GrCtx.groupName} onChange={handleGroupNameChange} error={(!!(ValCtx.groupNameErrors))}/>
                             {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </ControlGroup>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="primary" onClick={handleRequestSubmit} label="Submit" />
+                    <Button data-test="form:submit-form-button" appearance="primary" onClick={handleRequestSubmit} label="Submit" />
                 </Modal.Footer>
             </Modal>
         </div>

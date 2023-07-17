@@ -90,22 +90,22 @@ function VarBinds(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test={`form:varbind-row-${indexCopy}`} index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
                     <ValidationGroup>
                          <div style={{display: 'flex'}}>
-                            <Text defaultValue={value.family} placeholder="MIB family"
+                            <Text data-test={`form:varbind${indexCopy}-mib-family-input`} defaultValue={value.family} placeholder="MIB family"
                                   onChange={e => handleItemValueFamily(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.category} placeholder="MIB category"
+                            <Text data-test={`form:varbind${indexCopy}-mib-category-input`} defaultValue={value.category} placeholder="MIB category"
                                   onChange={e => handleItemValueCategory(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.index} placeholder="MIB index"
+                            <Text data-test={`form:varbind${indexCopy}-mib-index-input`} defaultValue={value.index} placeholder="MIB index"
                                   onChange={e => handleItemValueIndex(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>
                         {((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors) ?
                             ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el) => <P key={createDOMID()}
-                                                                                 style={validationMessage}>{el}</P>) :
+                                                                                         style={validationMessage}>{el}</P>) :
                             <P/>)}
                     </ValidationGroup>
                 </FormRows.Row>
@@ -126,6 +126,7 @@ function VarBinds(props){
             onRequestAdd={handleRequestAdd}
             style={{ width: 300 }}
             addLabel="Add varBbind"
+            data-test="form:add-varbinds"
         >
             {rowItems}
         </FormRows>

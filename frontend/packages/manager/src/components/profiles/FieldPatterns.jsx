@@ -78,9 +78,9 @@ function FieldPatterns(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test={`form:field-pattern-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <ValidationGroup>
-                        <Text defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                        <Text data-test={`form:field-pattern-${indexCopy}`} defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
                               error={((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors))}/>
                         {((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors) ?
                             ValCtx.conditionPatternsErrors[newIndices[`${keyID}`]].map((el) =>
@@ -104,6 +104,7 @@ function FieldPatterns(props){
                 onRequestAdd={handleRequestAdd}
                 style={{ width: 300 }}
                 addLabel="Add pattern"
+                data-test="form:field-patterns"
             >
                 {rowItems}
         </FormRows>
