@@ -125,7 +125,7 @@ function VarBinds(props){
         <FormRows
             onRequestAdd={handleRequestAdd}
             style={{ width: 300 }}
-            addLabel="Add varBbind"
+            addLabel="Add varBind"
             data-test="form:add-varbinds"
         >
             {rowItems}

@@ -20,6 +20,7 @@ function renderModal(profileProps= {}){
     )
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 describe("AddProfileModal", () => {
     it("Test no VarBinds and no profile name", () => {
@@ -33,7 +34,7 @@ describe("AddProfileModal", () => {
         expect(screen.queryByText("At least one varBind must be specified.")).toBeInTheDocument();
     })
 
-    it("Test empty VarBind", () => {
+    it("Test empty VarBind", async () => {
         renderModal();
         const submitButton = screen.getByDataTest("form:submit-form-button");
         const frequencyInput = screen.getByDataTest("form:frequency-input").querySelector("input")
@@ -44,11 +45,11 @@ describe("AddProfileModal", () => {
         fireEvent.change(frequencyInput, {target: {value: 2}})
 
         fireEvent.click(submitButton);
-        fireEvent.click(submitButton);
+        await sleep(5)
         expect(screen.queryByText("MIB-Component is required")).toBeInTheDocument()
     })
 
-    it("Test adding multiple varbinds with errors", () => {
+    it("Test adding multiple varbinds with errors", async () => {
         renderModal();
         const submitButton = screen.getByDataTest("form:submit-form-button");
         const frequencyInput = screen.getByDataTest("form:frequency-input").querySelector("input")
@@ -59,7 +60,7 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         fireEvent.click(addVarBindButton);
         fireEvent.change(frequencyInput, {target: {value: 2}})
-        const mibFamilyInput0 =
+        let mibFamilyInput0 =
             screen.getByDataTest("form:varbind0-mib-family-input").querySelector("input")
         const mibCategoryInput1 =
             screen.getByDataTest("form:varbind1-mib-category-input").querySelector("input")
@@ -70,9 +71,9 @@ describe("AddProfileModal", () => {
         fireEvent.change(mibCategoryInput1, {target: {value: "aa?"}})
         fireEvent.change(mibIndexInput2, {target: {value: "a. a"}})
         fireEvent.click(submitButton);
-        fireEvent.click(submitButton);
+        await sleep(5)
 
-        const firstRow = screen.getByDataTest("form:varbind-row-0")
+        let firstRow = screen.getByDataTest("form:varbind-row-0")
         const secondRow = screen.getByDataTest("form:varbind-row-1")
         const thirdRow = screen.getByDataTest("form:varbind-row-2")
 
@@ -86,6 +87,35 @@ describe("AddProfileModal", () => {
         expect(within(thirdRow).queryByText("MIB-Component is required")).toBeInTheDocument()
         expect(within(thirdRow).queryByText("MIB object is required when MIB index is specified")).toBeInTheDocument()
         expect(within(thirdRow).queryByText("Index can't include white spaces")).toBeInTheDocument()
+
+        // Delete first two rows
+        await sleep(10)
+        let deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+
+        firstRow = screen.getByDataTest("form:varbind-row-0")
+        expect(within(firstRow).queryByText("MIB-Component is required")).toBeInTheDocument()
+        expect(within(firstRow).queryByText("MIB object is required when MIB index is specified")).toBeInTheDocument()
+        expect(within(firstRow).queryByText("Index can't include white spaces")).toBeInTheDocument()
+
+        // Delete remaining row and add the new one
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        fireEvent.click(addVarBindButton);
+        await sleep(10);
+
+        mibFamilyInput0 =
+            screen.getByDataTest("form:varbind0-mib-family-input").querySelector("input")
+
+        fireEvent.change(mibFamilyInput0, {target: {value: "mib"}})
+        firstRow = screen.getByDataTest("form:varbind-row-0")
+        expect(within(firstRow).queryByText("MIB-Component is required")).not.toBeInTheDocument()
     })
 
     it ("Test empty field and no patterns in smart profile", () => {
@@ -95,24 +125,151 @@ describe("AddProfileModal", () => {
         expect(screen.queryByText("Field is required")).not.toBeInTheDocument();
         expect(screen.queryByText("At least one pattern must be specified.")).not.toBeInTheDocument();
         fireEvent.click(submitButton);
-        fireEvent.click(submitButton);
         expect(screen.queryByText("Field is required")).toBeInTheDocument();
         expect(screen.queryByText("At least one pattern must be specified.")).toBeInTheDocument();
     })
 
-    it("Test wrong field and empty pattern in smart profile", () => {
+    it("Test wrong field and empty pattern in smart profile", async () => {
         renderModal({profileType: "smart"})
         const submitButton = screen.getByDataTest("form:submit-form-button");
         const addPatternButton = screen.getByDataTest("form:field-patterns").querySelector(`[data-test="add-row"]`)
         const fieldInput = screen.getByDataTest("form:condition-field-input").querySelector("input")
 
         fireEvent.click(addPatternButton);
+        fireEvent.click(addPatternButton);
         fireEvent.change(fieldInput, {target: {value: "t est"}});
+
+        let patternInput0 = screen.getByDataTest("form:field-pattern-0").querySelector("input")
+        fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.click(submitButton);
-        fireEvent.click(submitButton);
+        await sleep(10)
+
+        let firstRow = screen.getByDataTest("form:field-pattern-row-0")
+        const secondRow = screen.getByDataTest("form:field-pattern-row-1")
 
         expect(screen.queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
-        expect(screen.queryByText("Pattern is required")).toBeInTheDocument();
+        expect(within(firstRow).queryByText("Pattern is required")).not.toBeInTheDocument();
+        expect(within(secondRow).queryByText("Pattern is required")).toBeInTheDocument();
+
+        // Delete first row
+        await sleep(10)
+        let deleteRowButton0 = screen.getByDataTest("form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+
+        firstRow = screen.getByDataTest("form:field-pattern-row-0")
+        expect(within(firstRow).queryByText("Pattern is required")).toBeInTheDocument();
+
+        // Delete remaining row and add the new one
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        fireEvent.click(addPatternButton);
+        await sleep(10)
+        patternInput0 = screen.getByDataTest("form:field-pattern-0").querySelector("input")
+        fireEvent.change(patternInput0, {target: {value: "test"}})
+        fireEvent.click(submitButton);
+        await sleep(10)
+        expect(within(firstRow).queryByText("Pattern is required")).not.toBeInTheDocument();
+    })
+
+    it("Test no conditions", () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("form:submit-form-button");
+
+        expect(screen.queryByText("At least one condition must be specified.")).not.toBeInTheDocument();
+        fireEvent.click(submitButton);
+        expect(screen.queryByText("At least one condition must be specified.")).toBeInTheDocument();
+    })
+
+    it("Test errors in multiple conditions", async () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("form:conditional-profile").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addConditionalButton);
+        fireEvent.click(addConditionalButton);
+        fireEvent.click(addConditionalButton);
+
+        await sleep(5);
+
+        const optionsButton1 = screen.getByDataTest("form:conditional-select-operation-1")
+        fireEvent.click(optionsButton1)
+        await sleep(5)
+        const inOptionButton1 = screen.getByDataTest("form:conditional-in-1")
+        fireEvent.click(inOptionButton1)
+        await sleep(5)
+
+        const fieldInput0 =
+            screen.getByDataTest("form:conditional-field-0").querySelector('[data-test="textbox"]')
+        const fieldInput2 =
+            screen.getByDataTest("form:conditional-field-2").querySelector('[data-test="textbox"]')
+        const valueInput2 =
+            screen.getByDataTest("form:conditional-condition-2").querySelector('[data-test="textbox"]')
+
+        fireEvent.change(fieldInput0, {target: {value: "te st"}})
+        fireEvent.change(fieldInput2, {target: {value: "test"}})
+        fireEvent.change(valueInput2, {target: {value: "2"}})
+
+        await sleep(15);
+
+        fireEvent.click(submitButton);
+        fireEvent.click(submitButton);
+
+        let firstRow = screen.getByDataTest("form:conditional-row-0")
+        const secondRow = screen.getByDataTest("form:conditional-row-1")
+        const thirdRow = screen.getByDataTest("form:conditional-row-2")
+
+        expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
+            "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
+        expect(within(firstRow).queryByText("Value is required")).toBeInTheDocument();
+
+        expect(within(secondRow).queryByText("Field is required")).toBeInTheDocument()
+        expect(within(secondRow).queryByText("Value is required")).toBeInTheDocument()
+
+        expect(within(thirdRow).queryByText("Field can consist only of upper and lower english letters, " +
+            "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
+        expect(within(thirdRow).queryByText("Field is required")).not.toBeInTheDocument()
+        expect(within(thirdRow).queryByText("Value is required")).not.toBeInTheDocument()
+
+        // Delete first and second row
+        await sleep(10)
+        let deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+
+        firstRow = screen.getByDataTest("form:conditional-row-0")
+        expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
+            "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
+        expect(within(firstRow).queryByText("Field is required")).not.toBeInTheDocument()
+        expect(within(firstRow).queryByText("Value is required")).not.toBeInTheDocument()
+
+        // Delete remaining row and add the new one
+        await sleep(10)
+        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        fireEvent.click(deleteRowButton0)
+        await sleep(10)
+        fireEvent.click(addConditionalButton);
+        await sleep(10);
+
+        const valueInput0 =
+            screen.getByDataTest("form:conditional-condition-0").querySelector('[data-test="textbox"]')
+        fireEvent.change(valueInput0, {target: {value: "2"}})
+
+        fireEvent.click(submitButton)
+        await sleep(5)
+
+        firstRow = screen.getByDataTest("form:conditional-row-0")
+
+        expect(within(firstRow).queryByText("Field is required")).toBeInTheDocument()
+        expect(within(firstRow).queryByText("Value is required")).not.toBeInTheDocument()
     })
 })

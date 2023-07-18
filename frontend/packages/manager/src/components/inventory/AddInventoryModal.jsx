@@ -179,9 +179,9 @@ function AddInventoryModal() {
                     labelWidth={140}
                     >
                         <Select data-test="form:version" defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
-                            <Select.Option label="1" value="1"/>
-                            <Select.Option label="2c" value="2c"/>
-                            <Select.Option label="3" value="3"/>
+                            <Select.Option data-test="form:version-1" label="1" value="1"/>
+                            <Select.Option data-test="form:version-2c" label="2c" value="2c"/>
+                            <Select.Option data-test="form:version-3" label="3" value="3"/>
                         </Select>
                     </StyledControlGroup>
 

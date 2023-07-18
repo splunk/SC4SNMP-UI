@@ -92,7 +92,7 @@ function Conditional(props){
         const newIndex = rowItems.length;
         const keyID = createDOMID();
         const conditionalCopy = ProfCtx.conditional;
-        conditionalCopy.push({field: "", operation: "equal", value: [""]});
+        conditionalCopy.push({field: "", operation: "equals", value: [""]});
         indicesCopy[`${keyID}`] = newIndex;
         setIndices(indicesCopy);
         ProfCtx.setConditional(conditionalCopy);
@@ -108,37 +108,37 @@ function Conditional(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test={`form:conditional-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <Card style={{width: "100%"}}>
                         <Card.Body>
                             <div style={validationGroup}>
-                                <Text placeholder="Field" defaultValue={condition.field} onChange={e => handleField(newIndices[`${keyID}`], e)}
+                                <Text data-test={`form:conditional-field-${indexCopy}`} placeholder="Field" defaultValue={condition.field} onChange={e => handleField(newIndices[`${keyID}`], e)}
                                       error={((ValCtx.conditionalFieldErrors && newIndices[`${keyID}`] in ValCtx.conditionalFieldErrors))}/>
                                 {((ValCtx.conditionalFieldErrors && newIndices[`${keyID}`] in ValCtx.conditionalFieldErrors) ?
                                     ValCtx.conditionalFieldErrors[newIndices[`${keyID}`]].map((el) =>
                                         <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                             </div>
                             <div style={validationGroup}>
-                                <Select value={condition.operation} onChange={(e, { value }) =>
+                                <Select data-test={`form:conditional-select-operation-${indexCopy}`} value={condition.operation} onChange={(e, { value }) =>
                                     handleOperation(newIndices[`${keyID}`], value)} filter>
-                                    <Select.Option label="equals" value="equals"/>
-                                    <Select.Option label="less than" value="less than"/>
-                                    <Select.Option label="greater than" value="greater than"/>
-                                    <Select.Option label="in" value="in"/>
+                                    <Select.Option data-test={`form:conditional-equals-${indexCopy}`} label="equals" value="equals"/>
+                                    <Select.Option data-test={`form:conditional-lt-${indexCopy}`} label="less than" value="less than"/>
+                                    <Select.Option data-test={`form:conditional-gt-${indexCopy}`} label="greater than" value="greater than"/>
+                                    <Select.Option  data-test={`form:conditional-in-${indexCopy}`}label="in" value="in"/>
                                 </Select>
                                 <P/>
                             </div>
                             {
                                 ProfCtx.conditional[newIndices[`${keyID}`]].operation === 'in' ? (
                                         <div style={validationGroup}>
-                                            <ConditionalIn newSubmit={props.newSubmit} conditionIndex={newIndices[`${keyID}`]}/>
+                                            <ConditionalIn data-test={`form:conditional-condition-${indexCopy}`} newSubmit={props.newSubmit} conditionIndex={newIndices[`${keyID}`]}/>
                                             {((ValCtx.conditionalValuesExistErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesExistErrors) ?
                                                 <P key={createDOMID()} style={validationMessage}>{ValCtx.conditionalValuesExistErrors[newIndices[`${keyID}`]]}</P>
                                                 : null)}
                                         </div>
                                     ) : (
                                     <div style={validationGroup}>
-                                        <Text placeholder="Value" defaultValue={condition.value[0]} onChange={e => handleValue(newIndices[`${keyID}`], e)}
+                                        <Text data-test={`form:conditional-condition-${indexCopy}`} placeholder="Value" defaultValue={condition.value[0]} onChange={e => handleValue(newIndices[`${keyID}`], e)}
                                               error={((ValCtx.conditionalValuesErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors
                                                   && 0 in ValCtx.conditionalValuesErrors[newIndices[`${keyID}`]]))}/>
                                         {((ValCtx.conditionalValuesErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors
@@ -168,6 +168,7 @@ function Conditional(props){
                 onRequestAdd={handleRequestAdd}
                 style={{ width: 300 }}
                 addLabel="Add condition"
+                data-test="form:conditional-profile"
             >
                 {rowItems}
         </FormRows>

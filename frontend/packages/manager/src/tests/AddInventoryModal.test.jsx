@@ -23,6 +23,8 @@ function renderModal(){
     )
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 jest.mock("axios")
 
 describe("AddInventoryModal", () => {
@@ -109,5 +111,22 @@ describe("AddInventoryModal", () => {
         fireEvent.click(submitButton);
         expect(screen.queryByText("If provided, Security Engine can consists only of 10-64 characters in hexadecimal" +
             " notation. All letter must be either upper or lowe case.")).toBeInTheDocument();
+    })
+
+    it("Test no secret in version 3 of snmp", async () => {
+        axios.get.mockResolvedValueOnce({data:[]});
+        await act( async () => renderModal());
+        const submitButton = screen.getByDataTest("form:submit-form-button");
+
+        const versionButton = screen.getByDataTest("form:version")
+        fireEvent.click(versionButton)
+        await sleep(5)
+        const versionOptionButton = screen.getByDataTest("form:version-3")
+        fireEvent.click(versionOptionButton)
+        await sleep(5)
+
+        fireEvent.click(submitButton)
+        await sleep(5)
+        expect(screen.queryByText("When using SNMP version 3, secret must be specified")).toBeInTheDocument()
     })
 })

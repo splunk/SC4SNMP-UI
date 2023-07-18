@@ -81,7 +81,7 @@ function ConditionalIn(props){
             return (
                 <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <div style={validationGroup}>
-                        <Text defaultValue={value} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                        <Text data-test={`${props["data-test"]}-${indexCopy}`} defaultValue={value} placeholder={"Value"} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
                               error={((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors)) &&
                         newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]}/>
                         {((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors
