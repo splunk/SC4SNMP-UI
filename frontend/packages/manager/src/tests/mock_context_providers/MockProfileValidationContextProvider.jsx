@@ -1,11 +1,10 @@
-import React, {useState, createContext, useContext} from 'react';
+import React, {useState} from "react";
+import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 
-const ProfilesValidationContxt = createContext();
-
-export function ProfilesValidationContxtProvider(props){
+export function MockProfileValidationContextProvider(props){
     const [profileNameErrors, setProfileNameErrors] = useState(null);
     const [frequencyErrors, setFrequencyErrors] = useState(null);
-    const [varBindsErrors, setVarBindsErrors] = useState(null);
+    const [varBindsErrors, setVarBindsErrors] = useState( null);
     const [varBindsExistErrors, setVarBindsExistErrors] = useState(null);
     const [conditionFieldErrors, setConditionFieldErrors] = useState(null);
     const [conditionPatternsErrors, setConditionPatternsErrors] = useState(null);
@@ -154,6 +153,3 @@ export function ProfilesValidationContxtProvider(props){
         </ProfilesValidationContxt.Provider>
     )
 };
-
-export const useProfilesValidationContxt = () => useContext(ProfilesValidationContxt);
-export default ProfilesValidationContxt;

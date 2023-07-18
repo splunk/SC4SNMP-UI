@@ -1,15 +1,16 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
 import FormRows from "@splunk/react-ui/FormRows";
-import ProfileContext from "../../store/profile-contxt";
-import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
-import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
+import {validationMessage} from "../../styles/ValidationStyles";
+import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
+import ValidationGroup from "../validation/ValidationGroup";
 
 function FieldPatterns(props){
-    const ProfCtx = useContext(ProfileContext);
-    const ValCtx = useContext(ProfilesValidationContxt);
+    const ProfCtx = useProfileContext();
+    const ValCtx = useProfilesValidationContxt();
     const [indices, setIndices] = useState({});
     const [reload, setReload] = useState(true);
     const [rowItems, setRowItems] = useState([]);
@@ -77,14 +78,14 @@ function FieldPatterns(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
-                    <div style={validationGroup}>
-                        <Text defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                <FormRows.Row data-test={`form:field-pattern-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
+                    <ValidationGroup>
+                        <Text data-test={`form:field-pattern-${indexCopy}`} defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
                               error={((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors))}/>
                         {((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors) ?
                             ValCtx.conditionPatternsErrors[newIndices[`${keyID}`]].map((el) =>
                                 <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                    </div>
+                    </ValidationGroup>
                 </FormRows.Row>
             );
         });
@@ -103,6 +104,7 @@ function FieldPatterns(props){
                 onRequestAdd={handleRequestAdd}
                 style={{ width: 300 }}
                 addLabel="Add pattern"
+                data-test="form:field-patterns"
             >
                 {rowItems}
         </FormRows>

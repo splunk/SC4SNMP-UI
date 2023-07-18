@@ -1,18 +1,9 @@
-import React, {useState, createContext, useRef, useContext} from 'react';
-import { useButtonsContext } from "./buttons-contx";
+import React, {useState} from "react";
+import {jest} from "@jest/globals";
+import GroupContext from "../../store/group-contxt";
 
-const GroupContext = createContext();
-
-export function GroupContextProvider(props){
-    const BtnCtx = useButtonsContext();
-
-    // Controling Modals
-    const [addGroupOpen, setAddGroupOpen] = useState(false);
-    const [addDeviceOpen, setAddDeviceOpen] = useState(false);
-    const [deleteUrl, setDeleteUrl] = useState('');
-    const [deleteName, setDeleteName] = useState('');
-
-    const addGroupModalToggle = useRef(null);
+const setStateMock = jest.fn()
+export function MockGroupContextProvider(props){
 
     // Is edit
     const [isGroupEdit, setIsGroupEdit] = useState(false);
@@ -34,7 +25,7 @@ export function GroupContextProvider(props){
     const [deviceId, setDeviceId] = useState(null);
     const [address, setAddress] = useState('');
     const [port, setPort] = useState("");
-    const [version, setVersion] = useState('');
+    const [version, setVersion] = useState('1');
     const [community, setCommunity] = useState('');
     const [secret, setSecret] = useState('');
     const [securityEngine, setSecurityEngine] = useState('');
@@ -59,20 +50,20 @@ export function GroupContextProvider(props){
 
     const context = {
         // Controling Modals
-        addGroupOpen,
-        setAddGroupOpen,
-        addDeviceOpen,
-        setAddDeviceOpen,
-        deleteOpen: BtnCtx.deleteOpen,
-        setDeleteOpen: BtnCtx.setDeleteOpen,
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
-        deleteUrl,
-        setDeleteUrl,
-        deleteName,
-        setDeleteName,
+        addGroupOpen: true,
+        setAddGroupOpen: setStateMock,
+        addDeviceOpen: true,
+        setAddDeviceOpen: setStateMock,
+        deleteOpen: true,
+        setDeleteOpen: setStateMock,
+        buttonsOpen: false,
+        setButtonsOpen: setStateMock,
+        deleteUrl: "",
+        setDeleteUrl: setStateMock,
+        deleteName: "",
+        setDeleteName: setStateMock,
 
-        addGroupModalToggle,
+        addGroupModalToggle: null,
 
         // Is edit
         isGroupEdit,
@@ -120,7 +111,3 @@ export function GroupContextProvider(props){
         </GroupContext.Provider>
     )
 };
-
-export const useGroupContext = () => useContext(GroupContext);
-export default GroupContext;
-

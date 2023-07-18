@@ -1,27 +1,23 @@
-import React, {useState, createContext, useRef, useContext} from 'react';
-import ButtonsContext from "./buttons-contx";
+import React, {useState} from "react";
+import {jest} from "@jest/globals";
+import ProfileContext from "../../store/profile-contxt";
 
-const ProfileContext = createContext();
 
-export function ProfileContxtProvider(props) {
-    const BtnCtx = useContext(ButtonsContext);
+const setStateMock = jest.fn()
 
+export function MockProfileContextProvider(props) {
     // data for DeleteProfileModal
     const [profileId, setProfileId] = useState(null);
-    const deleteModalToggle = useRef(null);
-
-    // data for AddProfileModal
-    const [addOpen, setAddOpen] = useState(false);
-    const addModalToggle = useRef(null);
 
     // data for auto refreshing profiles panel
     const [profilesChange, setProfilesChange] = useState(true);
+
 
     // data for editing in AddProfileModal
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState([]);
-    const [condition, setCondition] = useState("standard");
+    const [condition, setCondition] = useState(("profileType" in props["profileProps"] ? props["profileProps"]["profileType"] : "standard"));
     const [conditionField, setConditionField] = useState("");
     const [conditionPatterns, setConditionPatterns] = useState([]);
     const [conditional, setConditional] = useState([]);
@@ -34,14 +30,14 @@ export function ProfileContxtProvider(props) {
     const context = {
         profileId,
         setProfileId,
-        deleteOpen: BtnCtx.deleteOpen,
-        setDeleteOpen: BtnCtx.setDeleteOpen,
-        deleteModalToggle,
+        deleteOpen: false,
+        setDeleteOpen: setStateMock,
+        deleteModalToggle: null,
         profilesChange,
         makeProfilesChange: profilesChangeHandler,
-        addOpen,
-        setAddOpen,
-        addModalToggle,
+        addOpen: true,
+        setAddOpen: setStateMock,
+        addModalToggle: null,
 
         profileName,
         setProfileName,
@@ -67,6 +63,3 @@ export function ProfileContxtProvider(props) {
         </ProfileContext.Provider>
     )
 }
-
-export const useProfileContext = () => useContext(ProfileContext);
-export default ProfileContext;

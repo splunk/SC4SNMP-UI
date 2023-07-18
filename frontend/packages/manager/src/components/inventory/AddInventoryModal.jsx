@@ -6,23 +6,24 @@ import Select from '@splunk/react-ui/Select';
 import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import RadioBar from '@splunk/react-ui/RadioBar';
-import InventoryContext from "../../store/inventory-contxt";
+import {useInventoryContext} from "../../store/inventory-contxt";
 import axios from "axios";
 import Button from '@splunk/react-ui/Button';
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
-import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import {useInventoryDevicesValidationContxt} from "../../store/inventory-devices-validation-contxt";
+import { validationMessage } from "../../styles/ValidationStyles";
+import ValidationGroup from "../validation/ValidationGroup";
 import { backendHost } from "../../host";
-import ErrorsModalContext from "../../store/errors-modal-contxt";
+import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 
 
 function AddInventoryModal() {
     const [initProfiles, setInitProfiles] = useState([]);
-    const InvCtx = useContext(InventoryContext);
-    const ValCtx = useContext(InventoryDevicesValidationContxt);
-    const ErrCtx = useContext(ErrorsModalContext);
+    const InvCtx = useInventoryContext();
+    const ValCtx = useInventoryDevicesValidationContxt();
+    const ErrCtx = useErrorsModalContext();
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         InvCtx.setAddress(val);
@@ -160,16 +161,16 @@ function AddInventoryModal() {
                 <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device/group` : "Add a new device/group")} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address/Group">
-                        <div style={validationGroup}>
-                            <Text value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
-                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        <ValidationGroup>
+                            <Text data-test="form:group-ip-input" value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
+                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P data-test="ip-group-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                        </ValidationGroup>
                     </StyledControlGroup>
                     <StyledControlGroup labelWidth={140} label="Port">
-                        <div style={validationGroup}>
-                            <Text value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                        <ValidationGroup>
+                            <Text data-test="form:port-input" value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup
@@ -177,48 +178,48 @@ function AddInventoryModal() {
                     labelFor="customized-select-after"
                     labelWidth={140}
                     >
-                        <Select defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
-                            <Select.Option label="1" value="1"/>
-                            <Select.Option label="2c" value="2c"/>
-                            <Select.Option label="3" value="3"/>
+                        <Select data-test="form:version" defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
+                            <Select.Option data-test="form:version-1" label="1" value="1"/>
+                            <Select.Option data-test="form:version-2c" label="2c" value="2c"/>
+                            <Select.Option data-test="form:version-3" label="3" value="3"/>
                         </Select>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Community" labelWidth={140}>
-                        <div style={validationGroup}>
-                            <Text value={InvCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
+                        <ValidationGroup>
+                            <Text data-test="form:community-input" value={InvCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
                             {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Secret" labelWidth={140}>
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Text value={InvCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
                             {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Security Engine" labelWidth={140}>
-                        <div style={validationGroup}>
-                            <Text value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
+                        <ValidationGroup>
+                            <Text data-test="form:security-engine-input" value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
                             {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Walk Interval (s)" labelWidth={140}>
-                        <div style={validationGroup}>
-                            <Number value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
+                        <ValidationGroup>
+                            <Number data-test="form:walk-interval-input" value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
                             {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Profiles" labelWidth={140}>
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles} error={((ValCtx.profilesErrors) ? true : false)}>
                                 {initProfiles.map((v) => (<Multiselect.Option key={createDOMID()} label={v} value={v} />))}
                             </Multiselect>
                             {((ValCtx.profilesErrors) ? ValCtx.profilesErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Smart Profiles enabled" labelWidth={140}>
@@ -231,7 +232,7 @@ function AddInventoryModal() {
                 </StyledModalBody>
                 <Modal.Footer>
                     <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="primary" label="Submit" onClick={handleApply} />
+                    <Button data-test="form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>
         </div>

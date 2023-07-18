@@ -1,15 +1,16 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
 import FormRows from "@splunk/react-ui/FormRows";
-import ProfileContext from "../../store/profile-contxt";
-import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
-import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
+import {validationMessage} from "../../styles/ValidationStyles";
+import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
+import ValidationGroup from "../validation/ValidationGroup";
 
 function VarBinds(props){
-    const ProfCtx = useContext(ProfileContext);
-    const ValCtx = useContext(ProfilesValidationContxt);
+    const ProfCtx = useProfileContext();
+    const ValCtx = useProfilesValidationContxt();
     const [indices, setIndices] = useState({});
     const [rowItems, setRowItems] = useState([]);
     const [reload, setReload] = useState(true);
@@ -89,24 +90,24 @@ function VarBinds(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
-                    <div style={validationGroup}>
+                <FormRows.Row data-test={`form:varbind-row-${indexCopy}`} index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
+                    <ValidationGroup>
                          <div style={{display: 'flex'}}>
-                            <Text defaultValue={value.family} placeholder="MIB family"
+                            <Text data-test={`form:varbind${indexCopy}-mib-family-input`} defaultValue={value.family} placeholder="MIB family"
                                   onChange={e => handleItemValueFamily(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.category} placeholder="MIB category"
+                            <Text data-test={`form:varbind${indexCopy}-mib-category-input`} defaultValue={value.category} placeholder="MIB category"
                                   onChange={e => handleItemValueCategory(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text defaultValue={value.index} placeholder="MIB index"
+                            <Text data-test={`form:varbind${indexCopy}-mib-index-input`} defaultValue={value.index} placeholder="MIB index"
                                   onChange={e => handleItemValueIndex(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>
                         {((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors) ?
                             ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el) => <P key={createDOMID()}
-                                                                                 style={validationMessage}>{el}</P>) :
+                                                                                         style={validationMessage}>{el}</P>) :
                             <P/>)}
-                    </div>
+                    </ValidationGroup>
                 </FormRows.Row>
             );
         });
@@ -124,7 +125,8 @@ function VarBinds(props){
         <FormRows
             onRequestAdd={handleRequestAdd}
             style={{ width: 300 }}
-            addLabel="Add varBbind"
+            addLabel="Add varBind"
+            data-test="form:add-varbinds"
         >
             {rowItems}
         </FormRows>

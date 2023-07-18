@@ -1,19 +1,12 @@
-import React, {useState, createContext, useRef, useContext} from 'react';
-import { useButtonsContext } from "./buttons-contx";
+import React, {useState} from "react";
+import InventoryContext from "../../store/inventory-contxt";
+import {jest} from "@jest/globals";
 
-const InventoryContext = createContext();
+const setStateMock = jest.fn()
 
-export function InventoryContextProvider(props){
-    const BtnCtx = useButtonsContext();
-
+export function MockInventoryContextProvider(props){
     // data for DeleteInventoryModal
-    const [inventoryId, setInventoryId] = useState(null);
-
-    const rowToggle = useRef(null);
-
-    // data for AddInventoryModal
-    const [addOpen, setAddOpen] = useState(false);
-    const addModalToggle = useRef(null);
+    const [inventoryId, setInventoryId] = useState("1");
 
 
     // data for auto refreshing inventory panel
@@ -25,7 +18,7 @@ export function InventoryContextProvider(props){
 
     // data for editing in AddInventoryModal
     const [isEdit, setIsEdit] = useState(false);
-    const [address, setAddress] = useState('');
+    const [address, setAddress] = useState('10.10.10.10');
     const [port, setPort] = useState('161');
     const [version, setVersion] = useState('2c');
     const [community, setCommunity] = useState('');
@@ -51,15 +44,15 @@ export function InventoryContextProvider(props){
     const context = {
         inventoryId: inventoryId,
         setInventoryId: setInventoryId,
-        deleteOpen: BtnCtx.deleteOpen,
-        setDeleteOpen: BtnCtx.setDeleteOpen,
+        deleteOpen: false,
+        setDeleteOpen: setStateMock,
 
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
+        buttonsOpen: false,
+        setButtonsOpen: setStateMock,
 
-        addOpen: addOpen,
-        setAddOpen: setAddOpen,
-        addModalToggle: addModalToggle,
+        addOpen: true,
+        setAddOpen: setStateMock,
+        addModalToggle: null,
 
         inventoryChange: inventoryChange,
         makeInventoryChange: inventoryChangeHandler,
@@ -94,6 +87,3 @@ export function InventoryContextProvider(props){
         </InventoryContext.Provider>
     )
 };
-
-export const useInventoryContext = () => useContext(InventoryContext);
-export default InventoryContext;

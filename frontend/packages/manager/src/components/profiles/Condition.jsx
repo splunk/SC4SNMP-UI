@@ -1,18 +1,19 @@
 import React, {useState, useRef, useCallback, useContext, useEffect} from 'react';
 import { createDOMID } from '@splunk/ui-utils/id';
-import ProfileContext from "../../store/profile-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
 import {StyledControlGroup} from "../../styles/inventory/InventoryStyle";
 import Select from "@splunk/react-ui/Select";
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
 import FieldPatterns from "./FieldPatterns";
-import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
-import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
+import {validationMessage} from "../../styles/ValidationStyles";
+import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 import Conditional from "./Conditional";
+import ValidationGroup from "../validation/ValidationGroup";
 
 function Condition(props){
-    const ProfCtx = useContext(ProfileContext);
-    const ValCtx = useContext(ProfilesValidationContxt);
+    const ProfCtx = useProfileContext();
+    const ValCtx = useProfilesValidationContxt();
 
     const handleFieldChange = useCallback((e, { value: val }) => {
         ProfCtx.setConditionField(val);
@@ -38,19 +39,19 @@ function Condition(props){
                 ProfCtx.condition === 'smart' ? (
                     <div>
                         <StyledControlGroup label="Field">
-                            <div style={validationGroup}>
-                                <Text value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
+                            <ValidationGroup>
+                                <Text data-test="form:condition-field-input" value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
                                 {((ValCtx.conditionFieldErrors) ? ValCtx.conditionFieldErrors.map((el) =>
                                     <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                            </div>
+                            </ValidationGroup>
                         </StyledControlGroup>
                         <StyledControlGroup label="Patterns">
-                            <div style={validationGroup}>
+                            <ValidationGroup>
                                 <FieldPatterns newSubmit={props.newSubmit}/>
                                 {((ValCtx.patternsExistErrors) ?
                                 <P key={createDOMID()} style={validationMessage}>{ValCtx.patternsExistErrors}</P>
                                 : null)}
-                            </div>
+                            </ValidationGroup>
                         </StyledControlGroup>
                     </div>) : null
             }
@@ -58,12 +59,12 @@ function Condition(props){
             {
                 ProfCtx.condition === 'conditional' ? (
                     <StyledControlGroup label="Conditions">
-                        <div style={validationGroup}>
+                        <ValidationGroup>
                             <Conditional newSubmit={props.newSubmit}/>
                             {((ValCtx.conditionalExistErrors) ?
                             <P key={createDOMID()} style={validationMessage}>{ValCtx.conditionalExistErrors}</P>
                             : null)}
-                        </div>
+                        </ValidationGroup>
                     </StyledControlGroup>
                 ) : null
             }

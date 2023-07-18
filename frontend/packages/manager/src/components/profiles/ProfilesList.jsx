@@ -7,8 +7,8 @@ import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from "@splunk/react-ui/Button";
 import axios from "axios";
-import ProfileContext from "../../store/profile-contxt";
-import ErrorsModalContext from "../../store/errors-modal-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
+import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {backendHost} from "../../host";
 import {Pagination} from "../../styles/groups/GroupsStyle";
 import DeleteModal from "../DeleteModal";
@@ -61,8 +61,8 @@ function ProfilesList() {
     const [totalPages, setTotalPages] = useState(1);
     const [profilesRecords, setProfilesRecords] = useState([]);
     const [expandedRowId, setExpandedRowId] = useState(null);
-    const ProfCtx = useContext(ProfileContext);
-    const ErrCtx = useContext(ErrorsModalContext);
+    const ProfCtx = useProfileContext();
+    const ErrCtx = useErrorsModalContext();
 
     const getProfileRows = (page) => {
         const urlCount = `http://${backendHost}/profiles/count`;

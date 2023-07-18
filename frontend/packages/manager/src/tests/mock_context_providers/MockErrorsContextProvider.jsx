@@ -1,8 +1,7 @@
-import React, {useState, createContext, useContext} from 'react';
+import React, {useState} from "react";
+import ErrorsModalContext from "../../store/errors-modal-contxt";
 
-const ErrorsModalContext = createContext();
-
-export function ErrorsModalContextProvider(props){
+export function MockErrorsContextProvider(props){
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -18,6 +17,3 @@ export function ErrorsModalContextProvider(props){
         </ErrorsModalContext.Provider>
     )
 };
-
-export const useErrorsModalContext = () => useContext(ErrorsModalContext);
-export default ErrorsModalContext;

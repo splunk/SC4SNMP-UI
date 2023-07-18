@@ -1,11 +1,11 @@
-import React, {useCallback, useContext, useState} from 'react';
-import MenuHeaderContxt from '../../store/menu-header-contxt';
+import React, {useCallback} from 'react';
+import {useMenuHeaderContxt} from '../../store/menu-header-contxt';
 import { StyledTab, StyledMenuBar, StyledMenuBarLeft, StyledMenuBarRight } from "../../styles/menu_header/MenuBarStyle";
 import P from '@splunk/react-ui/Paragraph';
 import TabBar from '@splunk/react-ui/TabBar';
 
 function Menu(){
-    const MenuCtx = useContext(MenuHeaderContxt);
+    const MenuCtx = useMenuHeaderContxt();
 
     const handleMenuChange = useCallback((e, { selectedTabId }) => {
         MenuCtx.setActiveTabId(selectedTabId);
