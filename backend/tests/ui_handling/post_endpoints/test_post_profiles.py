@@ -117,8 +117,7 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
     m_find.assert_has_calls(calls)
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update})
-    assert response.json == {"message": f"Profile profile_1 was deleted. If profile_1 was used in some records in the inventory,"
-                                        f" those records were updated."}
+    assert response.json == {"message": f"Profile profile_1 was deleted. It was also deleted from some inventory records."}
 
 
 # TEST UPDATING PROFILE

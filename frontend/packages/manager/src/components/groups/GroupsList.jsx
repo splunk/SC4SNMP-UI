@@ -39,7 +39,7 @@ function GroupsList() {
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
-    const [devicesPerPage, setDevicesPerPage] = useState('3');
+    const [devicesPerPage, setDevicesPerPage] = useState('20');
 
     useEffect(() => {
         let isMounted = true;
@@ -96,10 +96,15 @@ function GroupsList() {
         GrCtx.resetDevice();
     };
 
-    const groupDeleteHandler = (groupId, groupName) => {
+    const groupDeleteHandler = (groupId, groupName, groupInInventory) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
         GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
+        if (groupInInventory){
+            GrCtx.setGroupWarning(`WARNING: This group is configured in the inventory`);
+        }else{
+            GrCtx.setGroupWarning(null);
+        }
         GrCtx.makeGroupsChange();
     };
 
@@ -226,7 +231,8 @@ function GroupsList() {
             <div>
                 <Button style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
                 <Button style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName))} appearance="pill" icon={<Trash />} />
+                <Button style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))}
+                        appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -248,12 +254,11 @@ function GroupsList() {
                     <Pagination>
                         <Select appearance="pill" suffixLabel="inventory items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
-                                defaultValue="3">
-                            <Select.Option label="3" value="3" />
+                                defaultValue="20">
                             <Select.Option label="10" value="10" />
+                            <Select.Option label="20" value="20" />
                             <Select.Option label="50" value="50" />
                             <Select.Option label="100" value="100" />
-                            <Select.Option label="200" value="200" />
                         </Select>
                         <Paginator
                             onChange={(event, { page }) => (paginationHandler(page, openedGroupId))}
@@ -291,7 +296,7 @@ function GroupsList() {
                 </div>
             </GroupDevices>
             <AddDeviceModal />
-            <DeleteModal deleteName={GrCtx.deleteName}
+            <DeleteModal deleteName={GrCtx.deleteName} customWarning={GrCtx.groupWarning}
                              handleDelete={() => (deleteModalRequest())}/>
         </GroupsContent>
     );

@@ -2,13 +2,14 @@ from bson import ObjectId
 from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
-from SC4SNMP_UI_backend.common.conversions import ProfileConversion
-from SC4SNMP_UI_backend.common.helpers import update_profiles_in_inventory
+from SC4SNMP_UI_backend.common.backend_ui_conversions import ProfileConversion, get_group_or_profile_name_from_backend
+from SC4SNMP_UI_backend.common.inventory_utils import update_profiles_in_inventory
 
 profiles_blueprint = Blueprint('profiles_blueprint', __name__)
 
 profile_conversion = ProfileConversion()
 mongo_profiles = mongo_client.sc4snmp.profiles_ui
+mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
 # @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @profiles_blueprint.route('/profiles/names')
@@ -17,7 +18,7 @@ def get_profile_names():
     profiles = list(mongo_profiles.find())
     profiles_list = []
     for pr in profiles:
-        converted = profile_conversion.backend2ui(pr)
+        converted = profile_conversion.backend2ui(pr, profile_in_inventory=True)
         if converted['conditions']['condition'] not in ['mandatory', 'base']:
             profiles_list.append(converted)
     return jsonify([el["profileName"] for el in profiles_list])
@@ -38,7 +39,10 @@ def get_profiles_list(page_num, prof_per_page):
     profiles = list(mongo_profiles.find().skip(skips).limit(prof_per_page))
     profiles_list = []
     for pr in profiles:
-        converted = profile_conversion.backend2ui(pr)
+        profile_name = get_group_or_profile_name_from_backend(pr)
+        profile_in_inventory = True if list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_name}.*'},
+                                                                  "delete": False})) else False
+        converted = profile_conversion.backend2ui(pr, profile_in_inventory=profile_in_inventory)
         if converted['conditions']['condition'] not in ['mandatory']:
             profiles_list.append(converted)
     return jsonify(profiles_list)
@@ -50,7 +54,7 @@ def get_all_profiles_list():
     profiles = list(mongo_profiles.find())
     profiles_list = []
     for pr in profiles:
-        converted = profile_conversion.backend2ui(pr)
+        converted = profile_conversion.backend2ui(pr, profile_in_inventory=True)
         if converted['conditions']['condition'] not in ['mandatory']:
             profiles_list.append(converted)
     return jsonify(profiles_list)
@@ -80,11 +84,14 @@ def delete_profile_record(profile_id):
     def delete_profile(index, record_to_update, kwargs):
         record_to_update["profiles"].pop(index)
         return record_to_update
-    update_profiles_in_inventory(profile_name, delete_profile)
+    inventory_records = update_profiles_in_inventory(profile_name, delete_profile)
+    if inventory_records:
+        message = f"Profile {profile_name} was deleted. It was also deleted from some inventory records."
+    else:
+        message = f"Profile {profile_name} was deleted."
 
     mongo_profiles.delete_one({'_id': ObjectId(profile_id)})
-    return jsonify({"message": f"Profile {profile_name} was deleted. If {profile_name} was used in some records in the inventory,"
-                                       f" those records were updated."}), 200
+    return jsonify({"message": message}), 200
 
 
 @profiles_blueprint.route('/profiles/update/<profile_id>', methods=['POST'])

@@ -2,6 +2,7 @@ import React, { useCallback, useState, useContext } from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
+import Message from "@splunk/react-ui/Message";
 import ButtonsContext from "../store/buttons-contx";
 
 function DeleteModal(props) {
@@ -25,6 +26,10 @@ function DeleteModal(props) {
                 <Modal.Header title={`Delete ${props.deleteName}`} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <P>Are you sure you want to delete {props.deleteName} ?</P>
+                    {("customWarning" in props && props["customWarning"] != null) ?
+                        (<Message appearance="fill" type="warning">
+                            {props["customWarning"]}
+                        </Message>) : null}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />

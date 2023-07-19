@@ -2,8 +2,8 @@ from bson import ObjectId
 from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
-from SC4SNMP_UI_backend.common.conversions import InventoryConversion
-from SC4SNMP_UI_backend.common.helpers import HandleNewDevice
+from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
+from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice
 
 inventory_blueprint = Blueprint('inventory_blueprint', __name__)
 

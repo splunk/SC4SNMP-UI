@@ -119,16 +119,37 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
     }
     m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
 
-    m_find.return_value = [backend_group]
+    m_find.side_effect = [
+        [backend_group],
+        []
+    ]
+
+    calls_find = [
+        call({'_id': ObjectId(common_id)}),
+        call({"address": "group_1"})
+    ]
+
     m_delete.return_value = None
     m_update.return_value = None
 
     response = client.post(f"/groups/delete/{common_id}")
-    assert m_find.call_args == call({'_id': ObjectId(common_id)})
+    m_find.assert_has_calls(calls_find)
     assert m_delete.call_args == call({'_id': ObjectId(common_id)})
     assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
     assert response.json == {
-        "message": "Group group_1 was deleted. If group_1 was configured in the inventory, it was deleted from there."}
+        "message": "Group group_1 was deleted."}
+
+    m_find.side_effect = [
+        [backend_group],
+        [{}]
+    ]
+
+    response = client.post(f"/groups/delete/{common_id}")
+    m_find.assert_has_calls(calls_find)
+    assert m_delete.call_args == call({'_id': ObjectId(common_id)})
+    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
+    assert response.json == {
+        "message": "Group group_1 was deleted. It was also deleted from the inventory."}
 
 
 # TEST ADDING DEVICE

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from SC4SNMP_UI_backend.common.conversions import ProfileConversion, GroupConversion, GroupDeviceConversion, \
+from SC4SNMP_UI_backend.common.backend_ui_conversions import ProfileConversion, GroupConversion, GroupDeviceConversion, \
     InventoryConversion
 from bson import ObjectId
 
@@ -29,7 +29,8 @@ class TestConversions(TestCase):
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1.test.2"},
                          {"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "profileInInventory": True
         }
 
         cls.ui_prof_2 = {
@@ -44,7 +45,8 @@ class TestConversions(TestCase):
             },
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "profileInInventory": False
         }
 
         cls.ui_prof_3 = {
@@ -59,7 +61,8 @@ class TestConversions(TestCase):
             },
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "profileInInventory": True
         }
 
         cls.ui_prof_4 = {
@@ -79,7 +82,8 @@ class TestConversions(TestCase):
             },
             "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                          {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "profileInInventory": False
         }
 
         cls.backend_prof_1 = {
@@ -139,7 +143,8 @@ class TestConversions(TestCase):
 
         cls.ui_group = {
             "_id": common_id,
-            "groupName": "group_1"
+            "groupName": "group_1",
+            "groupInInventory": False
         }
 
         cls.ui_group_device_1 = {
@@ -241,10 +246,10 @@ class TestConversions(TestCase):
         }
 
     def test_profile_backend_to_ui(self):
-        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_1), self.ui_prof_1)
-        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_2), self.ui_prof_2)
-        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_3), self.ui_prof_3)
-        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_4), self.ui_prof_4)
+        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_1, profile_in_inventory=True), self.ui_prof_1)
+        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_2, profile_in_inventory=False), self.ui_prof_2)
+        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_3, profile_in_inventory=True), self.ui_prof_3)
+        self.assertDictEqual(profile_conversion.backend2ui(self.backend_prof_4, profile_in_inventory=False), self.ui_prof_4)
 
     def test_profile_ui_to_backend(self):
         back_pr1 = self.backend_prof_1
@@ -265,7 +270,7 @@ class TestConversions(TestCase):
         self.assertDictEqual(profile_conversion.ui2backend(self.ui_prof_4), back_pr4)
 
     def test_group_backend_to_ui(self):
-        self.assertDictEqual(group_conversion.backend2ui(self.backend_group), self.ui_group)
+        self.assertDictEqual(group_conversion.backend2ui(self.backend_group, group_in_inventory=False), self.ui_group)
 
     def test_group_ui_to_backend(self):
         new_group_from_ui = {

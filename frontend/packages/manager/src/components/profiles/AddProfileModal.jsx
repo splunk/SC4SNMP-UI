@@ -5,9 +5,9 @@ import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
+import axios from "axios";
 import VarBinds from "./VarBinds";
 import Condition from "./Condition";
-import axios from "axios";
 import {useProfileContext} from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
@@ -131,12 +131,13 @@ function AddProfileModal(props) {
                         </ValidationGroup>
                     </StyledControlGroup>
 
+                    {(ProfCtx.condition !== "walk") ?
                     <StyledControlGroup label="Frequency of polling (s)" >
                         <ValidationGroup>
                             <Number data-test="form:frequency-input" value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
                             {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
-                    </StyledControlGroup>
+                    </StyledControlGroup> : null}
 
                     <Condition newSubmit={newSubmit}/>
 

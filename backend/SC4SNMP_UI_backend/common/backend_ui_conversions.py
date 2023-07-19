@@ -19,28 +19,35 @@ def snake_case2camel_case(txt):
     return ''.join(result)
 
 
-def get_group_name_from_backend(document: dict):
-    group_name = None
+def get_group_or_profile_name_from_backend(document: dict):
+    group_or_profile_name = None
     for key in document.keys():
         if key != "_id":
-            group_name = key
-    return group_name
+            group_or_profile_name = key
+    return group_or_profile_name
 
 
 class Conversion:
-    @abstractmethod
-    def _ui2backend_map(self, document: dict, **kwargs):
-        pass
 
     @abstractmethod
-    def _backend2ui_map(self, document: dict, **kwargs):
-        pass
-
     def backend2ui(self, document: dict, **kwargs):
-        return self._backend2ui_map(document, **kwargs)
+        pass
 
+    @abstractmethod
     def ui2backend(self, document: dict, **kwargs):
-        return self._ui2backend_map(document, **kwargs)
+        pass
+
+
+def string_value_to_numeric(value: str):
+    try:
+        if value.isnumeric():
+            return int(value)
+        elif value.replace(".", "").isnumeric():
+            return float(value)
+        else:
+            return value
+    except ValueError:
+        return value
 
 
 class ProfileConversion(Conversion):
@@ -65,25 +72,14 @@ class ProfileConversion(Conversion):
         for key, value in self.__backend2ui_profile_types.items():
             self.__ui2backend_profile_types[value] = key
 
-    def __string_value_to_numeric(self, value: str):
-        try:
-            if value.isnumeric():
-                return int(value)
-            elif value.replace(".", "").isnumeric():
-                return float(value)
-            else:
-                return value
-        except ValueError:
-            return value
-
-    def _backend2ui_map(self, document: dict, **kwargs):
-        profile_name = None
-        for key in document.keys():
-            if key != "_id":
-                profile_name = key
-        if profile_name is None:
+    def backend2ui(self, document: dict, **kwargs):
+        profile_name = get_group_or_profile_name_from_backend(document)
+        if "profile_in_inventory" not in kwargs.keys():
+            raise ValueError("No profile_in_inventory provided")
+        elif profile_name is None:
             raise ValueError("No profile name detected")
         else:
+            profile_in_inventory = kwargs["profile_in_inventory"]
             backend_var_binds = document[profile_name]["varBinds"]
             var_binds = []
             for vb in backend_var_binds:
@@ -136,13 +132,14 @@ class ProfileConversion(Conversion):
             result = {
                 "_id": str(document["_id"]),
                 "profileName": profile_name,
-                "frequency": document[profile_name].get("frequency", 0),
+                "frequency": document[profile_name].get("frequency", 1),
                 "conditions": conditions,
-                "varBinds": var_binds
+                "varBinds": var_binds,
+                "profileInInventory": profile_in_inventory
             }
             return result
 
-    def _ui2backend_map(self, document: dict, **kwargs):
+    def ui2backend(self, document: dict, **kwargs):
         conditions = None
         condition = None
         if document['conditions']['condition'] == "smart":
@@ -159,9 +156,9 @@ class ProfileConversion(Conversion):
                 if operation == "in":
                     value = []
                     for v in ui_condition["value"]:
-                        value.append(self.__string_value_to_numeric(v))
+                        value.append(string_value_to_numeric(v))
                 else:
-                    value = self.__string_value_to_numeric(ui_condition["value"][0])
+                    value = string_value_to_numeric(ui_condition["value"][0])
                 conditions.append(
                     {"field": field, "operation": operation, "value": value}
                 )
@@ -180,10 +177,11 @@ class ProfileConversion(Conversion):
 
         item = {
             document['profileName']: {
-                'frequency': int(document['frequency']),
                 'varBinds': var_binds
             }
         }
+        if document['conditions']['condition'] != "walk":
+            item[document['profileName']].update({'frequency': int(document['frequency'])})
         if condition is not None:
             item[document['profileName']].update({'condition': condition})
         if conditions is not None:
@@ -195,15 +193,19 @@ class GroupConversion(Conversion):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _backend2ui_map(self, document: dict, **kwargs):
-        group_name = get_group_name_from_backend(document)
-        result = {
-            "_id": str(document["_id"]),
-            "groupName": group_name
-        }
-        return result
+    def backend2ui(self, document: dict, **kwargs):
+        if "group_in_inventory" in kwargs.keys():
+            group_name = get_group_or_profile_name_from_backend(document)
+            result = {
+                "_id": str(document["_id"]),
+                "groupName": group_name,
+                "groupInInventory": kwargs["group_in_inventory"]
+            }
+            return result
+        else:
+            raise ValueError("No group_in_inventory provided")
 
-    def _ui2backend_map(self, document: dict, **kwargs):
+    def ui2backend(self, document: dict, **kwargs):
         result = {
             document["groupName"]: []
         }
@@ -215,7 +217,7 @@ class GroupDeviceConversion(Conversion):
         super().__init__(*args, **kwargs)
         self.optional_fields = ["port", "version", "community", "secret", "security_engine"]
 
-    def _backend2ui_map(self, document: dict, **kwargs):
+    def backend2ui(self, document: dict, **kwargs):
         if "group_id" in kwargs.keys() and "device_id" in kwargs.keys():
             group_id = kwargs["group_id"]
             device_id = kwargs["device_id"]
@@ -234,7 +236,7 @@ class GroupDeviceConversion(Conversion):
         else:
             raise ValueError("No group_id or device_id provided")
 
-    def _ui2backend_map(self, document: dict, **kwargs):
+    def ui2backend(self, document: dict, **kwargs):
         result = {
             "address": document["address"]
         }
@@ -251,7 +253,7 @@ class InventoryConversion(Conversion):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _ui2backend_map(self, document: dict, **kwargs):
+    def ui2backend(self, document: dict, **kwargs):
         if "delete" in kwargs.keys():
             profiles = ""
             for i in range(len(document['profiles'])):
@@ -274,7 +276,7 @@ class InventoryConversion(Conversion):
         else:
             raise ValueError("No delete provided")
 
-    def _backend2ui_map(self, document: dict, **kwargs):
+    def backend2ui(self, document: dict, **kwargs):
         profiles_mongo = document['profiles']
         if len(profiles_mongo) > 0:
             profiles = profiles_mongo.split(";")
