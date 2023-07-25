@@ -1,0 +1,161 @@
+UI:
+  enable: true
+  frontEnd:
+    NodePort: 30001
+  backEnd:
+    NodePort: 30002
+  valuesFileDirectory: /home/ubuntu/values_folder
+  valuesFileName: values.yaml
+  keepSectionFiles: true
+image:
+  pullPolicy: Always
+splunk:
+  enabled: true
+  protocol: https
+  host: 0.0.0.0
+  token: 00000000-0000-0000-0000-000000000000
+  insecureSSL: 'true'
+  port: '8088'
+
+  sourcetypeTraps: mytype:trap
+  # sourcetype for non-metric polling event
+  sourcetypePollingEvents: mytype:polling
+  # sourcetype for metric polling event
+  sourcetypePollingMetrics: mytype:metric
+traps:
+  #service:
+  #    type: NodePort
+  #    externalTrafficPolicy: Cluster
+  #    nodePort: 30000
+  communities:
+    2c:
+    - public
+    - homelab
+  #usernameSecrets:
+  #  - sc4snmp-hlab-sha-aes
+  #  - sc4snmp-hlab-sha-des
+
+  #loadBalancerIP: The IP address in the metallb pool
+  loadBalancerIP: 0.0.0.0
+worker:
+  # There are 3 types of workers
+  trap:
+    # replicaCount: number of trap-worker pods which consumes trap tasks
+    replicaCount: 1
+    #autoscaling: use it instead of replicaCount in order to make pods scalable by itself
+    #autoscaling:
+    #  enabled: true
+    #  minReplicas: 2
+    #  maxReplicas: 10
+    #  targetCPUUtilizationPercentage: 80
+  poller:
+    # replicaCount: number of poller-worker pods which consumes polling tasks
+    replicaCount: 1
+    #autoscaling: use it instead of replicaCount in order to make pods scalable by itself
+    #autoscaling:
+    #  enabled: true
+    #  minReplicas: 2
+    #  maxReplicas: 10
+    #  targetCPUUtilizationPercentage: 80
+  sender:
+    # replicaCount: number of sender-worker pods which consumes sending tasks
+    replicaCount: 1
+    # autoscaling: use it instead of replicaCount in order to make pods scalable by itself
+    #autoscaling:
+    #  enabled: true
+    #  minReplicas: 2
+    #  maxReplicas: 10
+    #  targetCPUUtilizationPercentage: 80
+  # udpConnectionTimeout: timeout in seconds for SNMP operations
+  #udpConnectionTimeout: 5
+  logLevel: DEBUG
+scheduler:
+  logLevel: DEBUG
+  groups: |
+    group1:
+    - address: 52.14.243.157
+      port: 1163
+    - address: 20.14.10.0
+      port: 161
+    group2:
+    - address: 0.10.20.30
+    - address: 52.14.243.157
+      port: 1165
+      version: '3'
+      secret: 'mysecret'
+      security_engine: aabbccdd1234
+  profiles: |
+    single_metric:
+      frequency: 60
+      varBinds:
+      - ['IF-MIB', 'ifMtu', '1']
+    small_walk:
+      condition:
+        type: walk
+      varBinds:
+      - ['IP-MIB']
+      - ['IF-MIB']
+    gt_profile:
+      frequency: 10
+      conditions:
+      - field: IF-MIB.ifIndex
+        operation: "gt"
+        value: 1
+      varBinds:
+      - ['IF-MIB', 'ifOutDiscards']
+    lt_profile:
+      frequency: 10
+      conditions:
+      - field: IF-MIB.ifIndex
+        operation: "lt"
+        value: 2
+      varBinds:
+      - ['IF-MIB', 'ifOutDiscards']
+    in_profile:
+      frequency: 10
+      conditions:
+      - field: IF-MIB.ifDescr
+        operation: "in"
+        value:
+        - "eth0"
+        - "test value"
+      varBinds:
+      - ['IF-MIB', 'ifOutDiscards']
+    multiple_conditions:
+      frequency: 10
+      conditions:
+      - field: IF-MIB.ifIndex
+        operation: "gt"
+        value: 1
+      - field: IF-MIB.ifDescr
+        operation: "in"
+        value:
+        - "eth0"
+        - "test value"
+      varBinds:
+      - ['IF-MIB', 'ifOutDiscards']
+      - ['IF-MIB', 'ifOutErrors']
+      - ['IF-MIB', 'ifOutOctets']
+poller:
+  metricsIndexingEnabled: true
+  usernameSecrets:
+    - testv3
+ #   - sc4snmp-hlab-sha-aes
+ #   - sc4snmp-hlab-sha-des
+  inventory: |-
+    address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,delete
+    1.1.1.1,161,2c,public,,,1800,small_walk;in_profile,t,f
+    group1,1161,2c,public,,,1800,single_metric;multiple_conditions,f,f
+#    group2,163,2c,public,,,3000,generic_switch,,
+ #   10.0.0.100,,3,,sc4snmp-hlab-sha-des,,1800,,,
+sim:
+  enabled: false
+  signalfxToken:
+  signalfxRealm: us1
+mongodb:
+  pdb:
+    create: true
+  persistence:
+    storageClass: microk8s-hostpath
+  volumePermissions:
+    enabled: true

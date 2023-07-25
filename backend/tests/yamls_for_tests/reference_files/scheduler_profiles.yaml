@@ -1,0 +1,51 @@
+single_metric:
+  frequency: 60
+  varBinds:
+  - ['IF-MIB', 'ifMtu', '1']
+small_walk:
+  condition:
+    type: walk
+  varBinds:
+  - ['IP-MIB']
+  - ['IF-MIB']
+gt_profile:
+  frequency: 10
+  conditions:
+  - field: IF-MIB.ifIndex
+    operation: "gt"
+    value: 1
+  varBinds:
+  - ['IF-MIB', 'ifOutDiscards']
+lt_profile:
+  frequency: 10
+  conditions:
+  - field: IF-MIB.ifIndex
+    operation: "lt"
+    value: 2
+  varBinds:
+  - ['IF-MIB', 'ifOutDiscards']
+in_profile:
+  frequency: 10
+  conditions:
+  - field: IF-MIB.ifDescr
+    operation: "in"
+    value:
+    - "eth0"
+    - "test value"
+  varBinds:
+  - ['IF-MIB', 'ifOutDiscards']
+multiple_conditions:
+  frequency: 10
+  conditions:
+  - field: IF-MIB.ifIndex
+    operation: "gt"
+    value: 1
+  - field: IF-MIB.ifDescr
+    operation: "in"
+    value:
+    - "eth0"
+    - "test value"
+  varBinds:
+  - ['IF-MIB', 'ifOutDiscards']
+  - ['IF-MIB', 'ifOutErrors']
+  - ['IF-MIB', 'ifOutOctets']

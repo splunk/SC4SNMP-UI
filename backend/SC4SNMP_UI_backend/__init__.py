@@ -14,9 +14,16 @@ MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672//")
 REDIS_URL = os.getenv("REDIS_URL")
+VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
+KEEP_TEMP_FILES = os.getenv("KEEP_TEMP_FILES", "false")
 
+class NoValuesDirectoryException(Exception):
+    pass
 
 def create_app():
+    if len(VALUES_DIRECTORY) == 0:
+        raise NoValuesDirectoryException
+
     app = Flask(__name__)
 
     app.config.from_mapping(

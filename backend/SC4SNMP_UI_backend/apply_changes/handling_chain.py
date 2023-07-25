@@ -8,10 +8,11 @@ import os
 
 
 CHANGES_INTERVAL_SECONDS = 300
-TMP_FILE_PREFIX = "sc4snmp_ui"
+TMP_FILE_PREFIX = "sc4snmp_ui_"
 TMP_DIR = "/tmp"
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
 VALUES_FILE = os.getenv("VALUES_FILE", "")
+KEEP_TEMP_FILES = os.getenv("KEEP_TEMP_FILES", "false")
 mongo_config_collection = mongo_client.sc4snmp.config_collection
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
@@ -44,28 +45,43 @@ class AbstractHandler(Handler):
 class SaveConfigToFileHandler(AbstractHandler):
     def handle(self, request: dict):
         """
+        SaveConfigToFileHandler saves current configuration of profiles, groups and inventory from mongo
+        to files on the host machine.
 
-        :yaml_sections = {
-            "<values.yaml.key>": (mongo_collection, MongoToYamlDictConversion, TempFileHandling)
+        :param request: dictionary with at least one key "yaml_sections". Under this key there should be dictionary
+        with the following structure
+        {
+            "key.to.section": (mongo_collection, MongoToYamlDictConversion, TempFileHandling)
         }
+        where:
+            - "key.to.section": a key to section of values.yaml file that should be updated (e.g. "scheduler.profiles")
+            - mongo_collection: mongo collection with configuration of given section
+            - MongoToYamlDictConversion: implementation of this abstract class
+            - TempFileHandling: implementation of this abstract class
         """
-        if len(VALUES_DIRECTORY) == 0:
-            raise ValueError("VALUES_DIRECTORY must be provided.")
 
         yaml = ruamel.yaml.YAML()
         values_file_resolved = True
         values_file_path = os.path.join(VALUES_DIRECTORY, VALUES_FILE)
+
         if len(VALUES_FILE) == 0 or (VALUES_FILE.split(".")[1] != "yaml" and VALUES_FILE.split(".")[1] != "yml") or \
                 not os.path.exists(os.path.join(VALUES_DIRECTORY, VALUES_FILE)):
+            # If VALUES_FILE can't be found or wasn't provided, it won't be updated. In this case separate files
+            # with configuration of specific section will be saved in the hosts machine.
             values_file_resolved = False
         values = {}
         if values_file_resolved:
             with open(values_file_path, "r") as file:
                 values = yaml.load(file)
 
+        if not values_file_resolved or KEEP_TEMP_FILES.lower() in ["t", "true", "y", "yes", "1"]:
+            delete_temp_files = False
+        else:
+            delete_temp_files = True
+
         for key, value in request["yaml_sections"].items():
             tmp_file_name = TMP_FILE_PREFIX + key.replace(".", "_") + ".yaml"
-            directory = VALUES_DIRECTORY if not values_file_resolved else TMP_DIR
+            directory = VALUES_DIRECTORY if not delete_temp_files else TMP_DIR
             tmp_file_path = os.path.join(directory, tmp_file_name)
 
             mongo_collection = value[0]
@@ -74,8 +90,9 @@ class SaveConfigToFileHandler(AbstractHandler):
 
             documents = list(mongo_collection.find())
             converted = mongo_to_yaml_conversion.convert(documents)
-            parsed_values = tmp_file_handling.parse_dict_to_yaml(converted, values_file_resolved)
+            parsed_values = tmp_file_handling.parse_dict_to_yaml(converted, delete_temp_files)
 
+            # update appropriate section values dictionary
             values_keys = key.split(".")
             sub_dict = values
             for value_index, value_key in enumerate(values_keys):
