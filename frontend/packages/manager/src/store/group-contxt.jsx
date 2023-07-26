@@ -66,8 +66,6 @@ export function GroupContextProvider(props){
         setAddDeviceOpen,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
         deleteUrl,
         setDeleteUrl,
         deleteName,

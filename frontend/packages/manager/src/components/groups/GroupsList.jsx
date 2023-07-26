@@ -223,16 +223,15 @@ function GroupsList() {
         }
     };
 
-    const groupsList = groups.map((group) => (
-        <SingleGroup onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+    const groupsList = groups.map((group, i) => (
+        <SingleGroup data-test={`sc4snmp:group-${i}`} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
             <P>
                 {group.groupName}
             </P>
             <div>
-                <Button style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))}
-                        appearance="pill" icon={<Trash />} />
+                <Button data-test={`sc4snmp:group-${i}:new-device-button`} style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
+                <Button data-test={`sc4snmp:group-${i}:edit-group-button`} style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
+                <Button data-test={`sc4snmp:group-${i}:delete-group-button`} style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -277,8 +276,8 @@ function GroupsList() {
                         </Table.Head>
                         <Table.Body>
                             {GrCtx.devices
-                                .map((row) => (
-                                    <Table.Row key={createDOMID()} >
+                                .map((row, i) => (
+                                    <Table.Row data-test={`sc4snmp:group-row-${i}`} key={createDOMID()} >
                                         <Table.Cell>{row.address}</Table.Cell>
                                         <Table.Cell>{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
                                         <Table.Cell>{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
@@ -286,8 +285,8 @@ function GroupsList() {
                                         <Table.Cell>{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
                                         <Table.Cell>{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
                                         <Table.Cell>
-                                            <Button onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                            <Button onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                            <Button data-test={`sc4snmp:group-row-edit-${i}`} onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                            <Button data-test={`sc4snmp:group-row-delete-${i}`} onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}

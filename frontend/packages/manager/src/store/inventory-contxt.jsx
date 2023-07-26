@@ -54,9 +54,6 @@ export function InventoryContextProvider(props){
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
 
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
-
         addOpen: addOpen,
         setAddOpen: setAddOpen,
         addModalToggle: addModalToggle,

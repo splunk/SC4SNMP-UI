@@ -23,9 +23,9 @@ describe("AddDeviceModal", () => {
     it("Test invalid IPv4 address and no community string",() => {
         renderModal();
 
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addressInput = screen.getByDataTest('form:ip-input').querySelector("input");
-        const communityInput = screen.getByDataTest('form:community-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addressInput = screen.getByDataTest('sc4snmp:form:ip-input').querySelector("input");
+        const communityInput = screen.getByDataTest('sc4snmp:form:community-input').querySelector("input");
 
 
         fireEvent.change(addressInput, {target: {value: "1.2.3.4"}})
@@ -46,8 +46,8 @@ describe("AddDeviceModal", () => {
 
     it("Test no IPv4 and walk interval below 1800", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addressInput = screen.getByDataTest('form:ip-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addressInput = screen.getByDataTest('sc4snmp:form:ip-input').querySelector("input");
 
         fireEvent.change(addressInput, {target: {value: ""}})
         fireEvent.click(submitButton);
@@ -56,8 +56,8 @@ describe("AddDeviceModal", () => {
 
     it("Test wrong port", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const portInput = screen.getByDataTest("form:port-input").querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const portInput = screen.getByDataTest("sc4snmp:form:port-input").querySelector("input");
 
         fireEvent.change(portInput, {target: {value: ""}})
         fireEvent.click(submitButton);
@@ -74,8 +74,8 @@ describe("AddDeviceModal", () => {
 
     it("Test wrong security engine", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const securityEngineInput = screen.getByDataTest("form:security-engine-input").querySelector("input")
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const securityEngineInput = screen.getByDataTest("sc4snmp:form:security-engine-input").querySelector("input")
 
         fireEvent.change(securityEngineInput, {target: {value: "a"}})
         fireEvent.click(submitButton);

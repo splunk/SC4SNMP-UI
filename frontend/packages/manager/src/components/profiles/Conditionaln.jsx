@@ -86,8 +86,8 @@ function ConditionalIn(props){
                         newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]}/>
                         {((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors
                          && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]) ?
-                                    ValCtx.conditionalValuesErrors[props.conditionIndex][newIndices[`${keyID}`]].map((el) =>
-                                        <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                                    ValCtx.conditionalValuesErrors[props.conditionIndex][newIndices[`${keyID}`]].map((el, i) =>
+                                        <P data-test={`sc4snmp:conditional-condition-error-${props["conditionIndex"]}-${indexCopy}-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                     </div>
                 </FormRows.Row>
             );

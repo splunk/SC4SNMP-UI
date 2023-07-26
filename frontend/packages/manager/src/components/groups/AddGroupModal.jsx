@@ -91,14 +91,14 @@ function AddGroupModal() {
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <ValidationGroup>
-                            <Text data-test="form:group-name-input" value={GrCtx.groupName} onChange={handleGroupNameChange} error={(!!(ValCtx.groupNameErrors))}/>
-                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:group-name-input" value={GrCtx.groupName} onChange={handleGroupNameChange} error={(!!(ValCtx.groupNameErrors))}/>
+                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el, i) => <P data-test={`sc4snmp:group-name-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </ControlGroup>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="form:submit-form-button" appearance="primary" onClick={handleRequestSubmit} label="Submit" />
+                    <Button data-test="sc4snmp:form:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:form:submit-form-button" appearance="primary" onClick={handleRequestSubmit} label="Submit" />
                 </Modal.Footer>
             </Modal>
         </div>

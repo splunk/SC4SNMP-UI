@@ -32,8 +32,8 @@ function DeleteModal(props) {
                         </Message>) : null}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="primary" onClick={props.handleDelete} label="Delete" />
+                    <Button data-test="sc4snmp:delete-modal:cancel-button" appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:delete-modal:delete-button" appearance="primary" onClick={props.handleDelete} label="Delete" />
                 </Modal.Footer>
             </Modal>
         </div>

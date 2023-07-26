@@ -126,16 +126,16 @@ function AddProfileModal(props) {
                 <StyledModalBody>
                     <StyledControlGroup label="Profile name">
                         <ValidationGroup>
-                            <Text data-test="form:profile-name-input" value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
-                            {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:profile-name-input" value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
+                            {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el, i) => <P data-test={`sc4snmp:profile-name-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     {(ProfCtx.condition !== "walk") ?
                     <StyledControlGroup label="Frequency of polling (s)" >
                         <ValidationGroup>
-                            <Number data-test="form:frequency-input" value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
-                            {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Number data-test="sc4snmp:form:frequency-input" value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
+                            {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el, i) => <P data-test={`sc4snmp:frequency-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup> : null}
 
@@ -152,8 +152,8 @@ function AddProfileModal(props) {
 
                 </StyledModalBody>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
+                    <Button data-test="sc4snmp:form:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>
         </div>

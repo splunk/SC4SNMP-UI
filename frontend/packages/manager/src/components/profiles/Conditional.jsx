@@ -108,43 +108,43 @@ function Conditional(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row data-test={`form:conditional-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test={`sc4snmp:form:conditional-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <Card style={{width: "100%"}}>
                         <Card.Body>
                             <div style={validationGroup}>
-                                <Text data-test={`form:conditional-field-${indexCopy}`} placeholder="Field" defaultValue={condition.field} onChange={e => handleField(newIndices[`${keyID}`], e)}
+                                <Text data-test={`sc4snmp:form:conditional-field-${indexCopy}`} placeholder="Field" defaultValue={condition.field} onChange={e => handleField(newIndices[`${keyID}`], e)}
                                       error={((ValCtx.conditionalFieldErrors && newIndices[`${keyID}`] in ValCtx.conditionalFieldErrors))}/>
                                 {((ValCtx.conditionalFieldErrors && newIndices[`${keyID}`] in ValCtx.conditionalFieldErrors) ?
-                                    ValCtx.conditionalFieldErrors[newIndices[`${keyID}`]].map((el) =>
-                                        <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                                    ValCtx.conditionalFieldErrors[newIndices[`${keyID}`]].map((el, i) =>
+                                        <P data-test={`sc4snmp:conditional-field-error-${indexCopy}-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                             </div>
                             <div style={validationGroup}>
-                                <Select data-test={`form:conditional-select-operation-${indexCopy}`} value={condition.operation} onChange={(e, { value }) =>
+                                <Select data-test={`sc4snmp:form:conditional-select-operation-${indexCopy}`} value={condition.operation} onChange={(e, { value }) =>
                                     handleOperation(newIndices[`${keyID}`], value)} filter>
-                                    <Select.Option data-test={`form:conditional-equals-${indexCopy}`} label="equals" value="equals"/>
-                                    <Select.Option data-test={`form:conditional-lt-${indexCopy}`} label="less than" value="less than"/>
-                                    <Select.Option data-test={`form:conditional-gt-${indexCopy}`} label="greater than" value="greater than"/>
-                                    <Select.Option  data-test={`form:conditional-in-${indexCopy}`}label="in" value="in"/>
+                                    <Select.Option data-test={`sc4snmp:form:conditional-equals-${indexCopy}`} label="equals" value="equals"/>
+                                    <Select.Option data-test={`sc4snmp:form:conditional-lt-${indexCopy}`} label="less than" value="less than"/>
+                                    <Select.Option data-test={`sc4snmp:form:conditional-gt-${indexCopy}`} label="greater than" value="greater than"/>
+                                    <Select.Option  data-test={`sc4snmp:form:conditional-in-${indexCopy}`}label="in" value="in"/>
                                 </Select>
                                 <P/>
                             </div>
                             {
                                 ProfCtx.conditional[newIndices[`${keyID}`]].operation === 'in' ? (
                                         <div style={validationGroup}>
-                                            <ConditionalIn data-test={`form:conditional-condition-${indexCopy}`} newSubmit={props.newSubmit} conditionIndex={newIndices[`${keyID}`]}/>
+                                            <ConditionalIn data-test={`sc4snmp:form:conditional-condition-${indexCopy}`} newSubmit={props.newSubmit} conditionIndex={newIndices[`${keyID}`]}/>
                                             {((ValCtx.conditionalValuesExistErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesExistErrors) ?
-                                                <P key={createDOMID()} style={validationMessage}>{ValCtx.conditionalValuesExistErrors[newIndices[`${keyID}`]]}</P>
+                                                <P data-test={`sc4snmp:conditional-in-error-${indexCopy}`} key={createDOMID()} style={validationMessage}>{ValCtx.conditionalValuesExistErrors[newIndices[`${keyID}`]]}</P>
                                                 : null)}
                                         </div>
                                     ) : (
                                     <div style={validationGroup}>
-                                        <Text data-test={`form:conditional-condition-${indexCopy}`} placeholder="Value" defaultValue={condition.value[0]} onChange={e => handleValue(newIndices[`${keyID}`], e)}
+                                        <Text data-test={`sc4snmp:form:conditional-condition-${indexCopy}`} placeholder="Value" defaultValue={condition.value[0]} onChange={e => handleValue(newIndices[`${keyID}`], e)}
                                               error={((ValCtx.conditionalValuesErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors
                                                   && 0 in ValCtx.conditionalValuesErrors[newIndices[`${keyID}`]]))}/>
                                         {((ValCtx.conditionalValuesErrors && newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors
                                                   && 0 in ValCtx.conditionalValuesErrors[newIndices[`${keyID}`]]) ?
-                                            ValCtx.conditionalValuesErrors[newIndices[`${keyID}`]][0].map((el) =>
-                                                <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                                            ValCtx.conditionalValuesErrors[newIndices[`${keyID}`]][0].map((el, i) =>
+                                                <P data-test={`sc4snmp:conditional-condition-error-${indexCopy}-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                                     </div>
                                 )
                             }
@@ -168,7 +168,7 @@ function Conditional(props){
                 onRequestAdd={handleRequestAdd}
                 style={{ width: 300 }}
                 addLabel="Add condition"
-                data-test="form:conditional-profile"
+                data-test="sc4snmp:form:add-conditional-profile"
             >
                 {rowItems}
         </FormRows>
