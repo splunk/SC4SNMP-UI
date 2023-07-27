@@ -1,5 +1,4 @@
-import React, {useCallback, useContext, useState} from 'react';
-import { Link, Route, Routes, Switch } from 'react-router-dom';
+import React from 'react';
 
 import ErrorsModal from "./components/ErrorsModal";
 import Menu from "./components/menu_header/Menu";
@@ -16,6 +15,7 @@ import { GroupContextProvider } from "./store/group-contxt";
 import { FontStyles } from "./styles/FontsStyles";
 
 function Uncontrolled() {
+
     return (
         <ButtonsContextProvider>
             <FontStyles/>
@@ -30,7 +30,6 @@ function Uncontrolled() {
                             </InventoryContextProvider>
                         </GroupContextProvider>
                     </ProfileContxtProvider>
-
                 </MenuHeaderContxtProvider>
                 <ErrorsModal />
             </ErrorsModalContextProvider>
