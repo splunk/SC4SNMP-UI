@@ -1,10 +1,10 @@
 import React, {useState, useRef, useCallback, useContext, useEffect} from 'react';
 import { createDOMID } from '@splunk/ui-utils/id';
-import {useProfileContext} from "../../store/profile-contxt";
-import {StyledControlGroup} from "../../styles/inventory/InventoryStyle";
 import Select from "@splunk/react-ui/Select";
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
+import {StyledControlGroup} from "../../styles/inventory/InventoryStyle";
+import {useProfileContext} from "../../store/profile-contxt";
 import FieldPatterns from "./FieldPatterns";
 import {validationMessage} from "../../styles/ValidationStyles";
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
@@ -27,12 +27,12 @@ function Condition(props){
         <div>
             <StyledControlGroup label="Profile type"
                 labelFor="customized-select-after">
-            <Select value={ProfCtx.condition} onChange={handleChange} filter>
-                <Select.Option label="standard" value="standard"/>
-                <Select.Option label="base" value="base"/>
-                <Select.Option label="smart" value="smart"/>
-                <Select.Option label="walk" value="walk"/>
-                <Select.Option label="conditional" value="conditional"/>
+            <Select data-test="sc4snmp:form:select-condition" value={ProfCtx.condition} onChange={handleChange} filter>
+                <Select.Option data-test="sc4snmp:form:condition-standard" label="standard" value="standard"/>
+                <Select.Option data-test="sc4snmp:form:condition-base" label="base" value="base"/>
+                <Select.Option data-test="sc4snmp:form:condition-smart" label="smart" value="smart"/>
+                <Select.Option data-test="sc4snmp:form:condition-walk" label="walk" value="walk"/>
+                <Select.Option data-test="sc4snmp:form:condition-conditional" label="conditional" value="conditional"/>
             </Select>
             </StyledControlGroup>
             {
@@ -40,7 +40,7 @@ function Condition(props){
                     <div>
                         <StyledControlGroup label="Field">
                             <ValidationGroup>
-                                <Text data-test="form:condition-field-input" value={ProfCtx.conditionField} onChange={handleFieldChange} error={((ValCtx.conditionFieldErrors) ? true : false)}/>
+                                <Text data-test="sc4snmp:form:condition-field-input" value={ProfCtx.conditionField} onChange={handleFieldChange} error={(!!(ValCtx.conditionFieldErrors))}/>
                                 {((ValCtx.conditionFieldErrors) ? ValCtx.conditionFieldErrors.map((el) =>
                                     <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                             </ValidationGroup>
@@ -49,7 +49,7 @@ function Condition(props){
                             <ValidationGroup>
                                 <FieldPatterns newSubmit={props.newSubmit}/>
                                 {((ValCtx.patternsExistErrors) ?
-                                <P key={createDOMID()} style={validationMessage}>{ValCtx.patternsExistErrors}</P>
+                                <P data-test="sc4snmp:patterns-error" key={createDOMID()} style={validationMessage}>{ValCtx.patternsExistErrors}</P>
                                 : null)}
                             </ValidationGroup>
                         </StyledControlGroup>
@@ -62,7 +62,7 @@ function Condition(props){
                         <ValidationGroup>
                             <Conditional newSubmit={props.newSubmit}/>
                             {((ValCtx.conditionalExistErrors) ?
-                            <P key={createDOMID()} style={validationMessage}>{ValCtx.conditionalExistErrors}</P>
+                            <P data-test="sc4snmp:conditional-error" key={createDOMID()} style={validationMessage}>{ValCtx.conditionalExistErrors}</P>
                             : null)}
                         </ValidationGroup>
                     </StyledControlGroup>

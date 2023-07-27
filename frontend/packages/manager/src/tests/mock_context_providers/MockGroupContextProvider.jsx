@@ -56,8 +56,6 @@ export function MockGroupContextProvider(props){
         setAddDeviceOpen: setStateMock,
         deleteOpen: true,
         setDeleteOpen: setStateMock,
-        buttonsOpen: false,
-        setButtonsOpen: setStateMock,
         deleteUrl: "",
         setDeleteUrl: setStateMock,
         deleteName: "",

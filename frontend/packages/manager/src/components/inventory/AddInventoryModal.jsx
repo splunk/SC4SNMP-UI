@@ -162,14 +162,14 @@ function AddInventoryModal() {
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address/Group">
                         <ValidationGroup>
-                            <Text data-test="form:group-ip-input" value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
-                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P data-test="ip-group-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:group-ip-input" value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
+                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el, i) => <P data-test={`sc4snmp:ip-group-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
                     <StyledControlGroup labelWidth={140} label="Port">
                         <ValidationGroup>
-                            <Text data-test="form:port-input" value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
-                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:port-input" value={InvCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el, i) => <P data-test={`sc4snmp:port-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
@@ -178,61 +178,61 @@ function AddInventoryModal() {
                     labelFor="customized-select-after"
                     labelWidth={140}
                     >
-                        <Select data-test="form:version" defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
-                            <Select.Option data-test="form:version-1" label="1" value="1"/>
-                            <Select.Option data-test="form:version-2c" label="2c" value="2c"/>
-                            <Select.Option data-test="form:version-3" label="3" value="3"/>
+                        <Select data-test="sc4snmp:form:select-version" defaultValue={InvCtx.version} inputId="customized-select-after" value={InvCtx.version} onChange={handleChangeVersion}>
+                            <Select.Option data-test="sc4snmp:form:version-1" label="1" value="1"/>
+                            <Select.Option data-test="sc4snmp:form:version-2c" label="2c" value="2c"/>
+                            <Select.Option data-test="sc4snmp:form:version-3" label="3" value="3"/>
                         </Select>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Community" labelWidth={140}>
                         <ValidationGroup>
-                            <Text data-test="form:community-input" value={InvCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
-                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:community-input" value={InvCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
+                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el, i) => <P data-test={`sc4snmp:community-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Secret" labelWidth={140}>
                         <ValidationGroup>
-                            <Text value={InvCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
-                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:secret-input" value={InvCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
+                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el, i) => <P data-test={`sc4snmp:secret-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Security Engine" labelWidth={140}>
                         <ValidationGroup>
-                            <Text data-test="form:security-engine-input" value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
-                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:security-engine-input" value={InvCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
+                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el, i) => <P data-test={`sc4snmp:security-engine-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Walk Interval (s)" labelWidth={140}>
                         <ValidationGroup>
-                            <Number data-test="form:walk-interval-input" value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
-                            {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Number data-test="sc4snmp:form:walk-interval-input" value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={((ValCtx.walkIntervalErrors) ? true : false)}/>
+                            {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el, i) => <P data-test={`sc4snmp:walk-interval-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Profiles" labelWidth={140}>
                         <ValidationGroup>
-                            <Multiselect onChange={handleChange} defaultValues={InvCtx.profiles} error={((ValCtx.profilesErrors) ? true : false)}>
-                                {initProfiles.map((v) => (<Multiselect.Option key={createDOMID()} label={v} value={v} />))}
+                            <Multiselect data-test="sc4snmp:form:profiles-multiselect" onChange={handleChange} defaultValues={InvCtx.profiles} error={((ValCtx.profilesErrors) ? true : false)}>
+                                {initProfiles.map((v, i) => (<Multiselect.Option data-test={`sc4snmp:form:profile-${i}`} key={createDOMID()} label={v} value={v} />))}
                             </Multiselect>
-                            {((ValCtx.profilesErrors) ? ValCtx.profilesErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            {((ValCtx.profilesErrors) ? ValCtx.profilesErrors.map((el, i) => <P data-test={`sc4snmp:profiles-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup label="Smart Profiles enabled" labelWidth={140}>
-                        <RadioBar value={InvCtx.smartProfiles} onChange={handleChangeSmartProfiles}>
-                            <RadioBar.Option value={true} label="true"/>
-                            <RadioBar.Option value={false} label="false"/>
+                        <RadioBar data-test="sc4snmp:form:smart-profiles" value={InvCtx.smartProfiles} onChange={handleChangeSmartProfiles}>
+                            <RadioBar.Option data-test="sc4snmp:form:smart-profile-true" value={true} label="true"/>
+                            <RadioBar.Option data-test="sc4snmp:form:smart-profile-false" value={false} label="false"/>
                         </RadioBar>
                     </StyledControlGroup>
 
                 </StyledModalBody>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
+                    <Button data-test="sc4snmp:form:cancelbutton" appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>
         </div>

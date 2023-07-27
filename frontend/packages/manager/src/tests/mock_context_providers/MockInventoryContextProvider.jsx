@@ -47,9 +47,6 @@ export function MockInventoryContextProvider(props){
         deleteOpen: false,
         setDeleteOpen: setStateMock,
 
-        buttonsOpen: false,
-        setButtonsOpen: setStateMock,
-
         addOpen: true,
         setAddOpen: setStateMock,
         addModalToggle: null,

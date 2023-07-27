@@ -23,8 +23,8 @@ function renderModal(){
 describe("AddGroupModal", () => {
     it("Test wrong group name", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const groupNameInput = screen.getByDataTest('form:group-name-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const groupNameInput = screen.getByDataTest('sc4snmp:form:group-name-input').querySelector("input");
 
         fireEvent.change(groupNameInput, {target: {value: "gro?up1"}})
         fireEvent.click(submitButton);
@@ -34,8 +34,8 @@ describe("AddGroupModal", () => {
 
     it("Test no group name provided", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const groupNameInput = screen.getByDataTest('form:group-name-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const groupNameInput = screen.getByDataTest('sc4snmp:form:group-name-input').querySelector("input");
 
         fireEvent.change(groupNameInput, {target: {value: ""}})
         fireEvent.click(submitButton);

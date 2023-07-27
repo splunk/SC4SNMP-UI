@@ -15,9 +15,9 @@ function Menu(){
             <StyledMenuBar>
                  <StyledMenuBarLeft>
                      <StyledTab activeTabId={MenuCtx.activeTabId} onChange={handleMenuChange}>
-                        <TabBar.Tab label="Profiles" tabId="Profiles" />
-                        <TabBar.Tab label="Groups" tabId="Groups" />
-                        <TabBar.Tab label="Inventory" tabId="Inventory" />
+                        <TabBar.Tab data-test="sc4snmp:profiles-tab" label="Profiles" tabId="Profiles" />
+                        <TabBar.Tab data-test="sc4snmp:groups-tab" label="Groups" tabId="Groups" />
+                        <TabBar.Tab data-test="sc4snmp:groups-tab" label="Inventory" tabId="Inventory" />
                     </StyledTab>
                  </StyledMenuBarLeft>
                  <StyledMenuBarRight>

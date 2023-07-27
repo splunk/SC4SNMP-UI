@@ -87,11 +87,11 @@ function Header(){
                 </StyledHeaderLeft>
                 <StyledHeaderRight>
                     <div>
-                        <Button icon={<Plus screenReaderText={null} />} appearance="primary"
+                        <Button data-test="sc4snmp:new-item-button" icon={<Plus screenReaderText={null} />} appearance="primary"
                                 label={addButtonLabel[MenuCtx.activeTabId]}
                                 onClick={addButtonHandler[MenuCtx.activeTabId]}
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
-                        <Button label="Apply changes" onClick={handleApplyChanges}
+                        <Button data-test="sc4snmp:apply-changes-button" label="Apply changes" onClick={handleApplyChanges}
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
                     </div>
                 </StyledHeaderRight>

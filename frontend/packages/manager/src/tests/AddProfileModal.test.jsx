@@ -25,7 +25,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 describe("AddProfileModal", () => {
     it("Test no VarBinds and no profile name", () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
 
         expect(screen.queryByText("Profile Name is required")).not.toBeInTheDocument();
         expect(screen.queryByText("At least one varBind must be specified.")).not.toBeInTheDocument();
@@ -36,9 +36,9 @@ describe("AddProfileModal", () => {
 
     it("Test empty VarBind", async () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const frequencyInput = screen.getByDataTest("form:frequency-input").querySelector("input")
-        const addVarBindButton = screen.getByDataTest("form:add-varbinds").querySelector(`[data-test="add-row"]`)
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const frequencyInput = screen.getByDataTest("sc4snmp:form:frequency-input").querySelector("input")
+        const addVarBindButton = screen.getByDataTest("sc4snmp:form:add-varbinds").querySelector(`[data-test="add-row"]`)
 
 
         fireEvent.click(addVarBindButton);
@@ -51,9 +51,9 @@ describe("AddProfileModal", () => {
 
     it("Test adding multiple varbinds with errors", async () => {
         renderModal();
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const frequencyInput = screen.getByDataTest("form:frequency-input").querySelector("input")
-        const addVarBindButton = screen.getByDataTest("form:add-varbinds").querySelector(`[data-test="add-row"]`)
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const frequencyInput = screen.getByDataTest("sc4snmp:form:frequency-input").querySelector("input")
+        const addVarBindButton = screen.getByDataTest("sc4snmp:form:add-varbinds").querySelector(`[data-test="add-row"]`)
 
 
         fireEvent.click(addVarBindButton);
@@ -61,11 +61,11 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         fireEvent.change(frequencyInput, {target: {value: 2}})
         let mibFamilyInput0 =
-            screen.getByDataTest("form:varbind0-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
         const mibCategoryInput1 =
-            screen.getByDataTest("form:varbind1-mib-category-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind1-mib-category-input").querySelector("input")
         const mibIndexInput2 =
-            screen.getByDataTest("form:varbind2-mib-index-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind2-mib-index-input").querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mi b"}})
         fireEvent.change(mibCategoryInput1, {target: {value: "aa?"}})
@@ -73,9 +73,9 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         await sleep(5)
 
-        let firstRow = screen.getByDataTest("form:varbind-row-0")
-        const secondRow = screen.getByDataTest("form:varbind-row-1")
-        const thirdRow = screen.getByDataTest("form:varbind-row-2")
+        let firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
+        const secondRow = screen.getByDataTest("sc4snmp:form:varbind-row-1")
+        const thirdRow = screen.getByDataTest("sc4snmp:form:varbind-row-2")
 
         expect(within(firstRow).queryByText("MIB-Component can consist only of upper and lower english letters, " +
             "numbers and two special characters: '-' and '_'. No spaces are allowed.")).toBeInTheDocument()
@@ -90,37 +90,37 @@ describe("AddProfileModal", () => {
 
         // Delete first two rows
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("form:varbind-row-0")
+        firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
         expect(within(firstRow).queryByText("MIB-Component is required")).toBeInTheDocument()
         expect(within(firstRow).queryByText("MIB object is required when MIB index is specified")).toBeInTheDocument()
         expect(within(firstRow).queryByText("Index can't include white spaces")).toBeInTheDocument()
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addVarBindButton);
         await sleep(10);
 
         mibFamilyInput0 =
-            screen.getByDataTest("form:varbind0-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mib"}})
-        firstRow = screen.getByDataTest("form:varbind-row-0")
+        firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
         expect(within(firstRow).queryByText("MIB-Component is required")).not.toBeInTheDocument()
     })
 
     it ("Test empty field and no patterns in smart profile", () => {
         renderModal({profileType: "smart"})
-        const submitButton = screen.getByDataTest("form:submit-form-button");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
 
         expect(screen.queryByText("Field is required")).not.toBeInTheDocument();
         expect(screen.queryByText("At least one pattern must be specified.")).not.toBeInTheDocument();
@@ -131,21 +131,21 @@ describe("AddProfileModal", () => {
 
     it("Test wrong field and empty pattern in smart profile", async () => {
         renderModal({profileType: "smart"})
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addPatternButton = screen.getByDataTest("form:field-patterns").querySelector(`[data-test="add-row"]`)
-        const fieldInput = screen.getByDataTest("form:condition-field-input").querySelector("input")
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addPatternButton = screen.getByDataTest("sc4snmp:form:field-patterns").querySelector(`[data-test="add-row"]`)
+        const fieldInput = screen.getByDataTest("sc4snmp:form:condition-field-input").querySelector("input")
 
         fireEvent.click(addPatternButton);
         fireEvent.click(addPatternButton);
         fireEvent.change(fieldInput, {target: {value: "t est"}});
 
-        let patternInput0 = screen.getByDataTest("form:field-pattern-0").querySelector("input")
+        let patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
         fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.click(submitButton);
         await sleep(10)
 
-        let firstRow = screen.getByDataTest("form:field-pattern-row-0")
-        const secondRow = screen.getByDataTest("form:field-pattern-row-1")
+        let firstRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-0")
+        const secondRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-1")
 
         expect(screen.queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
@@ -154,21 +154,21 @@ describe("AddProfileModal", () => {
 
         // Delete first row
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("form:field-pattern-row-0")
+        firstRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-0")
         expect(within(firstRow).queryByText("Pattern is required")).toBeInTheDocument();
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addPatternButton);
         await sleep(10)
-        patternInput0 = screen.getByDataTest("form:field-pattern-0").querySelector("input")
+        patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
         fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.click(submitButton);
         await sleep(10)
@@ -177,7 +177,7 @@ describe("AddProfileModal", () => {
 
     it("Test no conditions", () => {
         renderModal({profileType: "conditional"})
-        const submitButton = screen.getByDataTest("form:submit-form-button");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
 
         expect(screen.queryByText("At least one condition must be specified.")).not.toBeInTheDocument();
         fireEvent.click(submitButton);
@@ -186,8 +186,8 @@ describe("AddProfileModal", () => {
 
     it("Test errors in multiple conditions", async () => {
         renderModal({profileType: "conditional"})
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addConditionalButton = screen.getByDataTest("form:conditional-profile").querySelector(`[data-test="add-row"]`)
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("sc4snmp:form:add-conditional-profile").querySelector(`[data-test="add-row"]`)
 
         fireEvent.click(addConditionalButton);
         fireEvent.click(addConditionalButton);
@@ -195,19 +195,19 @@ describe("AddProfileModal", () => {
 
         await sleep(5);
 
-        const optionsButton1 = screen.getByDataTest("form:conditional-select-operation-1")
+        const optionsButton1 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-1")
         fireEvent.click(optionsButton1)
         await sleep(5)
-        const inOptionButton1 = screen.getByDataTest("form:conditional-in-1")
+        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in-1")
         fireEvent.click(inOptionButton1)
         await sleep(5)
 
         const fieldInput0 =
-            screen.getByDataTest("form:conditional-field-0").querySelector('[data-test="textbox"]')
+            screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector('[data-test="textbox"]')
         const fieldInput2 =
-            screen.getByDataTest("form:conditional-field-2").querySelector('[data-test="textbox"]')
+            screen.getByDataTest("sc4snmp:form:conditional-field-2").querySelector('[data-test="textbox"]')
         const valueInput2 =
-            screen.getByDataTest("form:conditional-condition-2").querySelector('[data-test="textbox"]')
+            screen.getByDataTest("sc4snmp:form:conditional-condition-2").querySelector('[data-test="textbox"]')
 
         fireEvent.change(fieldInput0, {target: {value: "te st"}})
         fireEvent.change(fieldInput2, {target: {value: "test"}})
@@ -218,9 +218,9 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         fireEvent.click(submitButton);
 
-        let firstRow = screen.getByDataTest("form:conditional-row-0")
-        const secondRow = screen.getByDataTest("form:conditional-row-1")
-        const thirdRow = screen.getByDataTest("form:conditional-row-2")
+        let firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
+        const secondRow = screen.getByDataTest("sc4snmp:form:conditional-row-1")
+        const thirdRow = screen.getByDataTest("sc4snmp:form:conditional-row-2")
 
         expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
@@ -236,17 +236,17 @@ describe("AddProfileModal", () => {
 
         // Delete first and second row
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("form:conditional-row-0")
+        firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
         expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
         expect(within(firstRow).queryByText("Field is required")).not.toBeInTheDocument()
@@ -254,20 +254,20 @@ describe("AddProfileModal", () => {
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addConditionalButton);
         await sleep(10);
 
         const valueInput0 =
-            screen.getByDataTest("form:conditional-condition-0").querySelector('[data-test="textbox"]')
+            screen.getByDataTest("sc4snmp:form:conditional-condition-0").querySelector('[data-test="textbox"]')
         fireEvent.change(valueInput0, {target: {value: "2"}})
 
         fireEvent.click(submitButton)
         await sleep(5)
 
-        firstRow = screen.getByDataTest("form:conditional-row-0")
+        firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
 
         expect(within(firstRow).queryByText("Field is required")).toBeInTheDocument()
         expect(within(firstRow).queryByText("Value is required")).not.toBeInTheDocument()

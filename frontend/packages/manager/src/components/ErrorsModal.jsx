@@ -20,7 +20,7 @@ function ErrorsModal() {
                     <P>{ErrCtx.message}</P>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Close" />
+                    <Button data-test="sc4snmp:errors-modal:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Close" />
                 </Modal.Footer>
             </Modal>
         </div>

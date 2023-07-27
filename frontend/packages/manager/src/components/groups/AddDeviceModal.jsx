@@ -122,14 +122,14 @@ function AddDeviceModal(){
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address">
                         <ValidationGroup>
-                            <Text data-test='form:ip-input' value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
-                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test='sc4snmp:form:ip-input' value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
+                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el, i) => <P data-test={`sc4snmp:ip-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
                     <StyledControlGroup labelWidth={140} label="Port" >
                         <ValidationGroup>
-                            <Text data-test="form:port-input" value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
-                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:port-input" value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
+                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el, i) => <P data-test={`sc4snmp:port-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
@@ -138,39 +138,39 @@ function AddDeviceModal(){
                     labelFor="customized-select-after"
                     labelWidth={140}
                     >
-                        <Select defaultValue={GrCtx.version} inputId="customized-select-after" value={GrCtx.version} onChange={handleChangeVersion}>
-                            <Select.Option label="From inventory" value=""/>
-                            <Select.Option label="1" value="1"/>
-                            <Select.Option label="2c" value="2c"/>
-                            <Select.Option label="3" value="3"/>
+                        <Select data-test="sc4snmp:form:select-version" defaultValue={GrCtx.version} inputId="customized-select-after" value={GrCtx.version} onChange={handleChangeVersion}>
+                            <Select.Option data-test="sc4snmp:form:version-from-inventory" label="From inventory" value=""/>
+                            <Select.Option data-test="sc4snmp:form:version-1" label="1" value="1"/>
+                            <Select.Option data-test="sc4snmp:form:version-2c" label="2c" value="2c"/>
+                            <Select.Option data-test="sc4snmp:form:version-3" label="3" value="3"/>
                         </Select>
                     </StyledControlGroup>
 
                     <StyledControlGroup labelWidth={140} label="Community">
                         <ValidationGroup>
-                            <Text data-test="form:community-input" value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
-                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:community-input" value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
+                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el, i) => <P data-test={`sc4snmp:community-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup labelWidth={140} label="Secret">
                         <ValidationGroup>
-                            <Text value={GrCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
-                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:secret-input" value={GrCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
+                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el, i) => <P data-test={`sc4snmp:secret-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup labelWidth={140} label="Security Engine">
                         <ValidationGroup>
-                            <Text data-test="form:security-engine-input" value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
-                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:security-engine-input" value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
+                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el, i) => <P data-test={`sc4snmp:security-engine-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                 </StyledModalBody>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
+                    <Button data-test="sc4snmp:form:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:form:submit-form-button" appearance="primary" label="Submit" onClick={handleApply} />
                 </Modal.Footer>
             </Modal>
         </div>

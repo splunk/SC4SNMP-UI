@@ -144,8 +144,8 @@ function InventoryList() {
                 </Table.Head>
                 <Table.Body>
                     {allInventoryRecords
-                        .map((row) => (
-                            <Table.Row key={createDOMID()} elementRef={InvCtx.rowToggle}>
+                        .map((row, i) => (
+                            <Table.Row data-test={`sc4snmp:inventory-row-${i}`} key={createDOMID()} elementRef={InvCtx.rowToggle}>
                                 <Table.Cell>{row.address}</Table.Cell>
                                 <Table.Cell>{row.port}</Table.Cell>
                                 <Table.Cell>{row.version}</Table.Cell>
@@ -156,8 +156,8 @@ function InventoryList() {
                                 <Table.Cell>{row.profiles.toString()}</Table.Cell>
                                 <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
                                 <Table.Cell>
-                                    <Button onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <Button data-test={`sc4snmp:inventory-row-edit-${i}`} onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                    <Button data-test={`sc4snmp:inventory-row-delete-${i}`} onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                 </Table.Cell>
                             </Table.Row>
                         ))}

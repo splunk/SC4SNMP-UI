@@ -33,9 +33,9 @@ describe("AddInventoryModal", () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
 
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addressInput = screen.getByDataTest('form:group-ip-input').querySelector("input");
-        const communityInput = screen.getByDataTest('form:community-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const communityInput = screen.getByDataTest('sc4snmp:form:community-input').querySelector("input");
 
 
         fireEvent.change(addressInput, {target: {value: "1.2.3.4"}})
@@ -56,9 +56,9 @@ describe("AddInventoryModal", () => {
     it("Test no IPv4 and walk interval below 1800", async () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addressInput = screen.getByDataTest('form:group-ip-input').querySelector("input");
-        const walkIntervalInput = screen.getByDataTest('form:walk-interval-input').querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const walkIntervalInput = screen.getByDataTest('sc4snmp:form:walk-interval-input').querySelector("input");
 
         fireEvent.change(addressInput, {target: {value: "group1"}})
         fireEvent.change(walkIntervalInput, {target: {value: 10}});
@@ -76,9 +76,9 @@ describe("AddInventoryModal", () => {
     it("Test wrong group name, no port and wrong port", async () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const addressInput = screen.getByDataTest('form:group-ip-input').querySelector("input");
-        const portInput = screen.getByDataTest("form:port-input").querySelector("input");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const portInput = screen.getByDataTest("sc4snmp:form:port-input").querySelector("input");
 
         fireEvent.change(addressInput, {target: {value: "group 1"}})
         fireEvent.change(portInput, {target: {value: ""}})
@@ -99,8 +99,8 @@ describe("AddInventoryModal", () => {
     it("Test wrong security engine", async () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
-        const submitButton = screen.getByDataTest("form:submit-form-button");
-        const securityEngineInput = screen.getByDataTest("form:security-engine-input").querySelector("input")
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const securityEngineInput = screen.getByDataTest("sc4snmp:form:security-engine-input").querySelector("input")
 
         fireEvent.change(securityEngineInput, {target: {value: "a"}})
         fireEvent.click(submitButton);
@@ -116,12 +116,12 @@ describe("AddInventoryModal", () => {
     it("Test no secret in version 3 of snmp", async () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
-        const submitButton = screen.getByDataTest("form:submit-form-button");
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
 
-        const versionButton = screen.getByDataTest("form:version")
+        const versionButton = screen.getByDataTest("sc4snmp:form:select-version")
         fireEvent.click(versionButton)
         await sleep(5)
-        const versionOptionButton = screen.getByDataTest("form:version-3")
+        const versionOptionButton = screen.getByDataTest("sc4snmp:form:version-3")
         fireEvent.click(versionOptionButton)
         await sleep(5)
 
