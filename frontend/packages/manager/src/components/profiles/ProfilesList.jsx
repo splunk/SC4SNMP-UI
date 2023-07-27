@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import Select from "@splunk/react-ui/Select";
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
@@ -56,7 +56,7 @@ function ProfilesList() {
         {sortKey: `actions`, label: 'Actions'},
     ];
 
-    const [profilesPerPage, setProfilesPerPage] = useState('3');
+    const [profilesPerPage, setProfilesPerPage] = useState('20');
     const [pageNum, setPageNum] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [profilesRecords, setProfilesRecords] = useState([]);
@@ -115,6 +115,11 @@ function ProfilesList() {
     const profileDeleteHandler = (row) => {
         ProfCtx.setProfileId(row._id);
         ProfCtx.setProfileName(row.profileName);
+        if (row.profileInInventory){
+            ProfCtx.setProfileWarning(`WARNING: This profile is configured in some records in the inventory`);
+        }else{
+            ProfCtx.setProfileWarning(null);
+        }
         ProfCtx.setDeleteOpen(true);
     };
 
@@ -148,12 +153,11 @@ function ProfilesList() {
             <Pagination>
                 <Select appearance="pill" suffixLabel="profiles per page"
                         value={profilesPerPage} onChange={profilesPerPageHandler}
-                        defaultValue="3">
-                    <Select.Option label="3" value="3" />
+                        defaultValue="20">
                     <Select.Option label="10" value="10" />
+                    <Select.Option label="20" value="20" />
                     <Select.Option label="50" value="50" />
                     <Select.Option label="100" value="100" />
-                    <Select.Option label="200" value="200" />
                 </Select>
                 <Paginator
                     onChange={(event, { page }) => (paginationHandler(page))}
@@ -180,7 +184,7 @@ function ProfilesList() {
                                 expanded={row._id === expandedRowId}
                             >
                                 <Table.Cell>{row.profileName}</Table.Cell>
-                                <Table.Cell>{row.frequency}</Table.Cell>
+                                <Table.Cell>{(row.conditions.condition !=="walk" ? row.frequency : <P>N/A</P>)}</Table.Cell>
                                 <Table.Cell>{row.conditions.condition}</Table.Cell>
                                 <Table.Cell>{(row.varBinds.length === 1) ? `1 MIB family` :
                                     `${row.varBinds.length} MIB families`}</Table.Cell>
@@ -194,7 +198,7 @@ function ProfilesList() {
                         ))}
                 </Table.Body>
             </Table>
-            <DeleteModal deleteName={`${ProfCtx.profileName}`}
+            <DeleteModal deleteName={`${ProfCtx.profileName}`} customWarning={ProfCtx.profileWarning}
                              handleDelete={deleteModalRequest}/>
         </div>
     );

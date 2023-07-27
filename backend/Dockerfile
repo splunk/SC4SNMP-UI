@@ -13,5 +13,7 @@ RUN chmod +x /flask_start.sh
 COPY ./celery_start.sh /celery_start.sh
 RUN chmod +x /celery_start.sh
 
+USER 10000:10000
+
 EXPOSE 5000
 CMD ["gunicorn", "-b", ":5000", "app:flask_app", "--log-level", "INFO"]

@@ -2,7 +2,7 @@ from SC4SNMP_UI_backend import mongo_client
 from enum import Enum
 from typing import Callable
 from bson import ObjectId
-from SC4SNMP_UI_backend.common.conversions import InventoryConversion
+from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
 
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
@@ -30,6 +30,7 @@ def update_profiles_in_inventory(profile_to_search: str, process_record: Callabl
         record_updated = process_record(index_to_update, record_updated, kwargs)
         record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
         mongo_inventory.update_one({"_id": ObjectId(record_id)}, {"$set": record_updated})
+    return inventory_records
 
 
 class HandleNewDevice:

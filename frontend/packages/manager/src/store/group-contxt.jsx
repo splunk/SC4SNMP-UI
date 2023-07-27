@@ -29,6 +29,7 @@ export function GroupContextProvider(props){
                                         secret: "",
                                         securityEngine: ""
                                     });
+    const [groupWarning, setGroupWarning] = useState(null);
 
     // Variables for device
     const [deviceId, setDeviceId] = useState(null);
@@ -89,6 +90,8 @@ export function GroupContextProvider(props){
         setDevices,
         inventoryConfig,
         setInventoryConfig,
+        groupWarning,
+        setGroupWarning,
 
         // Variables for device
         deviceId,

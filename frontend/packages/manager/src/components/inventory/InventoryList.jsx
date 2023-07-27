@@ -35,7 +35,7 @@ function InventoryList() {
     const [allInventoryRecords, setAllInventoryRecords] = useState([]);
     const [pageNum, setPageNum] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [devicesPerPage, setDevicesPerPage] = useState("3");
+    const [devicesPerPage, setDevicesPerPage] = useState("20");
 
     const BASE_URL_GET_ALL = `http://${backendHost}/inventory/`;
     const BASE_URL_DELETE = `http://${backendHost}/inventory/delete/`;
@@ -121,12 +121,11 @@ function InventoryList() {
             <Pagination>
                 <Select appearance="pill" suffixLabel="inventory items per page"
                         value={devicesPerPage} onChange={handleDevicesPerPage}
-                        defaultValue="3">
-                    <Select.Option label="3" value="3" />
+                        defaultValue="20">
                     <Select.Option label="10" value="10" />
+                    <Select.Option label="20" value="20" />
                     <Select.Option label="50" value="50" />
                     <Select.Option label="100" value="100" />
-                    <Select.Option label="200" value="200" />
                 </Select>
                 <Paginator
                     onChange={handlePagination}

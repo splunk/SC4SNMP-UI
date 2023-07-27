@@ -60,7 +60,8 @@ def test_get_all_profiles_list(m_client, client):
         },
         "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                      {"family": "IF-MIB", "category": "", "index": ""},
-                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+        'profileInInventory': True,
     }
 
     ui_prof_2 = {
@@ -75,7 +76,8 @@ def test_get_all_profiles_list(m_client, client):
         },
         "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
                      {"family": "IF-MIB", "category": "", "index": ""},
-                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+        'profileInInventory': True,
     }
 
     response = client.get('/profiles')
@@ -86,8 +88,9 @@ def test_get_all_profiles_list(m_client, client):
 @mock.patch("pymongo.collection.Collection.find")
 def test_get_groups_list(m_client, client):
     common_id = "635916b2c8cb7a15f28af40a"
-    m_client.return_value = [
-        {
+
+    m_client.side_effect = [
+        [{
             "_id": common_id,
             "group_1": [
                 {"address": "1.2.3.4"}
@@ -98,17 +101,21 @@ def test_get_groups_list(m_client, client):
             "group_2": [
                 {"address": "1.2.3.4"}
             ]
-        }
+        }],
+        [],
+        [{"address": "group_2"}]
     ]
 
     expected_groups = [
         {
             "_id": common_id,
-            "groupName": "group_1"
+            "groupName": "group_1",
+            "groupInInventory": False
         },
         {
             "_id": common_id,
-            "groupName": "group_2"
+            "groupName": "group_2",
+            "groupInInventory": True
         }
     ]
 

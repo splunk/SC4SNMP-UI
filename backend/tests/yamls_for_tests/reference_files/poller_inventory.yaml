@@ -1,0 +1,4 @@
+inventory: |-
+  address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,delete
+  1.1.1.1,161,2c,public,,,1800,small_walk;in_profile,t,f
+  group1,1161,2c,public,,,1800,single_metric;multiple_conditions,f,f

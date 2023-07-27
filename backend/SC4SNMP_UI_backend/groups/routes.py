@@ -2,10 +2,10 @@ from bson import ObjectId
 from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
-from SC4SNMP_UI_backend.common.conversions import GroupConversion, GroupDeviceConversion, InventoryConversion, \
-    get_group_name_from_backend
+from SC4SNMP_UI_backend.common.backend_ui_conversions import GroupConversion, GroupDeviceConversion, InventoryConversion, \
+    get_group_or_profile_name_from_backend
 from copy import copy
-from SC4SNMP_UI_backend.common.helpers import HandleNewDevice
+from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
@@ -21,7 +21,9 @@ def get_groups_list():
     groups = mongo_groups.find()
     groups_list = []
     for gr in list(groups):
-        groups_list.append(group_conversion.backend2ui(gr))
+        group_name = get_group_or_profile_name_from_backend(gr)
+        group_in_inventory = True if list(mongo_inventory.find({"address": group_name, "delete": False})) else False
+        groups_list.append(group_conversion.backend2ui(gr, group_in_inventory=group_in_inventory))
     return jsonify(groups_list)
 
 
@@ -50,7 +52,7 @@ def update_group(group_id):
             {"message": f"Group with name {group_obj['groupName']} already exists. Group was not edited."}), 400
     else:
         old_group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
-        old_group_name = get_group_name_from_backend(old_group)
+        old_group_name = get_group_or_profile_name_from_backend(old_group)
         mongo_groups.update_one({'_id': old_group['_id']}, {"$rename": {f"{old_group_name}": f"{group_obj['groupName']}"}})
 
         # Rename corresponding group in the inventory
@@ -63,19 +65,26 @@ def update_group(group_id):
 @cross_origin()
 def delete_group_and_devices(group_id):
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
+    configured_in_inventory = False
     with mongo_client.start_session() as session:
         with session.start_transaction():
             mongo_groups.delete_one({'_id': ObjectId(group_id)})
+            if list(mongo_inventory.find({"address": group_name})):
+                configured_in_inventory = True
             mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}})
-    return jsonify({"message": f"Group {group_name} was deleted. If {group_name} was configured in the inventory, it was deleted from there."}), 200
+    if configured_in_inventory:
+        message = f"Group {group_name} was deleted. It was also deleted from the inventory."
+    else:
+        message = f"Group {group_name} was deleted."
+    return jsonify({"message": message}), 200
 
 
 @groups_blueprint.route('/group/<group_id>/devices/count')
 @cross_origin()
 def get_devices_count_for_group(group_id):
     group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
     total_count = len(group[group_name])
     return jsonify(total_count)
 
@@ -88,7 +97,7 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
     skips = dev_per_page * (page_num - 1)
     group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
 
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
     devices_list = []
     for i, device in enumerate(group[group_name]):
         devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
@@ -113,7 +122,7 @@ def add_device_to_group():
     device_obj = request.json
     group_id = device_obj["groupId"]
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
     device_obj = group_device_conversion.ui2backend(device_obj)
     handler = HandleNewDevice(mongo_groups, mongo_inventory)
     host_added, message = handler.add_group_host(group_name, ObjectId(group_id), device_obj)
@@ -132,7 +141,7 @@ def update_device_from_group(device_id):
     device_id = device_id.split("-")[1]
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
     device_obj = group_device_conversion.ui2backend(device_obj)
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
     handler = HandleNewDevice(mongo_groups, mongo_inventory)
 
     host_edited, message = handler.edit_group_host(group_name, ObjectId(group_id), device_id, device_obj, )
@@ -149,7 +158,7 @@ def delete_device_from_group_record(device_id: str):
     group_id = device_id.split("-")[0]
     device_id = device_id.split("-")[1]
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))[0]
-    group_name = get_group_name_from_backend(group)
+    group_name = get_group_or_profile_name_from_backend(group)
     removed_device = group[group_name].pop(int(device_id))
     device_name = f"{removed_device['address']}:{removed_device.get('port','')}"
     new_values = {"$set": group}

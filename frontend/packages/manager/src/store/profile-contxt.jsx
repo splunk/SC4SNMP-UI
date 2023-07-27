@@ -26,6 +26,7 @@ export function ProfileContxtProvider(props) {
     const [conditionPatterns, setConditionPatterns] = useState([]);
     const [conditional, setConditional] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const [profileWarning, setProfileWarning] = useState(null);
 
     function profilesChangeHandler() {
         setProfilesChange(prev => {return !prev;});
@@ -58,7 +59,9 @@ export function ProfileContxtProvider(props) {
         conditional,
         setConditional,
         isEdit,
-        setIsEdit
+        setIsEdit,
+        profileWarning,
+        setProfileWarning
     };
 
     return(
