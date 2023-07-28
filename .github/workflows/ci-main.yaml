@@ -1,0 +1,80 @@
+#   ########################################################################
+#   Copyright 2021 Splunk Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#   ########################################################################
+
+name: ci-main
+on:
+  push:
+    branches:
+      - "main"
+      - "develop"
+      - "next"
+    tags-ignore:
+      - "v*"
+  pull_request:
+    branches:
+      - "main"
+      - "develop"
+      - "next"
+jobs:
+  test-unit-backend:
+    name: Test Backend Unit Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    env:
+      VALUES_DIRECTORY: /tmp
+    strategy:
+      matrix:
+        python-version:
+          - 3.9
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install packages
+        working-directory: ./backend
+        run: pip install -r ./requirements.txt
+      - name: Run Pytest
+        working-directory: ./backend
+        run: pytest
+  test-unit-frontned:
+    name: Test Frontend Unit Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 16
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Run install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+          dir: 'frontend'
+      - name: Build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+          dir: 'frontend'
+      - name: Run test in sub-folder
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: test
+          dir: 'frontend'
