@@ -77,6 +77,7 @@ function Conditional(props){
     const handleOperation = (index, operationValue) => {
         const conditionalCopy = ProfCtx.conditional;
         conditionalCopy[index].operation = operationValue
+        conditionalCopy[index].value = [""]
         ProfCtx.setConditional(conditionalCopy);
         setReload((prev)=>{return !prev});
     }
