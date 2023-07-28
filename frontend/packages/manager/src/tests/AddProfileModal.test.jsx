@@ -218,6 +218,8 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         fireEvent.click(submitButton);
 
+        await sleep(10);
+
         let firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
         const secondRow = screen.getByDataTest("sc4snmp:form:conditional-row-1")
         const thirdRow = screen.getByDataTest("sc4snmp:form:conditional-row-2")
@@ -271,5 +273,184 @@ describe("AddProfileModal", () => {
 
         expect(within(firstRow).queryByText("Field is required")).toBeInTheDocument()
         expect(within(firstRow).queryByText("Value is required")).not.toBeInTheDocument()
+    })
+
+    it("Test same varBinds error", async () => {
+        renderModal();
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addVarBindButton = screen.getByDataTest("sc4snmp:form:add-varbinds").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addVarBindButton);
+        fireEvent.click(addVarBindButton);
+        fireEvent.click(addVarBindButton);
+        await sleep(20);
+        const mibFamilyInput0 =
+            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
+        const mibCategoryInput0 =
+            screen.getByDataTest("sc4snmp:form:varbind0-mib-category-input").querySelector("input")
+        const mibIndexInput0 =
+            screen.getByDataTest("sc4snmp:form:varbind0-mib-index-input").querySelector("input")
+
+        const mibFamilyInput1 =
+            screen.getByDataTest("sc4snmp:form:varbind1-mib-family-input").querySelector("input")
+        const mibCategoryInput1 =
+            screen.getByDataTest("sc4snmp:form:varbind1-mib-category-input").querySelector("input")
+
+        const mibFamilyInput2 =
+            screen.getByDataTest("sc4snmp:form:varbind2-mib-family-input").querySelector("input")
+        const mibCategoryInput2 =
+            screen.getByDataTest("sc4snmp:form:varbind2-mib-category-input").querySelector("input")
+        const mibIndexInput2 =
+            screen.getByDataTest("sc4snmp:form:varbind2-mib-index-input").querySelector("input")
+
+        fireEvent.change(mibFamilyInput0, {target: {value: "SNMPv2-MIB"}})
+        fireEvent.change(mibCategoryInput0, {target: {value: "sysUpTime"}})
+        fireEvent.change(mibIndexInput0, {target: {value: "0"}})
+
+        fireEvent.change(mibFamilyInput1, {target: {value: "SNMPv2-MIB"}})
+        fireEvent.change(mibCategoryInput1, {target: {value: "sysName"}})
+
+        fireEvent.change(mibFamilyInput2, {target: {value: "SNMPv2-MIB"}})
+        fireEvent.change(mibCategoryInput2, {target: {value: "sysUpTime"}})
+        fireEvent.change(mibIndexInput2, {target: {value: "0"}})
+
+        fireEvent.click(submitButton);
+        await sleep(5)
+
+        const varBindError = screen.getByDataTest("sc4snmp:varbind-error-2-0")
+        expect(varBindError.textContent).toBe("The same varbind has been already configured for this profile")
+    })
+
+    it("Test same patterns error", async () => {
+        renderModal({profileType: "smart"})
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addPatternButton = screen.getByDataTest("sc4snmp:form:field-patterns").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addPatternButton);
+        fireEvent.click(addPatternButton);
+        fireEvent.click(addPatternButton);
+        await sleep(20);
+
+        const patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
+        const patternInput1 = screen.getByDataTest("sc4snmp:form:field-pattern-1").querySelector("input")
+        const patternInput2 = screen.getByDataTest("sc4snmp:form:field-pattern-2").querySelector("input")
+
+        fireEvent.change(patternInput0, {target: {value: "test"}})
+        fireEvent.change(patternInput1, {target: {value: "test2"}})
+        fireEvent.change(patternInput2, {target: {value: "test"}})
+        fireEvent.click(submitButton);
+        await sleep(10)
+
+        const patternError = screen.getByDataTest("sc4snmp:field-pattern-error-2-0")
+        expect(patternError.textContent).toBe("The same pattern has been already configured for this profile");
+    })
+
+    it("Test same conditional, 'in' condition errors", async () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("sc4snmp:form:add-conditional-profile").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addConditionalButton);
+        fireEvent.click(addConditionalButton);
+        await sleep(10)
+
+        const optionsButton0 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-0")
+        fireEvent.click(optionsButton0)
+        await sleep(10)
+        const inOptionButton0 = screen.getByDataTest("sc4snmp:form:conditional-in-0")
+        fireEvent.click(inOptionButton0)
+        await sleep(5)
+        const firstRowField = screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector(`input`)
+        fireEvent.change(firstRowField, {target: {value: "test"}})
+        const firstRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="add-row"]`)
+        fireEvent.click(firstRowAddValue)
+        await sleep(5)
+        const firstRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-0").querySelector(`input`)
+        const firstRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-1").querySelector(`input`)
+        fireEvent.change(firstRowValue0, {target: {value: "a"}})
+        fireEvent.change(firstRowValue1, {target: {value: "b"}})
+
+
+
+        const optionsButton1 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-1")
+        fireEvent.click(optionsButton1)
+        await sleep(10)
+        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in-1")
+        fireEvent.click(inOptionButton1)
+        await sleep(5)
+        const secondRowField = screen.getByDataTest("sc4snmp:form:conditional-field-1").querySelector(`input`)
+        fireEvent.change(secondRowField, {target: {value: "test"}})
+        const secondRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-1").querySelector(`[data-test="add-row"]`)
+        fireEvent.click(secondRowAddValue)
+        await sleep(5)
+        const secondRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-1-0").querySelector(`input`)
+        const secondRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-1-1").querySelector(`input`)
+        fireEvent.change(secondRowValue0, {target: {value: "b"}})
+        fireEvent.change(secondRowValue1, {target: {value: "a"}})
+
+        fireEvent.click(submitButton)
+        await sleep(5);
+
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error-1-0")
+        expect(sameConditionalError.textContent).toBe("The same condition has been already configured for this profile")
+    })
+
+    it("Test same conditional, 'equals' condition errors", async () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("sc4snmp:form:add-conditional-profile").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addConditionalButton);
+        fireEvent.click(addConditionalButton);
+        await sleep(10)
+
+        const fieldInput0 =
+            screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector('[data-test="textbox"]')
+        const valueInput0 =
+            screen.getByDataTest("sc4snmp:form:conditional-condition-0").querySelector('[data-test="textbox"]')
+        fireEvent.change(fieldInput0, {target: {value: "test"}})
+        fireEvent.change(valueInput0, {target: {value: "a"}})
+
+        const fieldInput1 =
+            screen.getByDataTest("sc4snmp:form:conditional-field-1").querySelector('[data-test="textbox"]')
+        const valueInput1 =
+            screen.getByDataTest("sc4snmp:form:conditional-condition-1").querySelector('[data-test="textbox"]')
+        fireEvent.change(fieldInput1, {target: {value: "test"}})
+        fireEvent.change(valueInput1, {target: {value: "a"}})
+
+        fireEvent.click(submitButton)
+        await sleep(5);
+
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error-1-0")
+        expect(sameConditionalError.textContent).toBe("The same condition has been already configured for this profile")
+    })
+
+    it("Test same values in given condition", async () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("sc4snmp:form:add-conditional-profile").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addConditionalButton);
+        await sleep(10)
+
+        const optionsButton0 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-0")
+        fireEvent.click(optionsButton0)
+        await sleep(10)
+        const inOptionButton0 = screen.getByDataTest("sc4snmp:form:conditional-in-0")
+        fireEvent.click(inOptionButton0)
+        await sleep(5)
+        const firstRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="add-row"]`)
+        fireEvent.click(firstRowAddValue)
+        await sleep(5)
+        const firstRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-0").querySelector(`input`)
+        const firstRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-1").querySelector(`input`)
+        fireEvent.change(firstRowValue0, {target: {value: "a"}})
+        fireEvent.change(firstRowValue1, {target: {value: "a"}})
+
+        fireEvent.click(submitButton)
+        await sleep(5);
+
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-condition-error-0-1-0")
+        expect(sameConditionalError.textContent).toBe("The same value has been already configured for this condition")
     })
 })

@@ -1,5 +1,26 @@
 import React from 'react';
 
+const sameConditions = (configuredConditions, fieldName, newConditionKeys) => {
+    /*
+        configuredConditions: {"fieldName1": [["fieldName1", "value1"], ["fieldName1", "value2", "value3"]]}
+        fieldName: "fieldName1"
+        newConditionKeys: ["fieldName1", "value5"]
+    */
+    if (fieldName in configuredConditions && fieldName.length > 0){
+        for (const keys of configuredConditions[fieldName]){
+            if (keys.length === newConditionKeys.length){
+                return keys.every(element => {
+                    return !!newConditionKeys.includes(element);
+                });
+            }
+            return false
+        }
+    } else{
+        console.log("fieldName not in configuredConditions")
+        return false
+    }
+}
+
 const validateProfiles = (validationObj) => {
     /*
      'errors' is an object storing error messages for each field. Example data structure for 'errors':
@@ -36,7 +57,7 @@ const validateProfiles = (validationObj) => {
     let isValid = true;
 
     // Validate Profile Name
-    if (validationObj.hasOwnProperty("profileName")){
+    if ("profileName" in validationObj){
         if (validationObj.profileName.length === 0){
             errors.profileName.push("Profile Name is required");
             isValid = false;
@@ -48,7 +69,7 @@ const validateProfiles = (validationObj) => {
     }
 
     // Validate Frequency
-    if (validationObj.hasOwnProperty("frequency")){
+    if ("frequency" in validationObj){
         if (!(Number.isInteger(validationObj.frequency) && validationObj.frequency > 0)){
             errors.frequency.push("Frequency must be a positive integer");
             isValid = false;
@@ -57,7 +78,7 @@ const validateProfiles = (validationObj) => {
 
     let message;
     // Validate Condition
-    if (validationObj.hasOwnProperty("conditions")){
+    if ("conditions" in validationObj){
         if (validationObj.conditions.condition === "smart"){
             // Validate 'field' input
             if (validationObj.conditions.field.length === 0){
@@ -74,7 +95,21 @@ const validateProfiles = (validationObj) => {
                 isValid = false;
             }
             // Validate each pattern
+            const configuredPatterns = {};
+            let patternKey;
             for (let i = 0; i < validationObj.conditions.patterns.length; i++){
+                patternKey = validationObj.conditions.patterns[i].pattern;
+                if (patternKey in configuredPatterns && patternKey.length > 0){
+                    message = "The same pattern has been already configured for this profile"
+                    if (i in errors.varBinds){
+                        errors.conditionPatterns[i].push(message);
+                    }else{
+                        errors.conditionPatterns[i] = [message];
+                    }
+                    isValid = false;
+                }else{
+                    configuredPatterns[patternKey] = true
+                }
                 if (validationObj.conditions.patterns[i].pattern.length === 0){
                     message = "Pattern is required";
                     if (i in errors.conditionPatterns){
@@ -95,24 +130,45 @@ const validateProfiles = (validationObj) => {
                 }; */
             }
         }else if (validationObj.conditions.condition === "conditional"){
-            // Validate 'field' input
-            let field
             let values;
             if (validationObj.conditions.conditions.length === 0){
                 errors.conditionalExist = "At least one condition must be specified.";
                 isValid = false;
             }
+            let field
+            const configuredConditions = {};
+            let fieldKey;
+            let conditionKeys = [];
              for (let i = 0; i < validationObj.conditions.conditions.length; i++){
                 field = validationObj.conditions.conditions[i].field;
+                values = validationObj.conditions.conditions[i].value;
+                fieldKey = `${field}`;
+                conditionKeys = [fieldKey];
+                values.forEach(v => {conditionKeys.push(`${v}`)});
+                conditionKeys.push(validationObj.conditions.conditions[i].operation)
+                if (sameConditions(configuredConditions, fieldKey, conditionKeys)){
+                    message = "The same condition has been already configured for this profile"
+                    if (i in errors.varBinds){
+                        errors.conditionalField[i].push(message);
+                    }else{
+                        errors.conditionalField[i] = [message];
+                    }
+                    isValid = false;
+                }else if (fieldKey in configuredConditions){
+                    configuredConditions[fieldKey].push(conditionKeys)
+                }else{
+                    configuredConditions[fieldKey] = [conditionKeys]
+                }
+
                 if (field.length === 0){
-                    if (errors.conditionalField.hasOwnProperty(i)){
+                    if (i in errors.conditionalField){
                         errors.conditionalField[i].push("Field is required");
                     }else{
                         errors.conditionalField[i] = ["Field is required"];
                     }
                     isValid = false;
                 }else if (!field.match(/^[.a-zA-Z0-9_-]+$/)){
-                    if (errors.conditionalField.hasOwnProperty(i)){
+                    if (i in errors.conditionalField){
                         errors.conditionalField[i].push("Field can consist only of upper and lower english letters, " +
                     "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.");
                     }else{
@@ -122,25 +178,35 @@ const validateProfiles = (validationObj) => {
                     isValid = false;
                 }
 
-                values = validationObj.conditions.conditions[i].value;
                 if (values.length === 0){
                     errors.conditionalValuesExist[i] = "At least one value must be specified.";
                     isValid = false;
                 }
                 let conditionsErrors = {}
+                const configuredConditionalValues = {};
                 for (let j = 0; j < values.length; j++){
+                    message = ""
                     if (values[j].length === 0){
-                        if (errors.conditionalValues.hasOwnProperty(i) && errors.conditionalValues[i].hasOwnProperty(j)){
-                            errors.conditionalValues[i][j].push("Value is required");
-                        }else if (errors.conditionalValues.hasOwnProperty(i)){
-                            errors.conditionalValues[i][j] = ["Value is required"];
+                        message = "Value is required"
+                        isValid = false;
+                    }else if(values[j] in configuredConditionalValues) {
+                        message = "The same value has been already configured for this condition"
+                        isValid = false;
+                    }
+                    if (!(values[j] in configuredConditionalValues)){
+                        configuredConditionalValues[values[j]] = true;
+                    }
+                    if (message.length > 0){
+                        if (i in errors.conditionalValues && j in errors.conditionalValues[i]){
+                            errors.conditionalValues[i][j].push(message);
+                        }else if (i in errors.conditionalValues){
+                            errors.conditionalValues[i][j] = [message];
                         }
                         else{
                             conditionsErrors = {}
-                            conditionsErrors[j] = ["Value is required"]
+                            conditionsErrors[j] = [message]
                             errors.conditionalValues[i] = conditionsErrors;
                         }
-                        isValid = false;
                     }
                 }
              }
@@ -148,19 +214,33 @@ const validateProfiles = (validationObj) => {
     }
 
     // Validate VarBinds
-    if (validationObj.hasOwnProperty("varBinds")){
+    if ("varBinds" in validationObj){
         if (validationObj.varBinds.length === 0){
             errors.varBindsExist = "At least one varBind must be specified.";
             isValid = false;
         }
+        const configuredVarBinds = {};
+        let varBindKey;
         for (let i = 0; i < validationObj.varBinds.length; i++){
+            varBindKey = `${validationObj.varBinds[i].family}${validationObj.varBinds[i].category}${validationObj.varBinds[i].index}`
+            if (varBindKey in configuredVarBinds && varBindKey.length > 0){
+                message = "The same varbind has been already configured for this profile"
+                if (i in errors.varBinds){
+                    errors.varBinds[i].push(message);
+                }else{
+                    errors.varBinds[i] = [message];
+                }
+                isValid = false;
+            }else{
+                configuredVarBinds[varBindKey] = true
+            }
             if (validationObj.varBinds[i].family.length === 0){
                 message = "MIB-Component is required";
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
                 }else{
                     errors.varBinds[i] = [message];
-                };
+                }
                 isValid = false;
 
             }else if (!validationObj.varBinds[i].family.match(/^[a-zA-Z0-9_-]+$/)){
@@ -170,9 +250,9 @@ const validateProfiles = (validationObj) => {
                     errors.varBinds[i].push(message);
                 }else{
                     errors.varBinds[i] = [message];
-                };
+                }
                 isValid = false;
-            };
+            }
 
             if (validationObj.varBinds[i].category.length > 0){
                 if (!validationObj.varBinds[i].category.match(/^[a-zA-Z0-9_-]+$/)){
@@ -182,10 +262,10 @@ const validateProfiles = (validationObj) => {
                         errors.varBinds[i].push(message);
                     }else{
                         errors.varBinds[i] = [message];
-                    };
+                    }
                     isValid = false;
-                };
-            };
+                }
+            }
 
             if (validationObj.varBinds[i].index.length > 0){
                 if (validationObj.varBinds[i].category.length === 0){
@@ -194,21 +274,21 @@ const validateProfiles = (validationObj) => {
                         errors.varBinds[i].push(message);
                     }else{
                         errors.varBinds[i] = [message];
-                    };
+                    }
                     isValid = false;
-                };
+                }
                 if (!validationObj.varBinds[i].index.match(/^[^\s]+$/)){
                     message = "Index can't include white spaces";
                     if (i in errors.varBinds){
                         errors.varBinds[i].push(message);
                     }else{
                         errors.varBinds[i] = [message];
-                    };
+                    }
                     isValid = false;
                 }
-            };
-        };
-    };
+            }
+        }
+    }
 
     return [isValid, errors];
 };
