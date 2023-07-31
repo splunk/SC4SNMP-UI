@@ -65,6 +65,7 @@ function InventoryList() {
 
     const setRowData = (row) => {
         InvCtx.setInventoryId(row._id);
+        InvCtx.setInventoryType(row.inventoryType);
         InvCtx.setAddress(row.address);
         InvCtx.setPort(row.port);
         InvCtx.setVersion(row.version);
@@ -93,6 +94,7 @@ function InventoryList() {
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
             }
             InvCtx.makeInventoryChange();

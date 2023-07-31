@@ -277,6 +277,8 @@ class InventoryConversion(Conversion):
             raise ValueError("No delete provided")
 
     def backend2ui(self, document: dict, **kwargs):
+        if "inventory_type" not in kwargs.keys():
+            raise ValueError("No inventory_type provided")
         profiles_mongo = document['profiles']
         if len(profiles_mongo) > 0:
             profiles = profiles_mongo.split(";")
@@ -284,6 +286,7 @@ class InventoryConversion(Conversion):
             profiles = []
         result = {
             '_id': str(document["_id"]),
+            'inventoryType': kwargs['inventory_type'],
             'address': document['address'],
             'port': str(document['port']),
             'version': document['version'],

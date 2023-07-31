@@ -29,48 +29,71 @@ jest.mock("axios")
 
 describe("AddInventoryModal", () => {
 
-    it("Test invalid IPv4 address and no community string",  async() => {
+    it("Test wrong host and group name and no community string",  async() => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
 
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
+        const groupButton = screen.getByDataTest("sc4snmp:form:inventory-type-group");
         const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
         const communityInput = screen.getByDataTest('sc4snmp:form:community-input').querySelector("input");
 
 
         fireEvent.change(addressInput, {target: {value: "1.2.3.4"}})
+        fireEvent.click(hostButton);
         fireEvent.click(submitButton);
+        await sleep(10);
 
 
-        expect(screen.queryByText("Provided address isn't a valid IPv4 address")).not.toBeInTheDocument();
+        expect(screen.queryByText("Address or host name can consist only of upper and lower english letters, " +
+            "\" + \"numbers and three special characters: '-', '.' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
         expect(screen.queryByText("When using SNMP version 1 or 2c, community string must be specified")).toBeInTheDocument();
 
 
         fireEvent.change(addressInput, {target: {value: "1.2. 3.4"}})
         fireEvent.change(communityInput, {target: {value: "public"}})
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Provided address isn't a valid IPv4 address")).toBeInTheDocument();
+        expect(screen.queryByText("Address or host name can consist only of upper and lower english letters, " +
+            "\" + \"numbers and three special characters: '-', '.' and '_'. No spaces are allowed.")).toBeInTheDocument();
         expect(screen.queryByText("When using SNMP version 1 or 2c, community string must be specified")).not.toBeInTheDocument();
+
+        fireEvent.click(groupButton);
+        fireEvent.click(submitButton);
+        await sleep(10);
+
+        expect(screen.queryByText("Group can consist only of upper and lower english letters, " +
+            "\" + \"numbers and three special characters: '-', '.' and '_'. No spaces are allowed.")).toBeInTheDocument();
     })
 
-    it("Test no IPv4 and walk interval below 1800", async () => {
+    it("Test no address and walk interval below 1800", async () => {
         axios.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
+        const groupButton = screen.getByDataTest("sc4snmp:form:inventory-type-group");
         const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
         const walkIntervalInput = screen.getByDataTest('sc4snmp:form:walk-interval-input').querySelector("input");
 
         fireEvent.change(addressInput, {target: {value: "group1"}})
         fireEvent.change(walkIntervalInput, {target: {value: 10}});
+        fireEvent.click(hostButton);
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Address or Group is required")).not.toBeInTheDocument();
+        await sleep(10);
+        expect(screen.queryByText("Address or host name is required")).not.toBeInTheDocument();
         expect(screen.queryByText("Walk Interval number must be an integer greater than or equal 1800")).toBeInTheDocument();
 
         fireEvent.change(addressInput, {target: {value: ""}})
         fireEvent.change(walkIntervalInput, {target: {value: 1900}});
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Address or Group is required")).toBeInTheDocument();
+        await sleep(10);
+        expect(screen.queryByText("Address or host name is required")).toBeInTheDocument();
         expect(screen.queryByText("Walk Interval number must be an integer greater than or equal 1800")).not.toBeInTheDocument();
+
+        fireEvent.click(groupButton)
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Group is required")).toBeInTheDocument();
     })
 
     it("Test wrong group name, no port and wrong port", async () => {
@@ -83,8 +106,6 @@ describe("AddInventoryModal", () => {
         fireEvent.change(addressInput, {target: {value: "group 1"}})
         fireEvent.change(portInput, {target: {value: ""}})
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Group or host name can consist only of upper and lower english letters, numbers and " +
-            "three special characters: '-', '.' and '_'. No spaces are allowed.")).toBeInTheDocument();
         expect(screen.queryByText("Port number must be specified")).toBeInTheDocument();
 
         fireEvent.change(portInput, {target: {value: "a"}})

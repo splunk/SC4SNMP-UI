@@ -207,6 +207,7 @@ class TestConversions(TestCase):
 
         cls.ui_inventory_1 = {
             "_id": common_id,
+            "inventoryType": "Host",
             "address": "11.0.78.114",
             "port": "161",
             "version": "3",
@@ -234,6 +235,7 @@ class TestConversions(TestCase):
 
         cls.ui_inventory_2 = {
             "_id": common_id,
+            "inventoryType": "Group",
             "address": "group_1",
             "port": "1161",
             "version": "2c",
@@ -320,8 +322,8 @@ class TestConversions(TestCase):
         self.assertDictEqual(group_device_conversion.ui2backend(self.ui_group_device_4), device)
 
     def test_inventory_backend_to_ui(self):
-        self.assertDictEqual(inventory_conversion.backend2ui(self.backend_inventory_1), self.ui_inventory_1)
-        self.assertDictEqual(inventory_conversion.backend2ui(self.backend_inventory_2), self.ui_inventory_2)
+        self.assertDictEqual(inventory_conversion.backend2ui(self.backend_inventory_1, inventory_type="Host"), self.ui_inventory_1)
+        self.assertDictEqual(inventory_conversion.backend2ui(self.backend_inventory_2, inventory_type="Group"), self.ui_inventory_2)
 
     def test_inventory_ui_to_backend(self):
         back_inv = self.backend_inventory_1

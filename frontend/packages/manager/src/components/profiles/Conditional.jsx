@@ -8,7 +8,7 @@ import {validationGroup, validationMessage} from "../../styles/ValidationStyles"
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 import Select from "@splunk/react-ui/Select";
 import Card from '@splunk/react-ui/Card';
-import ConditionalIn from "./Conditionaln";
+import ConditionalIn from "./ConditionalIn";
 
 function Conditional(props){
     const ProfCtx = useProfileContext();

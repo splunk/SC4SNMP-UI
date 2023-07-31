@@ -5,12 +5,15 @@ const ErrorsModalContext = createContext();
 export function ErrorsModalContextProvider(props){
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
+    const [errorType, setErrorType] = useState("info"); // possible states: info, warning, error
 
     const context = {
-        open: open,
-        setOpen: setOpen,
-        message: message,
-        setMessage: setMessage
+        open,
+        setOpen,
+        message,
+        setMessage,
+        errorType,
+        setErrorType
     };
     return (
         <ErrorsModalContext.Provider value={context}>

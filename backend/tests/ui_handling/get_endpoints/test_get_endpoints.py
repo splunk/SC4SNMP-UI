@@ -1,7 +1,6 @@
 from unittest import mock
 from bson import ObjectId
 
-
 @mock.patch("pymongo.collection.Collection.find")
 def test_get_profile_names(m_client, client):
     m_client.return_value = [{
@@ -264,8 +263,9 @@ def test_get_devices_of_group(m_client, client):
     assert response.json == third_result
 
 
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
 @mock.patch("pymongo.cursor.Cursor.limit")
-def test_get_inventory_list(m_cursor, client):
+def test_get_inventory_list(m_cursor, m_get_inventory_type, client):
     common_id = "635916b2c8cb7a15f28af40a"
 
     m_cursor.side_effect = [
@@ -314,9 +314,12 @@ def test_get_inventory_list(m_cursor, client):
         ]
     ]
 
+    m_get_inventory_type.side_effect = ["Host", "Group", "Group"]
+
     first_result = [
         {
             "_id": common_id,
+            "inventoryType": "Host",
             "address": "11.0.78.114",
             "port": "161",
             "version": "3",
@@ -329,6 +332,7 @@ def test_get_inventory_list(m_cursor, client):
         },
         {
             "_id": common_id,
+            "inventoryType": "Group",
             "address": "group_1",
             "port": "1161",
             "version": "2c",
@@ -344,6 +348,7 @@ def test_get_inventory_list(m_cursor, client):
     second_result = [
         {
             "_id": common_id,
+            "inventoryType": "Group",
             "address": "group_2",
             "port": "161",
             "version": "3",

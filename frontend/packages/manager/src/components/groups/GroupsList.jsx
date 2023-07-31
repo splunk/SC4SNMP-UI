@@ -202,6 +202,7 @@ function GroupsList() {
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
             }
             GrCtx.makeGroupsChange();

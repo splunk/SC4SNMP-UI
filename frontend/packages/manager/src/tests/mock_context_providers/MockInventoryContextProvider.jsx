@@ -27,6 +27,7 @@ export function MockInventoryContextProvider(props){
     const [walkInterval, setWalkInterval] = useState(1800);
     const [profiles, setProfiles] = useState([]);
     const [smartProfiles, setSmartProfiles] = useState(false);
+    const [inventoryType, setInventoryType] = useState("Host");
 
     function resetFormData() {
         setInventoryId(null);
@@ -42,8 +43,8 @@ export function MockInventoryContextProvider(props){
     }
 
     const context = {
-        inventoryId: inventoryId,
-        setInventoryId: setInventoryId,
+        inventoryId,
+        setInventoryId,
         deleteOpen: false,
         setDeleteOpen: setStateMock,
 
@@ -51,29 +52,31 @@ export function MockInventoryContextProvider(props){
         setAddOpen: setStateMock,
         addModalToggle: null,
 
-        inventoryChange: inventoryChange,
+        inventoryChange,
         makeInventoryChange: inventoryChangeHandler,
 
-        isEdit: isEdit,
-        setIsEdit: setIsEdit,
-        address: address,
-        setAddress: setAddress,
-        port: port,
-        setPort: setPort,
-        version: version,
-        setVersion: setVersion,
-        community: community,
-        setCommunity: setCommunity,
-        secret: secret,
-        setSecret: setSecret,
-        securityEngine: securityEngine,
-        setSecurityEngine: setSecurityEngine,
-        walkInterval: walkInterval,
-        setWalkInterval: setWalkInterval,
-        profiles: profiles,
-        setProfiles: setProfiles,
-        smartProfiles: smartProfiles,
-        setSmartProfiles: setSmartProfiles,
+        isEdit,
+        setIsEdit,
+        address,
+        setAddress,
+        port,
+        setPort,
+        version,
+        setVersion,
+        community,
+        setCommunity,
+        secret,
+        setSecret,
+        securityEngine,
+        setSecurityEngine,
+        walkInterval,
+        setWalkInterval,
+        profiles,
+        setProfiles,
+        smartProfiles,
+        setSmartProfiles,
+        inventoryType,
+        setInventoryType,
 
         resetFormData:resetFormData
     };

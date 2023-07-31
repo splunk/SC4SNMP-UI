@@ -42,6 +42,7 @@ function AddProfileModal(props) {
             .catch((error) => {
                 console.log(error);
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             });
     };
@@ -52,12 +53,14 @@ function AddProfileModal(props) {
                 ProfCtx.makeProfilesChange();
                 if (typeof response.data !== 'string' && 'message' in response.data){
                     console.log(response.data);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setOpen(true);
                     ErrCtx.setMessage(response.data.message);
                 }
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             });
     };
