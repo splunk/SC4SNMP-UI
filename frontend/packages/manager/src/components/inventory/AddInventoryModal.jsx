@@ -57,6 +57,10 @@ function AddInventoryModal() {
         InvCtx.setSmartProfiles(val);
     }, [InvCtx]);
 
+    const handleChangeInventoryType = useCallback((e, { value: val }) => {
+        InvCtx.setInventoryType(val)
+    }, [InvCtx])
+
     const handleChange = (e, { values }) => {
         InvCtx.setProfiles(values);
     };
@@ -77,12 +81,14 @@ function AddInventoryModal() {
             .then((response) => {
                 if (response.data !== "success" && 'message' in response.data){
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setMessage(response.data.message);
                 }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
@@ -93,12 +99,14 @@ function AddInventoryModal() {
                 console.log(response.data)
                 if (response.data !== "success" && 'message' in response.data){
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setMessage(response.data.message);
                 }
                 InvCtx.makeInventoryChange();
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
@@ -113,6 +121,7 @@ function AddInventoryModal() {
     const handleApply = useCallback(
     () => {
         const inventoryObj = {
+                inventoryType: InvCtx.inventoryType,
                 address: InvCtx.address,
                 port: InvCtx.port,
                 version: InvCtx.version,
@@ -151,18 +160,28 @@ function AddInventoryModal() {
         }
 
         },
-        [InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
+        [InvCtx.inventoryType, InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
             InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
     );
 
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit device/group` : "Add a new device/group")} onRequestClose={handleRequestClose} />
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit ${((InvCtx.inventoryType === "Host") ? "device" : "group")}` : "Add a new device/group")} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
-                    <StyledControlGroup labelWidth={140} label="IP address/Group">
+                    {
+                        InvCtx.isEdit ? null :
+                            <StyledControlGroup label="Host/Group" labelWidth={140}>
+                                <RadioBar data-test="sc4snmp:form:inventory-type" value={InvCtx.inventoryType} onChange={handleChangeInventoryType}>
+                                    <RadioBar.Option data-test="sc4snmp:form:inventory-type-host" value="Host" label="Host"/>
+                                    <RadioBar.Option data-test="sc4snmp:form:inventory-type-group" value="Group" label="Group"/>
+                                </RadioBar>
+                            </StyledControlGroup>
+                    }
+
+                    <StyledControlGroup labelWidth={140} label={((InvCtx.inventoryType === "Host") ? "Host" : "Group")}>
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:group-ip-input" value={InvCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
+                            <Text data-test="sc4snmp:form:group-ip-input" value={InvCtx.address} onChange={handleChangeAddress} error={(!!(ValCtx.addressErrors))}/>
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el, i) => <P data-test={`sc4snmp:ip-group-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>

@@ -5,7 +5,7 @@ from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.backend_ui_conversions import GroupConversion, GroupDeviceConversion, InventoryConversion, \
     get_group_or_profile_name_from_backend
 from copy import copy
-from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice
+from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
@@ -35,6 +35,10 @@ def add_group_record():
     if len(same_name_groups) > 0:
         result = jsonify(
             {"message": f"Group with name {group_obj['groupName']} already exists. Group was not added."}), 400
+    elif list(mongo_inventory.find({"address": group_obj['groupName'], "delete": False})):
+        result = jsonify(
+            {"message": f"In the inventory there is a record with name {group_obj['groupName']}. Group was not added."}
+        ), 400
     else:
         group_obj = group_conversion.ui2backend(group_obj)
         mongo_groups.insert_one(group_obj)
@@ -50,6 +54,10 @@ def update_group(group_id):
     if len(same_name_groups) > 0:
         result = jsonify(
             {"message": f"Group with name {group_obj['groupName']} already exists. Group was not edited."}), 400
+    elif list(mongo_inventory.find({"address": group_obj['groupName'], "delete": False})):
+        result = jsonify(
+            {"message": f"In the inventory there is a record with name {group_obj['groupName']}. Group was not edited."}
+        ), 400
     else:
         old_group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
         old_group_name = get_group_or_profile_name_from_backend(old_group)
@@ -110,7 +118,8 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
 def get_group_config_from_inventory(group_name):
     group_from_inventory = list(mongo_inventory.find({"address": group_name, "delete": False}))
     if len(group_from_inventory) > 0:
-        result = jsonify(inventory_conversion.backend2ui(group_from_inventory[0])), 200
+        inventory_type = get_inventory_type(group_from_inventory[0])
+        result = jsonify(inventory_conversion.backend2ui(group_from_inventory[0], inventory_type=inventory_type)), 200
     else:
         result = "", 204
     return result

@@ -20,7 +20,7 @@ function renderModal(){
 }
 
 describe("AddDeviceModal", () => {
-    it("Test invalid IPv4 address and no community string",() => {
+    it("Test invalid address and no community string",() => {
         renderModal();
 
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
@@ -33,14 +33,16 @@ describe("AddDeviceModal", () => {
         fireEvent.click(submitButton);
 
 
-        expect(screen.queryByText("Provided address isn't a valid IPv4 address")).not.toBeInTheDocument();
+        expect(screen.queryByText("Address or host name can consist only of upper and lower english letters, " +
+            "\" + \"numbers and three special characters: '-', '.' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
         expect(screen.queryByText("When using SNMP version 1 or 2c, community string must be specified")).toBeInTheDocument();
 
 
         fireEvent.change(addressInput, {target: {value: "1.2. 3.4"}})
         fireEvent.change(communityInput, {target: {value: "public"}})
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Provided address isn't a valid IPv4 address")).toBeInTheDocument();
+        expect(screen.queryByText("Address or host name can consist only of upper and lower english letters, " +
+            "\" + \"numbers and three special characters: '-', '.' and '_'. No spaces are allowed.")).toBeInTheDocument();
         expect(screen.queryByText("When using SNMP version 1 or 2c, community string must be specified")).not.toBeInTheDocument();
     })
 
@@ -51,7 +53,7 @@ describe("AddDeviceModal", () => {
 
         fireEvent.change(addressInput, {target: {value: ""}})
         fireEvent.click(submitButton);
-        expect(screen.queryByText("Address is required")).toBeInTheDocument();
+        expect(screen.queryByText("Address or host name is required")).toBeInTheDocument();
     })
 
     it("Test wrong port", () => {

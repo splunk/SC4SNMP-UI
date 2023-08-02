@@ -12,6 +12,13 @@ class HostConfiguration(Enum):
     SINGLE = 1
     GROUP = 2
 
+def get_inventory_type(document):
+    if list(mongo_groups.find({document["address"]: {"$exists": 1}})):
+        result = "Group"
+    else:
+        result = "Host"
+    return result
+
 def update_profiles_in_inventory(profile_to_search: str, process_record: Callable, **kwargs):
     """
     When profile is edited, then in some cases inventory records using this profile should be updated.
@@ -25,7 +32,7 @@ def update_profiles_in_inventory(profile_to_search: str, process_record: Callabl
     inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_to_search}.*'}}))
     for record in inventory_records:
         record_id = record["_id"]
-        record_updated = inventory_conversion.backend2ui(record)
+        record_updated = inventory_conversion.backend2ui(record, inventory_type=None) # inventory_type isn't used
         index_to_update = record_updated["profiles"].index(profile_to_search)
         record_updated = process_record(index_to_update, record_updated, kwargs)
         record_updated = inventory_conversion.ui2backend(record_updated, delete=False)
@@ -92,10 +99,14 @@ class HandleNewDevice:
     def add_single_host(self, address, port, device_object=None, add: bool=True):
         host_configured, deleted_inventory_record, host_configuration, existing_id_string, group_name = \
             self._is_host_configured(address, port)
+        groups = list(mongo_groups.find({address: {"$exists": True}}))
         if host_configured:
-            host_location_message = "as a single host in the inventory" if host_configuration == HostConfiguration.SINGLE else \
+            host_location_message = "in the inventory" if host_configuration == HostConfiguration.SINGLE else \
                 f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not added."
+            host_added = False
+        elif groups:
+            message = f"There is a group with the same name configured. Record {address} can't be added as a single host."
             host_added = False
         else:
             if add and device_object is not None:
@@ -130,7 +141,7 @@ class HandleNewDevice:
                     if len(deleted_inventory_record) > 0:
                         self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
         else:
-            host_location_message = "as a single host in the inventory" if host_configuration == HostConfiguration.SINGLE else \
+            host_location_message = "in the inventory" if host_configuration == HostConfiguration.SINGLE else \
                 f"in group {group_name}"
             message = f"Host {address}:{port} already exists {host_location_message}. Record was not edited."
             host_edited = False
@@ -191,12 +202,9 @@ class HandleNewDevice:
         existing_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": False}))
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
         group = list(self._mongo_groups.find({group_name: {"$exists": 1}}))
-        if len(group) == 0 and len(existing_inventory_record) == 0:
-            group_added = True
-            message = f"Group {group_name} doesn't exist in the configuration. Treating {group_name} as a hostname."
-        elif len(group) == 0 and len(existing_inventory_record) > 0:
+        if len(group) == 0:
             group_added = False
-            message = f"{group_name} has already been configured. Record was not added."
+            message = f"Group {group_name} doesn't exist in the configuration. Record was not added."
         elif len(existing_inventory_record) > 0:
             group_added = False
             message = f"Group {group_name} has already been added to the inventory. Record was not added."
@@ -229,8 +237,11 @@ class HandleNewDevice:
         group_id = ObjectId(group_id)
         existing_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": False}))
         deleted_inventory_record = list(self._mongo_inventory.find({'address': group_name, "delete": True}))
-
-        if len(existing_inventory_record) == 0 or (len(existing_inventory_record) > 0 and existing_inventory_record[0]["_id"] == group_id):
+        group = list(self._mongo_groups.find({group_name: {"$exists": 1}}))
+        if len(group) == 0:
+            group_edited = False
+            message = f"Group {group_name} doesn't exist in the configuration. Record was not edited."
+        elif len(existing_inventory_record) == 0 or (len(existing_inventory_record) > 0 and existing_inventory_record[0]["_id"] == group_id):
             message = "success"
             group_edited = True
             if edit and group_object is not None:
@@ -249,7 +260,7 @@ class HandleNewDevice:
                     if len(deleted_inventory_record) > 0:
                         self._mongo_inventory.delete_one({"_id": deleted_inventory_record[0]["_id"]})
         else:
-            message = f"Group wit name {group_name} already exists. Record was not edited."
+            message = f"Group with name {group_name} already exists. Record was not edited."
             group_edited = False
 
         return group_edited, message

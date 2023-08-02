@@ -39,6 +39,7 @@ function Header(){
 
     const handleRequestOpenInventory = () => {
         InvCtx.setAddOpen(true);
+        InvCtx.setInventoryType("Host");
         InvCtx.setIsEdit(false);
         InvCtx.resetFormData();
     };
@@ -49,6 +50,7 @@ function Header(){
         .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setMessage(response.data.message);
                 }
             })

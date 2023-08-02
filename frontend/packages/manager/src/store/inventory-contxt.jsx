@@ -9,8 +9,6 @@ export function InventoryContextProvider(props){
     // data for DeleteInventoryModal
     const [inventoryId, setInventoryId] = useState(null);
 
-    const rowToggle = useRef(null);
-
     // data for AddInventoryModal
     const [addOpen, setAddOpen] = useState(false);
     const addModalToggle = useRef(null);
@@ -34,6 +32,7 @@ export function InventoryContextProvider(props){
     const [walkInterval, setWalkInterval] = useState(1800);
     const [profiles, setProfiles] = useState([]);
     const [smartProfiles, setSmartProfiles] = useState(false);
+    const [inventoryType, setInventoryType] = useState("Host");
 
     function resetFormData() {
         setInventoryId(null);
@@ -49,40 +48,42 @@ export function InventoryContextProvider(props){
     }
 
     const context = {
-        inventoryId: inventoryId,
-        setInventoryId: setInventoryId,
+        inventoryId,
+        setInventoryId,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
 
-        addOpen: addOpen,
-        setAddOpen: setAddOpen,
-        addModalToggle: addModalToggle,
+        addOpen,
+        setAddOpen,
+        addModalToggle,
 
-        inventoryChange: inventoryChange,
+        inventoryChange,
         makeInventoryChange: inventoryChangeHandler,
 
-        isEdit: isEdit,
-        setIsEdit: setIsEdit,
-        address: address,
-        setAddress: setAddress,
-        port: port,
-        setPort: setPort,
-        version: version,
-        setVersion: setVersion,
-        community: community,
-        setCommunity: setCommunity,
-        secret: secret,
-        setSecret: setSecret,
-        securityEngine: securityEngine,
-        setSecurityEngine: setSecurityEngine,
-        walkInterval: walkInterval,
-        setWalkInterval: setWalkInterval,
-        profiles: profiles,
-        setProfiles: setProfiles,
-        smartProfiles: smartProfiles,
-        setSmartProfiles: setSmartProfiles,
+        isEdit,
+        setIsEdit,
+        address,
+        setAddress,
+        port,
+        setPort,
+        version,
+        setVersion,
+        community,
+        setCommunity,
+        secret,
+        setSecret,
+        securityEngine,
+        setSecurityEngine,
+        walkInterval,
+        setWalkInterval,
+        profiles,
+        setProfiles,
+        smartProfiles,
+        setSmartProfiles,
+        inventoryType,
+        setInventoryType,
 
-        resetFormData:resetFormData
+        resetFormData
     };
 
     return (

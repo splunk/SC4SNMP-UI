@@ -30,6 +30,7 @@ function AddGroupModal() {
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
@@ -39,12 +40,14 @@ function AddGroupModal() {
             .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setMessage(response.data.message);
                 }
                 GrCtx.makeGroupsChange();
             })
             .catch((error) => {
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("error");
                     ErrCtx.setMessage(error.response.data.message);
                 })
     };

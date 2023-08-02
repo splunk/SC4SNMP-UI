@@ -3,14 +3,13 @@ from flask import request, Blueprint, jsonify
 from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
-from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice
+from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
 
 inventory_blueprint = Blueprint('inventory_blueprint', __name__)
 
 inventory_conversion = InventoryConversion()
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
-
 
 @inventory_blueprint.route('/inventory/<page_num>/<dev_per_page>')
 @cross_origin()
@@ -22,7 +21,8 @@ def get_inventory_list(page_num, dev_per_page):
     inventory = list(mongo_inventory.find({"delete": False}).skip(skips).limit(dev_per_page))
     inventory_list = []
     for inv in inventory:
-        inventory_list.append(inventory_conversion.backend2ui(inv))
+        inventory_type = get_inventory_type(inv)
+        inventory_list.append(inventory_conversion.backend2ui(inv, inventory_type=inventory_type))
     return jsonify(inventory_list)
 
 
@@ -37,9 +37,10 @@ def get_inventory_count():
 @cross_origin()
 def add_inventory_record():
     inventory_obj = request.json
+    inventory_type = inventory_obj["inventoryType"]
     inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
     handler = HandleNewDevice(mongo_groups, mongo_inventory)
-    if inventory_obj["address"][0].isdigit():
+    if inventory_type == "Host":
         record_added, message = handler.add_single_host(inventory_obj["address"], str(inventory_obj["port"]),
                                                         inventory_obj, True)
     else:
@@ -68,23 +69,22 @@ def delete_inventory_record(inventory_id):
 @cross_origin()
 def update_inventory_record(inventory_id):
     inventory_obj = request.json
+    inventory_type = inventory_obj["inventoryType"]
     inventory_obj = inventory_conversion.ui2backend(inventory_obj, delete=False)
     current_inventory = list(mongo_inventory.find({"_id": ObjectId(inventory_id)}))[0]
+    current_inventory_type = get_inventory_type(current_inventory)
     handler = HandleNewDevice(mongo_groups, mongo_inventory)
 
-    is_current_a_single_host = current_inventory["address"][0].isdigit()
-    is_new_a_single_host = inventory_obj["address"][0].isdigit()
-    if is_current_a_single_host != is_new_a_single_host:
+    if inventory_type != current_inventory_type:
         result = jsonify({"message": "Can't edit single host to the group or group to the single host"}), 400
     else:
-        if is_new_a_single_host:
+        if inventory_type == "Host":
             record_edited, message = handler.edit_single_host(inventory_obj["address"], str(inventory_obj["port"]),
                                                               str(inventory_id), inventory_obj, True)
         else:
             record_edited, message = handler.edit_group_in_inventory(inventory_obj["address"], str(inventory_id), inventory_obj, True)
         if record_edited:
             if message == "success" or message is None:
-                print(message)
                 result = jsonify("success"), 200
             else:
                 result = jsonify({"message": message}), 200

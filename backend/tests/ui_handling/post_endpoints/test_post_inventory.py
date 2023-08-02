@@ -7,29 +7,56 @@ common_id = "635916b2c8cb7a15f28af40a"
 
 # TEST ADDING A SINGLE HOST
 ui_inventory_new = lambda : {
-        "address": "11.0.78.114",
-        "port": "161",
-        "version": "3",
-        "community": "",
-        "secret": "my_secret",
-        "walkInterval": 1800,
-        "securityEngine": "1234aabbccd",
-        "profiles": ["prof1", "prof2", "prof3"],
-        "smartProfiles": False
-    }
+    "inventoryType": "Host",
+    "address": "11.0.78.114",
+    "port": "161",
+    "version": "3",
+    "community": "",
+    "secret": "my_secret",
+    "walkInterval": 1800,
+    "securityEngine": "1234aabbccd",
+    "profiles": ["prof1", "prof2", "prof3"],
+    "smartProfiles": False
+}
 
 backend_inventory_new = lambda : {
-        "address": "11.0.78.114",
-        "port": 161,
-        "version": "3",
-        "community": "",
-        "secret": "my_secret",
-        "walk_interval": 1800,
-        "security_engine": "1234aabbccd",
-        "profiles": "prof1;prof2;prof3",
-        "smart_profiles": False,
-        "delete": False
-    }
+    "address": "11.0.78.114",
+    "port": 161,
+    "version": "3",
+    "community": "",
+    "secret": "my_secret",
+    "walk_interval": 1800,
+    "security_engine": "1234aabbccd",
+    "profiles": "prof1;prof2;prof3",
+    "smart_profiles": False,
+    "delete": False
+}
+
+ui_inventory_new_host_name = lambda : {
+    "inventoryType": "Host",
+    "address": "test",
+    "port": "161",
+    "version": "3",
+    "community": "",
+    "secret": "my_secret",
+    "walkInterval": 1800,
+    "securityEngine": "1234aabbccd",
+    "profiles": ["prof1", "prof2", "prof3"],
+    "smartProfiles": False
+}
+
+backend_inventory_new_host_name  = lambda : {
+    "address": "test",
+    "port": 161,
+    "version": "3",
+    "community": "",
+    "secret": "my_secret",
+    "walk_interval": 1800,
+    "security_engine": "1234aabbccd",
+    "profiles": "prof1;prof2;prof3",
+    "smart_profiles": False,
+    "delete": False
+}
 
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
@@ -44,12 +71,14 @@ def test_add_single_host_success(m_find, m_insert, m_delete, client):
     m_find.side_effect = [
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
-        []  # call from  HandleNewDevice._is_host_in_group
+        [],  # call from  HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
     calls_find = [
         call({'address': "11.0.78.114", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "11.0.78.114", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
-        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False})  # call from  HandleNewDevice._is_host_in_group
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from  HandleNewDevice._is_host_in_group
+        call({"11.0.78.114": {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
 
@@ -76,13 +105,69 @@ def test_add_single_host_success(m_find, m_insert, m_delete, client):
             "smart_profiles": False,
             "delete": True
         }],  # call from HandleNewDevice._is_host_configured
-        [] # call from  HandleNewDevice._is_host_in_group
+        [], # call from  HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
 
     response = client.post(f"/inventory/add", json=ui_inventory_new())
     m_find.assert_has_calls(calls_find)
     assert m_insert.call_args == call(backend_inventory_new())
+    assert m_delete.call_args == call({"_id": ObjectId(common_id)})
+    assert response.json == "success"
+
+@mock.patch("pymongo.collection.Collection.delete_one")
+@mock.patch("pymongo.collection.Collection.insert_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_single_host_name_success(m_find, m_insert, m_delete, client):
+    # Test adding a new device, when there was no device with the same
+    # address and port with deleted flag set to True.
+    m_insert.return_value = None
+    m_delete.return_value = None
+
+    m_find.side_effect = [
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from  HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
+    ]
+    calls_find = [
+        call({'address': "test", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
+        call({'address': "test", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from  HandleNewDevice._is_host_in_group
+        call({"test": {"$exists": True}}),  # call from HandleNewDevice.add_single_host
+    ]
+
+    response = client.post(f"/inventory/add", json=ui_inventory_new_host_name())
+    m_find.assert_has_calls(calls_find)
+    assert m_insert.call_args == call(backend_inventory_new_host_name())
+    assert not m_delete.called
+    assert response.json == "success"
+
+    # Test adding a new device when there was a device with the same
+    # address and port with deleted flag set to True.
+    m_find.side_effect = [
+        [],  # call from HandleNewDevice._is_host_configured
+        [{
+            "_id": ObjectId(common_id),
+            "address": "test",
+            "port": 161,
+            "version": "3",
+            "community": "",
+            "secret": "my_secret",
+            "walk_interval": 1800,
+            "security_engine": "1234aabbccd",
+            "profiles": "prof1;prof2;prof3",
+            "smart_profiles": False,
+            "delete": True
+        }],  # call from HandleNewDevice._is_host_configured
+        [],  # call from  HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
+    ]
+
+    response = client.post(f"/inventory/add", json=ui_inventory_new_host_name())
+    m_find.assert_has_calls(calls_find)
+    assert m_insert.call_args == call(backend_inventory_new_host_name())
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert response.json == "success"
 
@@ -109,18 +194,31 @@ def test_add_single_host_failure(m_find, m_insert, m_delete, client):
             "delete": False
         }],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice.add_single_host
     ]
     calls_find = [
         call({'address': "11.0.78.114", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "11.0.78.114", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({'11.0.78.114': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/add", json=ui_inventory_new())
     m_find.assert_has_calls(calls_find)
     assert not m_delete.called
     assert not m_insert.called
-    assert response.json == {"message": "Host 11.0.78.114:161 already exists as a single host in the inventory. "
+    assert response.json == {"message": "Host 11.0.78.114:161 already exists in the inventory. "
                                         "Record was not added."}
+
+    m_find.side_effect = [
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from  HandleNewDevice._is_host_in_group
+        [{"test":[]}],  # call from HandleNewDevice.add_single_host
+    ]
+    response = client.post(f"/inventory/add", json=ui_inventory_new_host_name())
+    assert not m_delete.called
+    assert not m_insert.called
+    assert response.json == {"message": "There is a group with the same name configured. Record test can't be added as a single host."}
 
 
 # TEST UPDATING A SINGLE HOST
@@ -137,15 +235,18 @@ backend_inventory_old = lambda : {
         "smart_profiles": False,
         "delete": False
     }
+
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_edit_single_host_success(m_find, m_insert, m_update, m_delete, client):
+def test_edit_single_host_success(m_find, m_insert, m_update, m_delete, m_get_inventory_type, client):
     # Test editing a device without changing its address and port
     m_insert.return_value = None
     m_update.return_value = None
     m_delete.return_value = None
+    m_get_inventory_type.return_value = "Host"
     m_find.side_effect = [
         [backend_inventory_old()],  # call from inventory/routes.update_inventory_record
         [backend_inventory_old()],  # call from HandleNewDevice._is_host_configured
@@ -168,16 +269,19 @@ def test_edit_single_host_success(m_find, m_insert, m_update, m_delete, client):
     assert response.json == "success"
 
 
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_edit_single_host_address_and_port_success(m_find, m_insert, m_update, m_delete, client):
+def test_edit_single_host_address_and_port_success(m_find, m_insert, m_update, m_delete, m_get_inventory_type, client):
     # Test editing a device with changing its address and port
     m_insert.return_value = None
     m_update.return_value = None
     m_delete.return_value = None
+    m_get_inventory_type.return_value = "Host"
     ui_inventory_new_address_port = {
+        "inventoryType": "Host",
         "address": "1.0.0.0",
         "port": "1111",
         "version": "3",
@@ -223,6 +327,7 @@ def test_edit_single_host_address_and_port_success(m_find, m_insert, m_update, m
         [],  # call from HandleNewDevice._is_host_configured
         [deleted_host_backend],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     calls_find = [
@@ -234,6 +339,88 @@ def test_edit_single_host_address_and_port_success(m_find, m_insert, m_update, m
         call({'address': "1.0.0.0", 'port': 1111, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "1.0.0.0", 'port': 1111, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
+        call({'1.0.0.0': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
+    ]
+
+    response = client.post(f"/inventory/update/{common_id}", json=ui_inventory_new_address_port)
+    m_find.assert_has_calls(calls_find)
+    assert m_insert.call_args == call(backend_inventory_new_address_port)
+    assert m_delete.call_args == call({"_id": ObjectId("43EE0BCBA668527E7106E4F5")})
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": {"delete": True}})
+    assert response.json == {
+        "message": "Address or port was edited which resulted in deleting the old device and creating " \
+                   "the new one at the end of the list."}
+
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
+@mock.patch("pymongo.collection.Collection.delete_one")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.insert_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_edit_ip_to_hostname_success(m_find, m_insert, m_update, m_delete, m_get_inventory_type, client):
+    m_insert.return_value = None
+    m_update.return_value = None
+    m_delete.return_value = None
+    m_get_inventory_type.return_value = "Host"
+    ui_inventory_new_address_port = {
+        "inventoryType": "Host",
+        "address": "test",
+        "port": "1111",
+        "version": "3",
+        "community": "",
+        "secret": "my_secret_new",
+        "walkInterval": 1800,
+        "securityEngine": "1234aabbccd",
+        "profiles": ["prof1", "prof2", "prof3"],
+        "smartProfiles": False
+    }
+    backend_inventory_new_address_port = {
+        "address": "test",
+        "port": 1111,
+        "version": "3",
+        "community": "",
+        "secret": "my_secret_new",
+        "walk_interval": 1800,
+        "security_engine": "1234aabbccd",
+        "profiles": "prof1;prof2;prof3",
+        "smart_profiles": False,
+        "delete": False
+    }
+    deleted_host_backend = {
+        "_id": ObjectId("43EE0BCBA668527E7106E4F5"),
+        "address": "11.0.78.114",
+        "port": 161,
+        "version": "3",
+        "community": "",
+        "secret": "my_secret",
+        "walk_interval": 1800,
+        "security_engine": "1234aabbccd",
+        "profiles": "prof1;prof2;prof3",
+        "smart_profiles": False,
+        "delete": True
+    }
+
+    m_find.side_effect = [
+        [backend_inventory_old()],  # call from inventory/routes.update_inventory_record
+        [],  # call from HandleNewDevice._is_host_configured
+        [deleted_host_backend],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_in_group
+        [backend_inventory_old()],  # call from HandleNewDevice.edit_single_host
+        [],  # call from HandleNewDevice._is_host_configured
+        [deleted_host_backend],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
+    ]
+
+    calls_find = [
+        call({"_id": ObjectId(common_id)}),  # call from inventory/routes.update_inventory_record
+        call({'address': "test", 'port': 1111, "delete": False}),  # call from HandleNewDevice._is_host_configured
+        call({'address': "test", 'port': 1111, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
+        call({"_id": ObjectId(common_id)}),
+        call({'address': "test", 'port': 1111, "delete": False}),  # call from HandleNewDevice._is_host_configured
+        call({'address': "test", 'port': 1111, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
+        call({'test': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/update/{common_id}", json=ui_inventory_new_address_port)
@@ -259,14 +446,17 @@ backend_inventory_old = lambda : {
         "smart_profiles": False,
         "delete": False
     }
+
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_edit_single_host_failed(m_find, m_insert, m_update, m_delete, client):
+def test_edit_single_host_failed(m_find, m_insert, m_update, m_delete, m_get_inventory_type, client):
     existing_id = "035916b2c8cb7a15f28af40b"
 
     ui_inventory_new = {
+        "inventoryType": "Host",
         "address": "0.0.0.0",
         "port": "1161",
         "version": "3",
@@ -281,6 +471,7 @@ def test_edit_single_host_failed(m_find, m_insert, m_update, m_delete, client):
     m_insert.return_value = None
     m_update.return_value = None
     m_delete.return_value = None
+    m_get_inventory_type.return_value = "Host"
 
     m_find.side_effect = [
         [backend_inventory_old()],  # call from inventory/routes.update_inventory_record
@@ -304,21 +495,55 @@ def test_edit_single_host_failed(m_find, m_insert, m_update, m_delete, client):
         call({"_id": ObjectId(common_id)}),  # call from inventory/routes.update_inventory_record
         call({'address': "0.0.0.0", 'port': 1161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "0.0.0.0", 'port': 1161, "delete": True}),  # call from HandleNewDevice._is_host_configured
-
     ]
 
     response = client.post(f"/inventory/update/{common_id}", json=ui_inventory_new)
     m_find.assert_has_calls(calls_find)
-    assert response.json == {"message": "Host 0.0.0.0:1161 already exists as a single host in the inventory. "
+    assert response.json == {"message": "Host 0.0.0.0:1161 already exists in the inventory. "
                                         "Record was not edited."}
     assert response.status_code == 400
     assert not m_insert.called
     assert not m_update.called
     assert not m_delete.called
 
+    ui_inventory_new = {
+        "inventoryType": "Host",
+        "address": "test",
+        "port": "1161",
+        "version": "3",
+        "community": "",
+        "secret": "my_secret",
+        "walkInterval": 1800,
+        "securityEngine": "1234aabbccd",
+        "profiles": ["prof1", "prof2", "prof3"],
+        "smartProfiles": False
+    }
+
+    m_find.side_effect = [
+        [backend_inventory_old()],  # call from inventory/routes.update_inventory_record
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_in_group
+        [backend_inventory_old()],  # call from HandleNewDevice.edit_single_host
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_in_group
+        [{"test":[]}],  # call from HandleNewDevice.add_single_host
+    ]
+    response = client.post(f"/inventory/update/{common_id}", json=ui_inventory_new)
+    assert response.json == {"message": "There is a group with the same name configured. Record test can't be added as a single host."}
+    assert response.status_code == 400
+    assert not m_insert.called
+    assert not m_update.called
+    assert not m_delete.called
+
+
+
+
 
 # TEST ADDING A GROUP
 new_group_ui_inventory = lambda : {
+    "inventoryType": "Group",
     "address": "group_1",
     "port": "161",
     "version": "3",
@@ -383,7 +608,8 @@ def test_add_group_success(m_find, m_insert, m_delete, client):
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
-        [existing_group_backend()]  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     calls_find = [
@@ -393,7 +619,8 @@ def test_add_group_success(m_find, m_insert, m_delete, client):
         call({'address': "1.2.3.4", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "1.2.3.4", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
-        call({"group_2": {"$exists": 1}})  # call from HandleNewDevice._is_host_in_group
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'1.2.3.4': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/add", json=new_group_ui_inventory())
@@ -422,7 +649,8 @@ def test_add_group_success(m_find, m_insert, m_delete, client):
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
-        [existing_group_backend()]  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/add", json=new_group_ui_inventory())
@@ -467,6 +695,7 @@ def test_add_group_with_hosts_configured_failure(m_find, m_insert, m_delete, cli
     m_delete.return_value = None
 
     new_group_ui_failure = {
+        "inventoryType": "Group",
         "address": "group_1",
         "port": "161",
         "version": "3",
@@ -490,7 +719,8 @@ def test_add_group_with_hosts_configured_failure(m_find, m_insert, m_delete, cli
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
-        [existing_group_backend()]  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     calls_find = [
@@ -500,7 +730,8 @@ def test_add_group_with_hosts_configured_failure(m_find, m_insert, m_delete, cli
         call({'address': "0.0.0.0", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "0.0.0.0", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
-        call({"group_2": {"$exists": 1}})  # call from HandleNewDevice._is_host_in_group
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'0.0.0.0': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/add", json=new_group_ui_failure)
@@ -519,6 +750,7 @@ def test_add_group_with_host_configured_multiple_times_failure(m_find, m_insert,
     m_delete.return_value = None
 
     new_group_ui_failure = {
+        "inventoryType": "Group",
         "address": "group_1",
         "port": "161",
         "version": "3",
@@ -548,12 +780,14 @@ def test_add_group_with_host_configured_multiple_times_failure(m_find, m_insert,
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
         [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
 
         # second iteration in HandleNewDevice.add_group_to_inventory
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
-        [existing_group_backend()]  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     calls_find = [
@@ -566,12 +800,14 @@ def test_add_group_with_host_configured_multiple_times_failure(m_find, m_insert,
         call({'address': "1.1.1.1", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
         call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'1.1.1.1': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
 
         # second iteration in HandleNewDevice.add_group_to_inventory
         call({'address': "1.1.1.1", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "1.1.1.1", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
-        call({"group_2": {"$exists": 1}})  # call from HandleNewDevice._is_host_in_group
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'1.1.1.1': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/add", json=new_group_ui_failure)
@@ -604,10 +840,10 @@ def test_add_group_without_configuration(m_find, m_insert, m_delete, client):
 
     response = client.post(f"/inventory/add", json=new_group_ui_inventory())
     m_find.assert_has_calls(calls_find)
-    assert m_insert.call_args == call(new_group_backend_inventory())
+    assert not m_insert.called
     assert not m_delete.called
     assert response.json == {"message": "Group group_1 doesn't exist in the configuration. "
-                                        "Treating group_1 as a hostname."}
+                                        "Record was not added."}
 
 
 @mock.patch("pymongo.collection.Collection.delete_one")
@@ -633,13 +869,14 @@ def test_add_group_without_configuration_failure(m_find, m_insert, m_delete, cli
     m_find.assert_has_calls(calls_find)
     assert not m_insert.called
     assert not m_delete.called
-    assert response.json == {"message": "group_1 has already been configured. Record was not added."}
+    assert response.json == {"message": "Group group_1 doesn't exist in the configuration. Record was not added."}
 
 
 
 # TEST UPDATING A GROUP
 
-ui_edited_group = lambda : {
+ui_edited_inventory_group = lambda : {
+    "inventoryType": "Group",
     "address": "group_1",
     "port": "161",
     "version": "3",
@@ -651,7 +888,7 @@ ui_edited_group = lambda : {
     "smartProfiles": False
 }
 
-edited_group = lambda : {
+edited_inventory_group = lambda : {
     "address": "group_1",
     "port": 161,
     "version": "3",
@@ -664,7 +901,7 @@ edited_group = lambda : {
     "delete": False
 }
 
-backend_existing_edit_group = lambda : {
+backend_inventory_existing_edit_group = lambda : {
     "_id": ObjectId(common_id),
     "address": "group_1",
     "port": 161,
@@ -678,6 +915,11 @@ backend_existing_edit_group = lambda : {
     "delete": False
 }
 
+backend_existing_edit_group = lambda : {
+    "_id": ObjectId(common_id),
+    "group_1": [{"address": "1.1.1.1"}]
+}
+
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
@@ -689,22 +931,26 @@ def test_update_group_without_changing_name_success(m_find, m_insert, m_update, 
     m_delete.return_value = None
 
     m_find.side_effect = [
-        [backend_existing_edit_group()],  # call from HandleNewDevice.update_inventory_record
-        [backend_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
+        [backend_inventory_existing_edit_group()],  # call from inventory/routes/update_inventory_record
+        [backend_existing_edit_group()],  # call from inventory/routes/get_inventory_type
+        [backend_inventory_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
         [],  # call from HandleNewDevice.edit_group_in_inventory
-        [backend_existing_edit_group()]  # call from HandleNewDevice.edit_group_in_inventory
+        [{"group_1": []}],  # call from HandleNewDevice.edit_group_in_inventory
+        [backend_inventory_existing_edit_group()]  # call from HandleNewDevice.edit_group_in_inventory
     ]
 
     calls_find = [
-        call({"_id": ObjectId(common_id)}),   # call from HandleNewDevice.update_inventory_record
+        call({"_id": ObjectId(common_id)}),   # call from inventory/routes/update_inventory_record
+        call({"group_1": {"$exists": 1}}),  # call from inventory/routes/get_inventory_type
         call({'address': "group_1", "delete": False}),  # call from HandleNewDevice.edit_group_in_inventory
         call({'address': "group_1", "delete": True}),  # call from HandleNewDevice.edit_group_in_inventory
+        call({"group_1": {"$exists": 1}}),  # call from HandleNewDevice.edit_group_in_inventory
         call({"_id": ObjectId(common_id)})  # call from HandleNewDevice.edit_group_in_inventory
     ]
 
-    response = client.post(f"/inventory/update/{common_id}", json=ui_edited_group())
+    response = client.post(f"/inventory/update/{common_id}", json=ui_edited_inventory_group())
     m_find.assert_has_calls(calls_find)
-    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": edited_group()})
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": edited_inventory_group()})
     assert not m_insert.called
     assert not m_delete.called
     assert response.json == "success"
@@ -721,6 +967,7 @@ def test_update_group_with_changing_name_success(m_find, m_insert, m_update, m_d
     m_delete.return_value = None
 
     new_name_group_ui = {
+        "inventoryType": "Group",
         "address": "group_2",
         "port": "161",
         "version": "3",
@@ -751,19 +998,23 @@ def test_update_group_with_changing_name_success(m_find, m_insert, m_update, m_d
     }
 
     m_find.side_effect = [
-        [backend_existing_edit_group()],  # call from HandleNewDevice.update_inventory_record
+        [backend_inventory_existing_edit_group()],  # call from inventory/routes/update_inventory_record
+        [backend_existing_edit_group()],  # call from inventory/routes/get_inventory_type
         [],  # call from HandleNewDevice.edit_group_in_inventory
         [],  # call from HandleNewDevice.edit_group_in_inventory
-        [backend_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
+        [{"group_2": []}],  # call from HandleNewDevice.edit_group_in_inventory
+        [backend_inventory_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
         [],  # call from HandleNewDevice.add_group_to_inventory
         [],  # call from HandleNewDevice.add_group_to_inventory
         [second_group_backend]  # call from HandleNewDevice.add_group_to_inventory
     ]
 
     calls_find = [
-        call({"_id": ObjectId(common_id)}),   # call from HandleNewDevice.update_inventory_record
+        call({"_id": ObjectId(common_id)}),   # call from inventory/routes/update_inventory_record
+        call({"group_1": {"$exists": 1}}),  # call from inventory/routes/get_inventory_type
         call({'address': "group_2", "delete": False}),  # call from HandleNewDevice.edit_group_in_inventory
         call({'address': "group_2", "delete": True}),  # call from HandleNewDevice.edit_group_in_inventory
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice.edit_group_in_inventory
         call({"_id": ObjectId(common_id)}),  # call from HandleNewDevice.edit_group_in_inventory
         call({'address': "group_2", "delete": False}),  # call from HandleNewDevice.add_group_to_inventory
         call({'address': "group_2", "delete": True}),  # call from HandleNewDevice.add_group_to_inventory
@@ -788,6 +1039,7 @@ def test_update_group_to_already_configured_failure(m_find, m_insert, m_update, 
     m_delete.return_value = None
 
     new_name_group_ui = {
+        "inventoryType": "Group",
         "address": "group_2",
         "port": "161",
         "version": "3",
@@ -814,15 +1066,19 @@ def test_update_group_to_already_configured_failure(m_find, m_insert, m_update, 
     }
 
     m_find.side_effect = [
-        [backend_existing_edit_group()],  # call from HandleNewDevice.update_inventory_record
+        [backend_inventory_existing_edit_group()],  # call from inventory/routes/update_inventory_record
+        [backend_existing_edit_group()],  # call from inventory/routes/get_inventory_type
         [inventory_existing_other_group],  # call from HandleNewDevice.edit_group_in_inventory
-        []  # call from HandleNewDevice.edit_group_in_inventory
+        [],  # call from HandleNewDevice.edit_group_in_inventory
+        [{"group_2": []}],  # call from HandleNewDevice.edit_group_in_inventory
     ]
 
     calls_find = [
-        call({"_id": ObjectId(common_id)}),  # call from HandleNewDevice.update_inventory_record
+        call({"_id": ObjectId(common_id)}),  # call from inventory/routes/update_inventory_record
+        call({"group_1": {"$exists": 1}}),  # call from inventory/routes/get_inventory_type
         call({'address': "group_2", "delete": False}),  # call from HandleNewDevice.edit_group_in_inventory
         call({'address': "group_2", "delete": True}),  # call from HandleNewDevice.edit_group_in_inventory
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice.edit_group_in_inventory
     ]
 
     response = client.post(f"/inventory/update/{common_id}", json=new_name_group_ui)
@@ -830,7 +1086,7 @@ def test_update_group_to_already_configured_failure(m_find, m_insert, m_update, 
     assert not m_update.called
     assert not m_insert.called
     assert not m_delete.called
-    assert response.json == {"message": "Group wit name group_2 already exists. Record was not edited."}
+    assert response.json == {"message": "Group with name group_2 already exists. Record was not edited."}
 
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -842,6 +1098,7 @@ def test_update_group_to_other_group_with_host_already_configured_failure(m_find
     m_delete.return_value = None
 
     new_group_ui_failure = {
+        "inventoryType": "Group",
         "address": "group_3",
         "port": "161",
         "version": "3",
@@ -859,10 +1116,12 @@ def test_update_group_to_other_group_with_host_already_configured_failure(m_find
     }
 
     m_find.side_effect = [
-        [backend_existing_edit_group()],  # call from HandleNewDevice.update_inventory_record
+        [backend_inventory_existing_edit_group()],  # call from inventory/routes/update_inventory_record
+        [backend_existing_edit_group()],  # call from inventory/routes/get_inventory_type
         [],  # call from HandleNewDevice.edit_group_in_inventory
         [],  # call from HandleNewDevice.edit_group_in_inventory
-        [backend_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
+        [{"group_3": []}],  # call from HandleNewDevice.edit_group_in_inventory
+        [backend_inventory_existing_edit_group()],  # call from HandleNewDevice.edit_group_in_inventory
 
         [],  # call from HandleNewDevice.add_group_to_inventory
         [],  # call from HandleNewDevice.add_group_to_inventory
@@ -870,13 +1129,16 @@ def test_update_group_to_other_group_with_host_already_configured_failure(m_find
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
-        [existing_group_backend()]  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
     ]
 
     calls_find = [
-        call({"_id": ObjectId(common_id)}),  # call from HandleNewDevice.update_inventory_record
+        call({"_id": ObjectId(common_id)}),  # call from inventory/routes/update_inventory_record
+        call({"group_1": {"$exists": 1}}),  # call from inventory/routes/get_inventory_type
         call({'address': "group_3", "delete": False}),  # call from HandleNewDevice.edit_group_in_inventory
         call({'address': "group_3", "delete": True}),  # call from HandleNewDevice.edit_group_in_inventory
+        call({"group_3": {"$exists": 1}}),  # call from HandleNewDevice.edit_group_in_inventory
         call({"_id": ObjectId(common_id)}),  # call from HandleNewDevice.edit_group_in_inventory
 
         call({'address': "group_3", "delete": False}),  # call from HandleNewDevice.add_group_to_inventory
@@ -885,7 +1147,8 @@ def test_update_group_to_other_group_with_host_already_configured_failure(m_find
         call({'address': "0.0.0.0", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "0.0.0.0", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
-        call({"group_2": {"$exists": 1}})  # call from HandleNewDevice._is_host_in_group
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'0.0.0.0': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/inventory/update/{common_id}", json=new_group_ui_failure)
@@ -896,16 +1159,19 @@ def test_update_group_to_other_group_with_host_already_configured_failure(m_find
                                         "Host 0.0.0.0:161 already exists in group group_2. Record was not added."}
 
 
+@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_update_group_host_or_host_to_group_failure(m_find, m_insert, m_update, m_delete, client):
+def test_update_group_host_or_host_to_group_failure(m_find, m_insert, m_update, m_delete, m_get_inventory_type, client):
     m_insert.return_value = None
     m_update.return_value = None
     m_delete.return_value = None
+    m_get_inventory_type.return_value = "Group"
 
     ui_edit_group_to_host = {
+        "inventoryType": "Host",
         "address": "1.1.1.1",
         "port": "161",
         "version": "3",
@@ -918,11 +1184,11 @@ def test_update_group_host_or_host_to_group_failure(m_find, m_insert, m_update, 
     }
 
     m_find.side_effect = [
-        [backend_existing_edit_group()],  # call from HandleNewDevice.update_inventory_record
+        [backend_inventory_existing_edit_group()],  # call from inventory/routes/update_inventory_record
     ]
 
     calls_find = [
-        call({"_id": ObjectId(common_id)}),  # call from HandleNewDevice.update_inventory_record
+        call({"_id": ObjectId(common_id)}),  # call from inventory/routes/update_inventory_record
     ]
 
     response = client.post(f"/inventory/update/{common_id}", json=ui_edit_group_to_host)
@@ -932,6 +1198,7 @@ def test_update_group_host_or_host_to_group_failure(m_find, m_insert, m_update, 
     assert not m_delete.called
     assert response.json == {"message": "Can't edit single host to the group or group to the single host"}
 
+    m_get_inventory_type.return_value = "Host"
     backend_edit_host_to_group = {
         "_id": ObjectId(common_id),
         "address": "1.1.1.1",
@@ -947,6 +1214,7 @@ def test_update_group_host_or_host_to_group_failure(m_find, m_insert, m_update, 
     }
 
     ui_edit_group_to_host2 = {
+        "inventoryType": "Group",
         "address": "group_1",
         "port": "161",
         "version": "3",

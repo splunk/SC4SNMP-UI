@@ -16,16 +16,21 @@ def test_add_group_record_success(m_find, m_insert, client):
         "group_1": []
     }
 
+    find_calls = [
+        call({'address': 'group_1', 'delete': False}),
+        call({f"group_1": {"$exists": True}}),
+    ]
+    m_find.side_effect = [[],[]]
+
     response = client.post(f"/groups/add", json=ui_group)
-    m_find.return_value = []
     m_insert.return_value = None
-    assert m_find.call_args == call({f"group_1": {"$exists": True}})
+    m_find.has_calls(find_calls)
     assert m_insert.call_args == call(backend_group)
     assert response.json == "success"
 
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_add_group_record_success(m_find, m_insert, client):
+def test_add_group_record_with_already_existing_name_failure(m_find, m_insert, client):
     ui_group = {
         "groupName": "group_1"
     }
@@ -41,6 +46,22 @@ def test_add_group_record_success(m_find, m_insert, client):
     response = client.post(f"/groups/add", json=ui_group)
     assert not m_insert.called
     assert response.json == {"message": "Group with name group_1 already exists. Group was not added."}
+
+@mock.patch("pymongo.collection.Collection.insert_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_group_record_with_name_existing_in_inventory_as_hostname_failure(m_find, m_insert, client):
+    ui_group = {
+        "groupName": "test"
+    }
+
+    m_find.side_effect = [
+        [],
+        [{"address": "test"}]
+    ]
+
+    response = client.post(f"/groups/add", json=ui_group)
+    assert not m_insert.called
+    assert response.json == {"message": "In the inventory there is a record with name test. Group was not added."}
 
 # TEST UPDATING GROUP
 @mock.patch("pymongo.collection.Collection.update_one")
@@ -65,6 +86,7 @@ def test_update_group_success(m_find, m_update, client):
     ]
 
     m_find.side_effect = [
+        [],
         [],
         [backend_group_old]
     ]
@@ -104,6 +126,23 @@ def test_update_group_failure(m_find, m_update, client):
     #m_update.assert_has_calls(calls_update)
     assert not m_update.called
     assert response.json == {"message": "Group with name group_1_edit already exists. Group was not edited."}
+
+@mock.patch("pymongo.collection.Collection.insert_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_update_group_record_with_name_existing_in_inventory_as_hostname_failure(m_find, m_insert, client):
+    ui_group = {
+        "_id": common_id,
+        "groupName": "test"
+    }
+
+    m_find.side_effect = [
+        [],
+        [{"address": "test"}]
+    ]
+
+    response = client.post(f"/groups/update/{common_id}", json=ui_group)
+    assert not m_insert.called
+    assert response.json == {"message": "In the inventory there is a record with name test. Group was not edited."}
 
 # TEST DELETING GROUP
 @mock.patch("pymongo.collection.Collection.find")
@@ -224,7 +263,8 @@ def test_add_device_to_group_configured_in_inventory_success(m_find, m_update, c
         [],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
         [group_inventory()],  # call from HandleNewDevice._is_host_in_group
-        [backend_group_add_device_old()]  # call from HandleNewDevice._is_host_in_group
+        [backend_group_add_device_old()],  # call from HandleNewDevice._is_host_in_group
+        []  # call from HandleNewDevice.add_single_host
     ]
     calls_find = [
         call({'_id': ObjectId(common_id)}, {"_id": 0}),  # call from group/routes.add_device_to_group
@@ -233,7 +273,8 @@ def test_add_device_to_group_configured_in_inventory_success(m_find, m_update, c
         call({'address': "2.2.2.2", 'port': 1161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "2.2.2.2", 'port': 1161, "delete": True}),  # call from HandleNewDevice._is_host_configured
         call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
-        call({"group_1": {"$exists": 1}})  # call from HandleNewDevice._is_host_in_group
+        call({"group_1": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({"2.2.2.2": {"$exists": True}})   # call from HandleNewDevice.add_single_host
     ]
     m_update.return_value = None
 
@@ -308,6 +349,7 @@ def test_add_device_to_group_configured_in_inventory_failed(m_find, m_update, cl
         [backend_group_add_device_old()],  # call from HandleNewDevice.add_group_host
         [existing_device_inventory],  # call from HandleNewDevice._is_host_configured
         [],  # call from HandleNewDevice._is_host_configured
+        [], # call from HandleNewDevice.add_single_host
     ]
     calls_find = [
         call({'_id': ObjectId(common_id)}, {"_id": 0}),  # call from group/routes.add_device_to_groupp
@@ -315,12 +357,13 @@ def test_add_device_to_group_configured_in_inventory_failed(m_find, m_update, cl
         call({'_id': ObjectId(common_id)}, {"_id": 0}),  # call from HandleNewDevice.add_group_host
         call({'address': "5.5.5.5", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
         call({'address': "5.5.5.5", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({"5.5.5.5": {"$exists": True}}),  # call from HandleNewDevice.add_single_host
     ]
 
     response = client.post(f"/devices/add", json=ui_group_device_new)
     m_find.assert_has_calls(calls_find)
     assert not m_update.called
-    assert response.json == {'message': 'Host 5.5.5.5:161 already exists as a single host in the inventory. Record was not added.'}
+    assert response.json == {'message': 'Host 5.5.5.5:161 already exists in the inventory. Record was not added.'}
 
 
 # TEST UPDATING DEVICES

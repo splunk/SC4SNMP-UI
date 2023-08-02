@@ -53,6 +53,7 @@ function AddDeviceModal(){
         })
         .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
@@ -65,6 +66,7 @@ function AddDeviceModal(){
         })
         .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
