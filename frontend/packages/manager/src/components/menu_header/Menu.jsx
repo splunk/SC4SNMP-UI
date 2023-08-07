@@ -33,7 +33,7 @@ function Menu(){
                      <StyledTab activeTabId={MenuCtx.activeTabId} onChange={handleMenuChange}>
                         <TabBar.Tab data-test="sc4snmp:profiles-tab" label="Profiles" tabId="Profiles" />
                         <TabBar.Tab data-test="sc4snmp:groups-tab" label="Groups" tabId="Groups" />
-                        <TabBar.Tab data-test="sc4snmp:groups-tab" label="Inventory" tabId="Inventory" />
+                        <TabBar.Tab data-test="sc4snmp:inventory-tab" label="Inventory" tabId="Inventory" />
                     </StyledTab>
                  </StyledMenuBarLeft>
                  <StyledMenuBarRight>

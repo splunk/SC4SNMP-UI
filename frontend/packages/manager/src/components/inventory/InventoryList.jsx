@@ -121,13 +121,13 @@ function InventoryList() {
     return (
         <div style={{width: '100%' }}>
             <Pagination>
-                <Select appearance="pill" suffixLabel="inventory items per page"
+                <Select data-test="sc4snmp:inventory-pagination" appearance="pill" suffixLabel="inventory items per page"
                         value={devicesPerPage} onChange={handleDevicesPerPage}
                         defaultValue="20">
-                    <Select.Option label="10" value="10" />
-                    <Select.Option label="20" value="20" />
-                    <Select.Option label="50" value="50" />
-                    <Select.Option label="100" value="100" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-10" label="10" value="10" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-20" label="20" value="20" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-50" label="50" value="50" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-100" label="100" value="100" />
                 </Select>
                 <Paginator
                     onChange={handlePagination}
