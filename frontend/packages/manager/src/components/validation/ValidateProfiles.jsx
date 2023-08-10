@@ -222,9 +222,9 @@ const validateProfiles = (validationObj) => {
         const configuredVarBinds = {};
         let varBindKey;
         for (let i = 0; i < validationObj.varBinds.length; i++){
-            varBindKey = `${validationObj.varBinds[i].family}${validationObj.varBinds[i].category}${validationObj.varBinds[i].index}`
+            varBindKey = `${validationObj.varBinds[i].component}${validationObj.varBinds[i].object}${validationObj.varBinds[i].index}`
             if (varBindKey in configuredVarBinds && varBindKey.length > 0){
-                message = "The same varbind has been already configured for this profile"
+                message = "The same varBind has been already configured for this profile"
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
                 }else{
@@ -234,7 +234,7 @@ const validateProfiles = (validationObj) => {
             }else{
                 configuredVarBinds[varBindKey] = true
             }
-            if (validationObj.varBinds[i].family.length === 0){
+            if (validationObj.varBinds[i].component.length === 0){
                 message = "MIB-Component is required";
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
@@ -243,9 +243,9 @@ const validateProfiles = (validationObj) => {
                 }
                 isValid = false;
 
-            }else if (!validationObj.varBinds[i].family.match(/^[a-zA-Z0-9_-]+$/)){
-                message = "MIB-Component can consist only of upper and lower english letters, " +
-                "numbers and two special characters: '-' and '_'. No spaces are allowed."
+            }else if (!validationObj.varBinds[i].component.match(/^[a-zA-Z0-9._-]+$/) || !isNaN(validationObj.varBinds[i].component)){
+                message = "MIB component can consist only of upper and lower english letters, " +
+                "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB component can't be a number."
                 if (i in errors.varBinds){
                     errors.varBinds[i].push(message);
                 }else{
@@ -254,10 +254,10 @@ const validateProfiles = (validationObj) => {
                 isValid = false;
             }
 
-            if (validationObj.varBinds[i].category.length > 0){
-                if (!validationObj.varBinds[i].category.match(/^[a-zA-Z0-9_-]+$/)){
+            if (validationObj.varBinds[i].object.length > 0){
+                if (!validationObj.varBinds[i].object.match(/^[a-zA-Z0-9._-]+$/) || !isNaN(validationObj.varBinds[i].object)){
                     message = "MIB object can consist only of upper and lower english letters, " +
-                        "numbers and two special characters: '-' and '_'. No spaces are allowed.";
+                        "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB object can't be a number.";
                     if (i in errors.varBinds){
                         errors.varBinds[i].push(message);
                     }else{
@@ -268,7 +268,7 @@ const validateProfiles = (validationObj) => {
             }
 
             if (validationObj.varBinds[i].index.length > 0){
-                if (validationObj.varBinds[i].category.length === 0){
+                if (validationObj.varBinds[i].object.length === 0){
                     message = "MIB object is required when MIB index is specified";
                     if (i in errors.varBinds){
                         errors.varBinds[i].push(message);

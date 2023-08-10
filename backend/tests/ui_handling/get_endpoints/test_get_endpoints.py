@@ -57,9 +57,9 @@ def test_get_all_profiles_list(m_client, client):
             "field": "",
             "patterns": []
         },
-        "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                     {"family": "IF-MIB", "category": "", "index": ""},
-                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+        "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                     {"component": "IF-MIB", "object": "", "index": ""},
+                     {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
         'profileInInventory': True,
     }
 
@@ -73,9 +73,9 @@ def test_get_all_profiles_list(m_client, client):
             "field": "SNMPv2-MIB.sysObjectID",
             "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}]
         },
-        "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                     {"family": "IF-MIB", "category": "", "index": ""},
-                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+        "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                     {"component": "IF-MIB", "object": "", "index": ""},
+                     {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
         'profileInInventory': True,
     }
 

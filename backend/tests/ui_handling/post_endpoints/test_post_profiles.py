@@ -17,9 +17,9 @@ def test_add_profile_record_success(m_insert, m_find, client):
             "field": "",
             "patterns": None
         },
-        "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                     {"family": "IF-MIB", "category": "", "index": ""},
-                     {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}]
+        "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                     {"component": "IF-MIB", "object": "", "index": ""},
+                     {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}]
     }
     backend_prof = {
         "profile_1": {
@@ -133,7 +133,7 @@ def test_update_profile_record_no_name_change_success(m_find, m_update, client):
             "field": "SNMPv2-MIB.sysObjectID",
             "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}]
         },
-        "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"}]
+        "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"}]
     }
 
     backend_prof_1_old = {
@@ -183,7 +183,7 @@ def test_update_profile_record_with_name_change_success(m_find, m_update, client
             "field": "SNMPv2-MIB.sysObjectID",
             "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}]
         },
-        "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"}]
+        "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"}]
     }
 
     backend_prof_1_new = {
