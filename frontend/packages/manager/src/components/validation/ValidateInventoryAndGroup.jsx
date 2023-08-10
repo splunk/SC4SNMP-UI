@@ -24,10 +24,10 @@ const validateInventoryAndGroup = (validationObj) => {
         if (validationObj.groupName.length === 0){
             errors.groupName.push("Group name is required");
             isValid = false;
-        }else if (!validationObj.groupName.match(/^[a-zA-Z0-9_-]+$/)){
+        }else if (!validationObj.groupName.match(/^[a-zA-Z0-9_-]+$/) || validationObj.groupName.match(/^[0-9].*$/)){
             isValid = false;
             errors.groupName.push("Group name can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'. No spaces are allowed.");
+            "numbers and two special characters: '-' and '_'. No spaces are allowed. Group name can't start with a number.");
         }
     }
 
