@@ -19,9 +19,10 @@ function renderModal(){
     )
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 describe("AddGroupModal", () => {
-    it("Test wrong group name", () => {
+    it("Test wrong group name", async () => {
         renderModal();
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const groupNameInput = screen.getByDataTest('sc4snmp:form:group-name-input').querySelector("input");
@@ -29,7 +30,13 @@ describe("AddGroupModal", () => {
         fireEvent.change(groupNameInput, {target: {value: "gro?up1"}})
         fireEvent.click(submitButton);
         expect(screen.queryByText("Group name can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
+            "numbers and two special characters: '-' and '_'. No spaces are allowed. Group name can't start with a number.")).toBeInTheDocument();
+
+        await sleep(5);
+        fireEvent.change(groupNameInput, {target: {value: "1group1"}})
+        fireEvent.click(submitButton);
+        expect(screen.queryByText("Group name can consist only of upper and lower english letters, " +
+            "numbers and two special characters: '-' and '_'. No spaces are allowed. Group name can't start with a number.")).toBeInTheDocument();
     })
 
     it("Test no group name provided", () => {
