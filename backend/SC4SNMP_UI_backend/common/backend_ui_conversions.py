@@ -84,8 +84,8 @@ class ProfileConversion(Conversion):
             var_binds = []
             for vb in backend_var_binds:
                 new_vb = {
-                    "family": vb[0],
-                    "category": vb[1] if len(vb) >= 2 else "",
+                    "component": vb[0],
+                    "object": vb[1] if len(vb) >= 2 else "",
                     "index": '.'.join(map(str, vb[2:])) if len(vb) >= 3 else "",
                 }
                 var_binds.append(new_vb)
@@ -168,9 +168,9 @@ class ProfileConversion(Conversion):
             }
         var_binds = []
         for var_b in document['varBinds']:
-            single_var_bind = [var_b['family']]
-            if len(var_b['category']) > 0:
-                single_var_bind.append(var_b['category'])
+            single_var_bind = [var_b['component']]
+            if len(var_b['object']) > 0:
+                single_var_bind.append(var_b['object'])
                 if len(var_b['index']) > 0:
                     single_var_bind += var_b['index'].split(".")
             var_binds.append(single_var_bind)

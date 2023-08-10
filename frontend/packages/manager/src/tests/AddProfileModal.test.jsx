@@ -61,11 +61,11 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         fireEvent.change(frequencyInput, {target: {value: 2}})
         let mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
         const mibCategoryInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind1-mib-category-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-1").querySelector("input")
         const mibIndexInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind2-mib-index-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-2").querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mi b"}})
         fireEvent.change(mibCategoryInput1, {target: {value: "aa?"}})
@@ -77,12 +77,12 @@ describe("AddProfileModal", () => {
         const secondRow = screen.getByDataTest("sc4snmp:form:varbind-row-1")
         const thirdRow = screen.getByDataTest("sc4snmp:form:varbind-row-2")
 
-        expect(within(firstRow).queryByText("MIB-Component can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'. No spaces are allowed.")).toBeInTheDocument()
+        expect(within(firstRow).queryByText("MIB component can consist only of upper and lower english letters, " +
+            "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB component can't be a number.")).toBeInTheDocument()
 
         expect(within(secondRow).queryByText("MIB-Component is required")).toBeInTheDocument()
         expect(within(secondRow).queryByText("MIB object can consist only of upper and lower english letters, " +
-            "numbers and two special characters: '-' and '_'. No spaces are allowed.")).toBeInTheDocument()
+                        "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB object can't be a number.")).toBeInTheDocument()
 
         expect(within(thirdRow).queryByText("MIB-Component is required")).toBeInTheDocument()
         expect(within(thirdRow).queryByText("MIB object is required when MIB index is specified")).toBeInTheDocument()
@@ -111,7 +111,7 @@ describe("AddProfileModal", () => {
         await sleep(10);
 
         mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mib"}})
         firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
@@ -285,23 +285,23 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         await sleep(20);
         const mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind0-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
         const mibCategoryInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind0-mib-category-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-0").querySelector("input")
         const mibIndexInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind0-mib-index-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-0").querySelector("input")
 
         const mibFamilyInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind1-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-1").querySelector("input")
         const mibCategoryInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind1-mib-category-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-1").querySelector("input")
 
         const mibFamilyInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind2-mib-family-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-2").querySelector("input")
         const mibCategoryInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind2-mib-category-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-2").querySelector("input")
         const mibIndexInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind2-mib-index-input").querySelector("input")
+            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-2").querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "SNMPv2-MIB"}})
         fireEvent.change(mibCategoryInput0, {target: {value: "sysUpTime"}})
@@ -318,7 +318,7 @@ describe("AddProfileModal", () => {
         await sleep(5)
 
         const varBindError = screen.getByDataTest("sc4snmp:varbind-error-2-0")
-        expect(varBindError.textContent).toBe("The same varbind has been already configured for this profile")
+        expect(varBindError.textContent).toBe("The same varBind has been already configured for this profile")
     })
 
     it("Test same patterns error", async () => {

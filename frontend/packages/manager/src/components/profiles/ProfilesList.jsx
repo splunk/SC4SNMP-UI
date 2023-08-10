@@ -23,13 +23,13 @@ function getExpansionRow(row) {
             <Table.Cell>{/* Empty cell */}</Table.Cell>
             <Table.Cell>
                 {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.family}</P>
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.component}</P>
                 ))}
             </Table.Cell>
 
             <Table.Cell>
                 {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.category}</P>
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.object}</P>
                 ))}
             </Table.Cell>
 
@@ -50,8 +50,8 @@ function ProfilesList() {
         {sortKey: 'profileName', label: 'Profile name'},
         {sortKey: 'frequency', label: 'Frequency'},
         {sortKey: 'profileType', label: 'Profile type'},
-        {sortKey: `mibFamily`, label: 'MIB family'},
-        {sortKey: `mibCategory`, label: 'MIB category'},
+        {sortKey: `mibComponent`, label: 'MIB Component'},
+        {sortKey: `mibObject`, label: 'MIB Object'},
         {sortKey: `index`, label: 'MIB Index'},
         {sortKey: `actions`, label: 'Actions'},
     ];

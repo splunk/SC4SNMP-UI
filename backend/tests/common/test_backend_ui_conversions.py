@@ -26,10 +26,10 @@ class TestConversions(TestCase):
                 "patterns": [],
                 "conditions": []
             },
-            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1.test.2"},
-                         {"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                         {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1.test.2"},
+                         {"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                         {"component": "IF-MIB", "object": "", "index": ""},
+                         {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
             "profileInInventory": True
         }
 
@@ -43,9 +43,9 @@ class TestConversions(TestCase):
                 "patterns": [],
                 "conditions": []
             },
-            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                         {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                         {"component": "IF-MIB", "object": "", "index": ""},
+                         {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
             "profileInInventory": False
         }
 
@@ -59,9 +59,9 @@ class TestConversions(TestCase):
                 "patterns": [{"pattern": "^MIKROTIK"}, {"pattern": "^MIKROTIK2"}],
                 "conditions": []
             },
-            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                         {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                         {"component": "IF-MIB", "object": "", "index": ""},
+                         {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
             "profileInInventory": True
         }
 
@@ -80,9 +80,9 @@ class TestConversions(TestCase):
                     {"field": "field: IF-MIB.ifIndex", "operation": "greater than", "value": ["5"]}
                 ]
             },
-            "varBinds": [{"family": "IF-MIB", "category": "ifInDiscards", "index": "1"},
-                         {"family": "IF-MIB", "category": "", "index": ""},
-                         {"family": "IF-MIB", "category": "ifOutErrors", "index": ""}],
+            "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
+                         {"component": "IF-MIB", "object": "", "index": ""},
+                         {"component": "IF-MIB", "object": "ifOutErrors", "index": ""}],
             "profileInInventory": False
         }
 

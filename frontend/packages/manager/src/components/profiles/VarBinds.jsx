@@ -51,15 +51,15 @@ function VarBinds(props){
         setReload((prev)=>{return !prev});
     };
 
-    const handleItemValueFamily = (index, e) => {
+    const handleItemValueComponent = (index, e) => {
         const varBindsCopy = ProfCtx.varBinds;
-        varBindsCopy[index].family = e.target.value
+        varBindsCopy[index].component = e.target.value
         ProfCtx.setVarBinds(varBindsCopy);
     }
 
-    const handleItemValueCategory = (index, e) => {
+    const handleItemValueObject = (index, e) => {
         const varBindsCopy = ProfCtx.varBinds;
-        varBindsCopy[index].category = e.target.value
+        varBindsCopy[index].object = e.target.value
         ProfCtx.setVarBinds(varBindsCopy);
     }
 
@@ -74,7 +74,7 @@ function VarBinds(props){
         const newIndex = rowItems.length;
         const keyID = createDOMID();
         const varBindsCopy = ProfCtx.varBinds;
-        varBindsCopy.push({family: "", category: "", index: ""});
+        varBindsCopy.push({component: "", object: "", index: ""});
         indicesCopy[`${keyID}`] = newIndex;
         setIndices(indicesCopy);
         ProfCtx.setVarBinds(varBindsCopy);
@@ -93,13 +93,13 @@ function VarBinds(props){
                 <FormRows.Row data-test={`sc4snmp:form:varbind-row-${indexCopy}`} index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
                     <ValidationGroup>
                          <div style={{display: 'flex'}}>
-                            <Text data-test={`sc4snmp:form:varbind${indexCopy}-mib-family-input`} defaultValue={value.family} placeholder="MIB family"
-                                  onChange={e => handleItemValueFamily(newIndices[`${keyID}`], e)}
+                            <Text data-test={`sc4snmp:form:varbind-mib-component-input-${indexCopy}`} defaultValue={value.component} placeholder="MIB component"
+                                  onChange={e => handleItemValueComponent(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text data-test={`sc4snmp:form:varbind${indexCopy}-mib-category-input`} defaultValue={value.category} placeholder="MIB category"
-                                  onChange={e => handleItemValueCategory(newIndices[`${keyID}`], e)}
+                            <Text data-test={`sc4snmp:form:varbind-mib-object-input-${indexCopy}`} defaultValue={value.object} placeholder="MIB object"
+                                  onChange={e => handleItemValueObject(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text data-test={`sc4snmp:form:varbind${indexCopy}-mib-index-input`} defaultValue={value.index} placeholder="MIB index"
+                            <Text data-test={`sc4snmp:form:varbind-mib-index-input-${indexCopy}`} defaultValue={value.index} placeholder="MIB index"
                                   onChange={e => handleItemValueIndex(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>
