@@ -177,9 +177,9 @@ function ProfilesList() {
                 </Table.Head>
                 <Table.Body>
                     {profilesRecords
-                        .map((row, i) => (
+                        .map((row) => (
                             <Table.Row
-                                data-test={`sc4snmp:profile-row-${i}`}
+                                data-test="sc4snmp:profile-row"
                                 key={row._id}
                                 expansionRow={getExpansionRow(row)}
                                 onExpansion={() => handleRowExpansion(row._id)}
@@ -193,8 +193,8 @@ function ProfilesList() {
                                 <Table.Cell>{/* MIB category is empty in this view */}</Table.Cell>
                                 <Table.Cell>{/* MIB index is empty in this view */}</Table.Cell>
                                 <Table.Cell>
-                                    <Button data-test={`sc4snmp:profile-row-edit-${i}`} onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button data-test={`sc4snmp:profile-row-delete-${i}`}  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                    <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                 </Table.Cell>
                             </Table.Row>
                         ))}

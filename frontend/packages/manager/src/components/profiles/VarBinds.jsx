@@ -90,21 +90,21 @@ function VarBinds(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row data-test={`sc4snmp:form:varbind-row-${indexCopy}`} index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test="sc4snmp:form:varbind-row" index={indexCopy} key={createDOMID()} onRequestRemove={handleRequestRemove}>
                     <ValidationGroup>
                          <div style={{display: 'flex'}}>
-                            <Text data-test={`sc4snmp:form:varbind-mib-component-input-${indexCopy}`} defaultValue={value.component} placeholder="MIB component"
+                            <Text data-test="sc4snmp:form:varbind-mib-component-input" defaultValue={value.component} placeholder="MIB component"
                                   onChange={e => handleItemValueComponent(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text data-test={`sc4snmp:form:varbind-mib-object-input-${indexCopy}`} defaultValue={value.object} placeholder="MIB object"
+                            <Text data-test="sc4snmp:form:varbind-mib-object-input" defaultValue={value.object} placeholder="MIB object"
                                   onChange={e => handleItemValueObject(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
-                            <Text data-test={`sc4snmp:form:varbind-mib-index-input-${indexCopy}`} defaultValue={value.index} placeholder="MIB index"
+                            <Text data-test="sc4snmp:form:varbind-mib-index-input" defaultValue={value.index} placeholder="MIB index"
                                   onChange={e => handleItemValueIndex(newIndices[`${keyID}`], e)}
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>
                         {((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors) ?
-                            ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el,i) => <P data-test={`sc4snmp:varbind-error-${indexCopy}-${i}`} key={createDOMID()}
+                            ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el,i) => <P data-test="sc4snmp:varbind-error" key={createDOMID()}
                                                                                          style={validationMessage}>{el}</P>) :
                             <P/>)}
                     </ValidationGroup>

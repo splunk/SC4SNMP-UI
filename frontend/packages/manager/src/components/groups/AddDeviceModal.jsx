@@ -3,12 +3,12 @@ import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
-import GroupContext from "../../store/group-contxt";
 import axios from "axios";
-import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
-import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
+import GroupContext from "../../store/group-contxt";
+import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
+import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
@@ -124,14 +124,14 @@ function AddDeviceModal(){
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address">
                         <ValidationGroup>
-                            <Text data-test='sc4snmp:form:ip-input' value={GrCtx.address} onChange={handleChangeAddress} error={((ValCtx.addressErrors) ? true : false)}/>
-                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el, i) => <P data-test={`sc4snmp:ip-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test='sc4snmp:form:ip-input' value={GrCtx.address} onChange={handleChangeAddress} error={(!!(ValCtx.addressErrors))}/>
+                            {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P data-test="sc4snmp:ip-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
                     <StyledControlGroup labelWidth={140} label="Port" >
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:port-input" value={GrCtx.port} onChange={handleChangePort} error={((ValCtx.portErrors) ? true : false)}/>
-                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el, i) => <P data-test={`sc4snmp:port-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:port-input" value={GrCtx.port} onChange={handleChangePort} error={(!!(ValCtx.portErrors))}/>
+                            {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P data-test="sc4snmp:port-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
@@ -150,22 +150,22 @@ function AddDeviceModal(){
 
                     <StyledControlGroup labelWidth={140} label="Community">
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:community-input" value={GrCtx.community} onChange={handleChangeCommunity} error={((ValCtx.communityErrors) ? true : false)}/>
-                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el, i) => <P data-test={`sc4snmp:community-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:community-input" value={GrCtx.community} onChange={handleChangeCommunity} error={(!!(ValCtx.communityErrors))}/>
+                            {((ValCtx.communityErrors) ? ValCtx.communityErrors.map((el) => <P data-test="sc4snmp:community-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup labelWidth={140} label="Secret">
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:secret-input" value={GrCtx.secret} onChange={handleChangeSecret} error={((ValCtx.secretErrors) ? true : false)}/>
-                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el, i) => <P data-test={`sc4snmp:secret-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:secret-input" value={GrCtx.secret} onChange={handleChangeSecret} error={(!!(ValCtx.secretErrors))}/>
+                            {((ValCtx.secretErrors) ? ValCtx.secretErrors.map((el) => <P data-test="sc4snmp:secret-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     <StyledControlGroup labelWidth={140} label="Security Engine">
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:security-engine-input" value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={((ValCtx.securityEngineErrors) ? true : false)}/>
-                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el, i) => <P data-test={`sc4snmp:security-engine-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:security-engine-input" value={GrCtx.securityEngine} onChange={handleChangeSecurityEngine} error={(!!(ValCtx.securityEngineErrors))}/>
+                            {((ValCtx.securityEngineErrors) ? ValCtx.securityEngineErrors.map((el) => <P data-test="sc4snmp:security-engine-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 

@@ -95,7 +95,7 @@ function AddGroupModal() {
                     <ControlGroup label="Group Name">
                         <ValidationGroup>
                             <Text data-test="sc4snmp:form:group-name-input" value={GrCtx.groupName} onChange={handleGroupNameChange} error={(!!(ValCtx.groupNameErrors))}/>
-                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el, i) => <P data-test={`sc4snmp:group-name-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P data-test="sc4snmp:group-name-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </ControlGroup>
                 </Modal.Body>
