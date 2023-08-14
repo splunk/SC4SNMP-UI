@@ -129,6 +129,7 @@ class ProfileConversion(Conversion):
                     "patterns": [],
                     "conditions": []
                 }
+
             result = {
                 "_id": str(document["_id"]),
                 "profileName": profile_name,
