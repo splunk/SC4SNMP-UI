@@ -17,29 +17,29 @@ import P from "@splunk/react-ui/Paragraph";
 
 function getExpansionRow(row) {
     return (
-        <Table.Row key={`${row._id}-expansion`}>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>
+        <Table.Row data-test="sc4snmp:profile-row-expanded" key={`${row._id}-expansion`}>
+            <Table.Cell data-test="sc4snmp:profile-name-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-frequency-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-type-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-component-expanded" >
                 {row.varBinds.map((value) => (
                     <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.component}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-object_expanded" >
                 {row.varBinds.map((value) => (
                     <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.object}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-index-expanded" >
                 {row.varBinds.map((value) => (
                     <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.index}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell />
+            <Table.Cell data-test="sc4snmp:profile-actions-expanded" />
         </Table.Row>
     );
 }
@@ -155,10 +155,10 @@ function ProfilesList() {
                 <Select data-test="sc4snmp:profiles-pagination" appearance="pill" suffixLabel="profiles per page"
                         value={profilesPerPage} onChange={profilesPerPageHandler}
                         defaultValue="20">
-                    <Select.Option data-test="sc4snmp:profiles-pagination-10" label="10" value="10" />
-                    <Select.Option data-test="sc4snmp:profiles-pagination-20" label="20" value="20" />
-                    <Select.Option data-test="sc4snmp:profiles-pagination-50" label="50" value="50" />
-                    <Select.Option data-test="sc4snmp:profiles-pagination-100" label="100" value="100" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="10" value="10" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="20" value="20" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="50" value="50" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="100" value="100" />
                 </Select>
                 <Paginator
                     onChange={(event, { page }) => (paginationHandler(page))}
@@ -167,7 +167,7 @@ function ProfilesList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table stripeRows resizableFillLayout rowExpansion="single">
+            <Table data-test="sc4snmp:profiles-table" stripeRows resizableFillLayout rowExpansion="single">
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -185,14 +185,14 @@ function ProfilesList() {
                                 onExpansion={() => handleRowExpansion(row._id)}
                                 expanded={row._id === expandedRowId}
                             >
-                                <Table.Cell>{row.profileName}</Table.Cell>
-                                <Table.Cell>{(row.conditions.condition !=="walk" ? row.frequency : <P>N/A</P>)}</Table.Cell>
-                                <Table.Cell>{row.conditions.condition}</Table.Cell>
-                                <Table.Cell>{(row.varBinds.length === 1) ? `1 MIB family` :
-                                    `${row.varBinds.length} MIB families`}</Table.Cell>
-                                <Table.Cell>{/* MIB category is empty in this view */}</Table.Cell>
-                                <Table.Cell>{/* MIB index is empty in this view */}</Table.Cell>
-                                <Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-name" >{row.profileName}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-frequency" >{(row.conditions.condition !=="walk" ? row.frequency : <P>N/A</P>)}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-type" >{row.conditions.condition}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-component" >{(row.varBinds.length === 1) ? `1 MIB component` :
+                                    `${row.varBinds.length} MIB components`}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-object" >{/* MIB object is empty in this view */}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-index" >{/* MIB index is empty in this view */}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-actions" >
                                     <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
                                     <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                 </Table.Cell>

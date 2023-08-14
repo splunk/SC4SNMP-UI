@@ -124,10 +124,10 @@ function InventoryList() {
                 <Select data-test="sc4snmp:inventory-pagination" appearance="pill" suffixLabel="inventory items per page"
                         value={devicesPerPage} onChange={handleDevicesPerPage}
                         defaultValue="20">
-                    <Select.Option data-test="sc4snmp:inventory-pagination-10" label="10" value="10" />
-                    <Select.Option data-test="sc4snmp:inventory-pagination-20" label="20" value="20" />
-                    <Select.Option data-test="sc4snmp:inventory-pagination-50" label="50" value="50" />
-                    <Select.Option data-test="sc4snmp:inventory-pagination-100" label="100" value="100" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-option" label="10" value="10" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-option" label="20" value="20" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-option" label="50" value="50" />
+                    <Select.Option data-test="sc4snmp:inventory-pagination-option" label="100" value="100" />
                 </Select>
                 <Paginator
                     onChange={handlePagination}
@@ -136,7 +136,7 @@ function InventoryList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table stripeRows resizableFillLayout>
+            <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -148,16 +148,16 @@ function InventoryList() {
                     {allInventoryRecords
                         .map((row) => (
                             <Table.Row data-test="sc4snmp:inventory-row" key={createDOMID()} elementRef={InvCtx.rowToggle}>
-                                <Table.Cell>{row.address}</Table.Cell>
-                                <Table.Cell>{row.port}</Table.Cell>
-                                <Table.Cell>{row.version}</Table.Cell>
-                                <Table.Cell>{row.community}</Table.Cell>
-                                <Table.Cell>{row.secret}</Table.Cell>
-                                <Table.Cell>{row.securityEngine}</Table.Cell>
-                                <Table.Cell>{row.walkInterval}</Table.Cell>
-                                <Table.Cell>{row.profiles.toString()}</Table.Cell>
-                                <Table.Cell>{row.smartProfiles.toString()}</Table.Cell>
-                                <Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-address" >{row.address}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-port" >{row.port}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-version" >{row.version}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-community" >{row.community}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-secret" >{row.secret}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-security-engine" >{row.securityEngine}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-walk-interval" >{row.walkInterval}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-profiles" >{row.profiles.toString()}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-smart-profiles" >{row.smartProfiles.toString()}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-actions" >
                                     <Button data-test="sc4snmp:inventory-row-edit" onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
                                     <Button data-test="sc4snmp:inventory-row-delete" onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                 </Table.Cell>
