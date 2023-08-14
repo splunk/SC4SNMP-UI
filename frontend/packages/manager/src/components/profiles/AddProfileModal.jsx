@@ -129,16 +129,16 @@ function AddProfileModal(props) {
                 <StyledModalBody>
                     <StyledControlGroup label="Profile name">
                         <ValidationGroup>
-                            <Text data-test="sc4snmp:form:profile-name-input" value={ProfCtx.profileName} onChange={handleProfileName} error={((ValCtx.profileNameErrors) ? true : false)}/>
-                            {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el, i) => <P data-test={`sc4snmp:profile-name-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Text data-test="sc4snmp:form:profile-name-input" value={ProfCtx.profileName} onChange={handleProfileName} error={(!!(ValCtx.profileNameErrors))}/>
+                            {((ValCtx.profileNameErrors) ? ValCtx.profileNameErrors.map((el) => <P data-test="sc4snmp:profile-name-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 
                     {(ProfCtx.condition !== "walk") ?
                     <StyledControlGroup label="Frequency of polling (s)" >
                         <ValidationGroup>
-                            <Number data-test="sc4snmp:form:frequency-input" value={ProfCtx.frequency} onChange={handleFrequency} error={((ValCtx.frequencyErrors) ? true : false)}/>
-                            {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el, i) => <P data-test={`sc4snmp:frequency-error-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            <Number data-test="sc4snmp:form:frequency-input" value={ProfCtx.frequency} onChange={handleFrequency} error={(!!(ValCtx.frequencyErrors))}/>
+                            {((ValCtx.frequencyErrors) ? ValCtx.frequencyErrors.map((el) => <P data-test="sc4snmp:frequency-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup> : null}
 

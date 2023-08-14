@@ -61,11 +61,11 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         fireEvent.change(frequencyInput, {target: {value: 2}})
         let mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-component-input")[0].querySelector("input")
         const mibCategoryInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-1").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-object-input")[1].querySelector("input")
         const mibIndexInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-2").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-index-input")[2].querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mi b"}})
         fireEvent.change(mibCategoryInput1, {target: {value: "aa?"}})
@@ -73,9 +73,9 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         await sleep(5)
 
-        let firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
-        const secondRow = screen.getByDataTest("sc4snmp:form:varbind-row-1")
-        const thirdRow = screen.getByDataTest("sc4snmp:form:varbind-row-2")
+        let firstRow = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0]
+        const secondRow = screen.getAllByDataTest("sc4snmp:form:varbind-row")[1]
+        const thirdRow = screen.getAllByDataTest("sc4snmp:form:varbind-row")[2]
 
         expect(within(firstRow).queryByText("MIB component can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB component can't be a number.")).toBeInTheDocument()
@@ -90,31 +90,31 @@ describe("AddProfileModal", () => {
 
         // Delete first two rows
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
+        firstRow = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0]
         expect(within(firstRow).queryByText("MIB-Component is required")).toBeInTheDocument()
         expect(within(firstRow).queryByText("MIB object is required when MIB index is specified")).toBeInTheDocument()
         expect(within(firstRow).queryByText("Index can't include white spaces")).toBeInTheDocument()
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:varbind-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addVarBindButton);
         await sleep(10);
 
         mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-component-input")[0].querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "mib"}})
-        firstRow = screen.getByDataTest("sc4snmp:form:varbind-row-0")
+        firstRow = screen.getAllByDataTest("sc4snmp:form:varbind-row")[0]
         expect(within(firstRow).queryByText("MIB-Component is required")).not.toBeInTheDocument()
     })
 
@@ -139,13 +139,13 @@ describe("AddProfileModal", () => {
         fireEvent.click(addPatternButton);
         fireEvent.change(fieldInput, {target: {value: "t est"}});
 
-        let patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
+        let patternInput0 = screen.getAllByDataTest("sc4snmp:form:field-pattern")[0].querySelector("input")
         fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.click(submitButton);
         await sleep(10)
 
-        let firstRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-0")
-        const secondRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-1")
+        let firstRow = screen.getAllByDataTest("sc4snmp:form:field-pattern-row")[0]
+        const secondRow = screen.getAllByDataTest("sc4snmp:form:field-pattern-row")[1]
 
         expect(screen.queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
@@ -154,21 +154,21 @@ describe("AddProfileModal", () => {
 
         // Delete first row
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:field-pattern-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("sc4snmp:form:field-pattern-row-0")
+        firstRow = screen.getAllByDataTest("sc4snmp:form:field-pattern-row")[0]
         expect(within(firstRow).queryByText("Pattern is required")).toBeInTheDocument();
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:field-pattern-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:field-pattern-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addPatternButton);
         await sleep(10)
-        patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
+        patternInput0 = screen.getAllByDataTest("sc4snmp:form:field-pattern")[0].querySelector("input")
         fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.click(submitButton);
         await sleep(10)
@@ -195,19 +195,19 @@ describe("AddProfileModal", () => {
 
         await sleep(5);
 
-        const optionsButton1 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-1")
+        const optionsButton1 = screen.getAllByDataTest("sc4snmp:form:conditional-select-operation")[1]
         fireEvent.click(optionsButton1)
         await sleep(5)
-        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in-1")
+        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in")
         fireEvent.click(inOptionButton1)
         await sleep(5)
 
         const fieldInput0 =
-            screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[0].querySelector('[data-test="textbox"]')
         const fieldInput2 =
-            screen.getByDataTest("sc4snmp:form:conditional-field-2").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[2].querySelector('[data-test="textbox"]')
         const valueInput2 =
-            screen.getByDataTest("sc4snmp:form:conditional-condition-2").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[2].querySelector('[data-test="textbox"]')
 
         fireEvent.change(fieldInput0, {target: {value: "te st"}})
         fireEvent.change(fieldInput2, {target: {value: "test"}})
@@ -220,9 +220,9 @@ describe("AddProfileModal", () => {
 
         await sleep(10);
 
-        let firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
-        const secondRow = screen.getByDataTest("sc4snmp:form:conditional-row-1")
-        const thirdRow = screen.getByDataTest("sc4snmp:form:conditional-row-2")
+        let firstRow = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0]
+        const secondRow = screen.getAllByDataTest("sc4snmp:form:conditional-row")[1]
+        const thirdRow = screen.getAllByDataTest("sc4snmp:form:conditional-row")[2]
 
         expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).toBeInTheDocument();
@@ -238,17 +238,17 @@ describe("AddProfileModal", () => {
 
         // Delete first and second row
         await sleep(10)
-        let deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        let deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
 
-        firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
+        firstRow = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0]
         expect(within(firstRow).queryByText("Field can consist only of upper and lower english letters, " +
             "numbers and three special characters: '.' '-' and '_'. No spaces are allowed.")).not.toBeInTheDocument();
         expect(within(firstRow).queryByText("Field is required")).not.toBeInTheDocument()
@@ -256,20 +256,20 @@ describe("AddProfileModal", () => {
 
         // Delete remaining row and add the new one
         await sleep(10)
-        deleteRowButton0 = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="remove"]`)
+        deleteRowButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0].querySelector(`[data-test="remove"]`)
         fireEvent.click(deleteRowButton0)
         await sleep(10)
         fireEvent.click(addConditionalButton);
         await sleep(10);
 
         const valueInput0 =
-            screen.getByDataTest("sc4snmp:form:conditional-condition-0").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[0].querySelector('[data-test="textbox"]')
         fireEvent.change(valueInput0, {target: {value: "2"}})
 
         fireEvent.click(submitButton)
         await sleep(5)
 
-        firstRow = screen.getByDataTest("sc4snmp:form:conditional-row-0")
+        firstRow = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0]
 
         expect(within(firstRow).queryByText("Field is required")).toBeInTheDocument()
         expect(within(firstRow).queryByText("Value is required")).not.toBeInTheDocument()
@@ -285,23 +285,23 @@ describe("AddProfileModal", () => {
         fireEvent.click(addVarBindButton);
         await sleep(20);
         const mibFamilyInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-0").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-component-input")[0].querySelector("input")
         const mibCategoryInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-0").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-object-input")[0].querySelector("input")
         const mibIndexInput0 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-0").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-index-input")[0].querySelector("input")
 
         const mibFamilyInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-1").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-component-input")[1].querySelector("input")
         const mibCategoryInput1 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-1").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-object-input")[1].querySelector("input")
 
         const mibFamilyInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-component-input-2").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-component-input")[2].querySelector("input")
         const mibCategoryInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-object-input-2").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-object-input")[2].querySelector("input")
         const mibIndexInput2 =
-            screen.getByDataTest("sc4snmp:form:varbind-mib-index-input-2").querySelector("input")
+            screen.getAllByDataTest("sc4snmp:form:varbind-mib-index-input")[2].querySelector("input")
 
         fireEvent.change(mibFamilyInput0, {target: {value: "SNMPv2-MIB"}})
         fireEvent.change(mibCategoryInput0, {target: {value: "sysUpTime"}})
@@ -317,7 +317,7 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         await sleep(5)
 
-        const varBindError = screen.getByDataTest("sc4snmp:varbind-error-2-0")
+        const varBindError = screen.getByDataTest("sc4snmp:varbind-error")
         expect(varBindError.textContent).toBe("The same varBind has been already configured for this profile")
     })
 
@@ -331,9 +331,9 @@ describe("AddProfileModal", () => {
         fireEvent.click(addPatternButton);
         await sleep(20);
 
-        const patternInput0 = screen.getByDataTest("sc4snmp:form:field-pattern-0").querySelector("input")
-        const patternInput1 = screen.getByDataTest("sc4snmp:form:field-pattern-1").querySelector("input")
-        const patternInput2 = screen.getByDataTest("sc4snmp:form:field-pattern-2").querySelector("input")
+        const patternInput0 = screen.getAllByDataTest("sc4snmp:form:field-pattern")[0].querySelector("input")
+        const patternInput1 = screen.getAllByDataTest("sc4snmp:form:field-pattern")[1].querySelector("input")
+        const patternInput2 = screen.getAllByDataTest("sc4snmp:form:field-pattern")[2].querySelector("input")
 
         fireEvent.change(patternInput0, {target: {value: "test"}})
         fireEvent.change(patternInput1, {target: {value: "test2"}})
@@ -341,7 +341,7 @@ describe("AddProfileModal", () => {
         fireEvent.click(submitButton);
         await sleep(10)
 
-        const patternError = screen.getByDataTest("sc4snmp:field-pattern-error-2-0")
+        const patternError = screen.getByDataTest("sc4snmp:field-pattern-error")
         expect(patternError.textContent).toBe("The same pattern has been already configured for this profile");
     })
 
@@ -354,44 +354,44 @@ describe("AddProfileModal", () => {
         fireEvent.click(addConditionalButton);
         await sleep(10)
 
-        const optionsButton0 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-0")
+        const optionsButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-select-operation")[0]
         fireEvent.click(optionsButton0)
         await sleep(10)
-        const inOptionButton0 = screen.getByDataTest("sc4snmp:form:conditional-in-0")
+        const inOptionButton0 = screen.getAllByDataTest("sc4snmp:form:conditional-in")[0]
         fireEvent.click(inOptionButton0)
         await sleep(5)
-        const firstRowField = screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector(`input`)
+        const firstRowField = screen.getAllByDataTest("sc4snmp:form:conditional-field")[0].querySelector(`input`)
         fireEvent.change(firstRowField, {target: {value: "test"}})
-        const firstRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="add-row"]`)
+        const firstRowAddValue = screen.getAllByDataTest("sc4snmp:form:conditional-row")[0].querySelector(`[data-test="add-row"]`)
         fireEvent.click(firstRowAddValue)
         await sleep(5)
-        const firstRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-0").querySelector(`input`)
-        const firstRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-1").querySelector(`input`)
+        const firstRowValue0 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[0].querySelector(`input`)
+        const firstRowValue1 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[1].querySelector(`input`)
         fireEvent.change(firstRowValue0, {target: {value: "a"}})
         fireEvent.change(firstRowValue1, {target: {value: "b"}})
 
 
 
-        const optionsButton1 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-1")
+        const optionsButton1 = screen.getAllByDataTest("sc4snmp:form:conditional-select-operation")[1]
         fireEvent.click(optionsButton1)
         await sleep(10)
-        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in-1")
+        const inOptionButton1 = screen.getByDataTest("sc4snmp:form:conditional-in")
         fireEvent.click(inOptionButton1)
         await sleep(5)
-        const secondRowField = screen.getByDataTest("sc4snmp:form:conditional-field-1").querySelector(`input`)
+        const secondRowField = screen.getAllByDataTest("sc4snmp:form:conditional-field")[1].querySelector(`input`)
         fireEvent.change(secondRowField, {target: {value: "test"}})
-        const secondRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-1").querySelector(`[data-test="add-row"]`)
+        const secondRowAddValue = screen.getAllByDataTest("sc4snmp:form:conditional-row")[1].querySelector(`[data-test="add-row"]`)
         fireEvent.click(secondRowAddValue)
         await sleep(5)
-        const secondRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-1-0").querySelector(`input`)
-        const secondRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-1-1").querySelector(`input`)
+        const secondRowValue0 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[2].querySelector(`input`)
+        const secondRowValue1 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[3].querySelector(`input`)
         fireEvent.change(secondRowValue0, {target: {value: "b"}})
         fireEvent.change(secondRowValue1, {target: {value: "a"}})
 
         fireEvent.click(submitButton)
         await sleep(5);
 
-        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error-1-0")
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error")
         expect(sameConditionalError.textContent).toBe("The same condition has been already configured for this profile")
     })
 
@@ -405,23 +405,23 @@ describe("AddProfileModal", () => {
         await sleep(10)
 
         const fieldInput0 =
-            screen.getByDataTest("sc4snmp:form:conditional-field-0").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[0].querySelector('[data-test="textbox"]')
         const valueInput0 =
-            screen.getByDataTest("sc4snmp:form:conditional-condition-0").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[0].querySelector('[data-test="textbox"]')
         fireEvent.change(fieldInput0, {target: {value: "test"}})
         fireEvent.change(valueInput0, {target: {value: "a"}})
 
         const fieldInput1 =
-            screen.getByDataTest("sc4snmp:form:conditional-field-1").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[1].querySelector('[data-test="textbox"]')
         const valueInput1 =
-            screen.getByDataTest("sc4snmp:form:conditional-condition-1").querySelector('[data-test="textbox"]')
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[1].querySelector('[data-test="textbox"]')
         fireEvent.change(fieldInput1, {target: {value: "test"}})
         fireEvent.change(valueInput1, {target: {value: "a"}})
 
         fireEvent.click(submitButton)
         await sleep(5);
 
-        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error-1-0")
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-field-error")
         expect(sameConditionalError.textContent).toBe("The same condition has been already configured for this profile")
     })
 
@@ -433,24 +433,24 @@ describe("AddProfileModal", () => {
         fireEvent.click(addConditionalButton);
         await sleep(10)
 
-        const optionsButton0 = screen.getByDataTest("sc4snmp:form:conditional-select-operation-0")
+        const optionsButton0 = screen.getByDataTest("sc4snmp:form:conditional-select-operation")
         fireEvent.click(optionsButton0)
         await sleep(10)
-        const inOptionButton0 = screen.getByDataTest("sc4snmp:form:conditional-in-0")
+        const inOptionButton0 = screen.getByDataTest("sc4snmp:form:conditional-in")
         fireEvent.click(inOptionButton0)
         await sleep(5)
-        const firstRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row-0").querySelector(`[data-test="add-row"]`)
+        const firstRowAddValue = screen.getByDataTest("sc4snmp:form:conditional-row").querySelector(`[data-test="add-row"]`)
         fireEvent.click(firstRowAddValue)
         await sleep(5)
-        const firstRowValue0 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-0").querySelector(`input`)
-        const firstRowValue1 = screen.getByDataTest("sc4snmp:form:conditional-condition-0-1").querySelector(`input`)
+        const firstRowValue0 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[0].querySelector(`input`)
+        const firstRowValue1 = screen.getAllByDataTest("sc4snmp:form:conditional-condition")[1].querySelector(`input`)
         fireEvent.change(firstRowValue0, {target: {value: "a"}})
         fireEvent.change(firstRowValue1, {target: {value: "a"}})
 
         fireEvent.click(submitButton)
         await sleep(5);
 
-        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-condition-error-0-1-0")
+        const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-condition-error")
         expect(sameConditionalError.textContent).toBe("The same value has been already configured for this condition")
     })
 })

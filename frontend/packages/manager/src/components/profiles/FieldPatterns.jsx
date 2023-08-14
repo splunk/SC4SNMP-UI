@@ -78,13 +78,13 @@ function FieldPatterns(props){
             const keyID = createDOMID();
             newIndices[`${keyID}`] = indexCopy;
             return (
-                <FormRows.Row data-test={`sc4snmp:form:field-pattern-row-${indexCopy}`} index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
+                <FormRows.Row data-test="sc4snmp:form:field-pattern-row" index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <ValidationGroup>
-                        <Text data-test={`sc4snmp:form:field-pattern-${indexCopy}`} defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                        <Text data-test="sc4snmp:form:field-pattern" defaultValue={value.pattern} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
                               error={((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors))}/>
                         {((ValCtx.conditionPatternsErrors && newIndices[`${keyID}`] in ValCtx.conditionPatternsErrors) ?
-                            ValCtx.conditionPatternsErrors[newIndices[`${keyID}`]].map((el, i) =>
-                                <P data-test={`sc4snmp:field-pattern-error-${indexCopy}-${i}`} key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                            ValCtx.conditionPatternsErrors[newIndices[`${keyID}`]].map((el) =>
+                                <P data-test="sc4snmp:field-pattern-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                     </ValidationGroup>
                 </FormRows.Row>
             );

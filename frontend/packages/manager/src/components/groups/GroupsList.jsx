@@ -224,15 +224,15 @@ function GroupsList() {
         }
     };
 
-    const groupsList = groups.map((group, i) => (
-        <SingleGroup data-test={`sc4snmp:group-${i}`} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+    const groupsList = groups.map((group) => (
+        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
             <P>
                 {group.groupName}
             </P>
             <div>
-                <Button data-test={`sc4snmp:group-${i}:new-device-button`} style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button data-test={`sc4snmp:group-${i}:edit-group-button`} style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button data-test={`sc4snmp:group-${i}:delete-group-button`} style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
+                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
+                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
+                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -255,10 +255,10 @@ function GroupsList() {
                         <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="group items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
                                 defaultValue="20">
-                            <Select.Option data-test="sc4snmp:group-pagination-10" label="10" value="10" />
-                            <Select.Option data-test="sc4snmp:group-pagination-20" label="20" value="20" />
-                            <Select.Option data-test="sc4snmp:group-pagination-50" label="50" value="50" />
-                            <Select.Option data-test="sc4snmp:group-pagination-100" label="100" value="100" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="10" value="10" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="20" value="20" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="50" value="50" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="100" value="100" />
                         </Select>
                         <Paginator
                             onChange={(event, { page }) => (paginationHandler(page, openedGroupId))}
@@ -267,7 +267,7 @@ function GroupsList() {
                             totalPages={totalPages}
                         />
                     </Pagination>
-                    <Table stripeRows resizableFillLayout>
+                    <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
                                 <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -277,17 +277,17 @@ function GroupsList() {
                         </Table.Head>
                         <Table.Body>
                             {GrCtx.devices
-                                .map((row, i) => (
-                                    <Table.Row data-test={`sc4snmp:group-row-${i}`} key={createDOMID()} >
-                                        <Table.Cell>{row.address}</Table.Cell>
-                                        <Table.Cell>{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
-                                        <Table.Cell>{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
-                                        <Table.Cell>{(row.community === '') ? GrCtx.inventoryConfig.community  : row.community}</Table.Cell>
-                                        <Table.Cell>{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
-                                        <Table.Cell>{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
-                                        <Table.Cell>
-                                            <Button data-test={`sc4snmp:group-row-edit-${i}`} onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                            <Button data-test={`sc4snmp:group-row-delete-${i}`} onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                .map((row) => (
+                                    <Table.Row data-test="sc4snmp:group-row" key={createDOMID()} >
+                                        <Table.Cell data-test="sc4snmp:host-address" >{row.address}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-port" >{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-version" >{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-community" >{(row.community === '') ? GrCtx.inventoryConfig.community  : row.community}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-secret" >{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-security-engine" >{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-actions" >
+                                            <Button data-test="sc4snmp:group-row-edit" onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                            <Button data-test="sc4snmp:group-row-delete" onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
