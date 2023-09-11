@@ -113,7 +113,7 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
 
     response = client.post(f'/profiles/delete/{common_id}')
 
-    calls = [call({'_id': ObjectId(common_id)}, {"_id": 0}), call({"profiles": {"$regex": '.*profile_1.*'}})]
+    calls = [call({'_id': ObjectId(common_id)}, {"_id": 0}), call({"profiles": {"$regex": '.*profile_1.*'}, "delete": False})]
     m_find.assert_has_calls(calls)
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update})
@@ -232,7 +232,7 @@ def test_update_profile_record_with_name_change_success(m_find, m_update, client
 
     calls_find = [call({f"profile_1_edit": {"$exists": True}, "_id": {"$ne": ObjectId(common_id)}}),
                   call({'_id': ObjectId(common_id)}, {"_id": 0}),
-                  call({"profiles": {"$regex": '.*profile_1.*'}})]
+                  call({"profiles": {"$regex": '.*profile_1.*'}, "delete": False})]
 
     calls_update = [call({'_id': ObjectId(common_id)}, {"$rename": {"profile_1": "profile_1_edit"}}),
                     call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update}),

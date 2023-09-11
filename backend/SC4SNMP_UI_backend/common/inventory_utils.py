@@ -29,7 +29,7 @@ def update_profiles_in_inventory(profile_to_search: str, process_record: Callabl
     :param kwargs: additional variables which user can pass to process_record function
     :return:
     """
-    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_to_search}.*'}}))
+    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_to_search}.*'}, "delete": False}))
     for record in inventory_records:
         record_id = record["_id"]
         record_updated = inventory_conversion.backend2ui(record, inventory_type=None) # inventory_type isn't used
