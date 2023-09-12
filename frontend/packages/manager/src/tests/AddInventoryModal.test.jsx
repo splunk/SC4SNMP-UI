@@ -81,19 +81,36 @@ describe("AddInventoryModal", () => {
         fireEvent.click(submitButton);
         await sleep(10);
         expect(screen.queryByText("Address or host name is required")).not.toBeInTheDocument();
-        expect(screen.queryByText("Walk Interval number must be an integer greater than or equal 1800")).toBeInTheDocument();
+        expect(screen.queryByText("Walk Interval number must be an integer in range 1800-604800.")).toBeInTheDocument();
 
         fireEvent.change(addressInput, {target: {value: ""}})
         fireEvent.change(walkIntervalInput, {target: {value: 1900}});
         fireEvent.click(submitButton);
         await sleep(10);
         expect(screen.queryByText("Address or host name is required")).toBeInTheDocument();
-        expect(screen.queryByText("Walk Interval number must be an integer greater than or equal 1800")).not.toBeInTheDocument();
+        expect(screen.queryByText("Walk Interval number must be an integer in range 1800-604800.")).not.toBeInTheDocument();
 
         fireEvent.click(groupButton)
         fireEvent.click(submitButton);
         await sleep(10);
         expect(screen.queryByText("Group is required")).toBeInTheDocument();
+    })
+
+    it("Test walk interval above 604800", async () => {
+        axios.get.mockResolvedValueOnce({data:[]});
+        await act( async () => renderModal());
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
+        const groupButton = screen.getByDataTest("sc4snmp:form:inventory-type-group");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const walkIntervalInput = screen.getByDataTest('sc4snmp:form:walk-interval-input').querySelector("input");
+
+        fireEvent.change(addressInput, {target: {value: "group1"}})
+        fireEvent.change(walkIntervalInput, {target: {value: 604801}});
+        fireEvent.click(hostButton);
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Walk Interval number must be an integer in range 1800-604800.")).toBeInTheDocument();
     })
 
     it("Test wrong group name, no port and wrong port", async () => {

@@ -29,6 +29,10 @@ const validateInventoryAndGroup = (validationObj) => {
             errors.groupName.push("Group name can consist only of upper and lower english letters, " +
             "numbers and two special characters: '-' and '_'. No spaces are allowed. Group name can't start with a number.");
         }
+        if (validationObj.groupName.length > 22){
+            isValid = false;
+            errors.groupName.push("Group name can have maximum length of 22 characters.");
+        }
     }
 
     // Validate address
@@ -96,9 +100,9 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate Walk Interval
     if ("walkInterval" in validationObj){
-        if (!(Number.isInteger(validationObj.walkInterval) && validationObj.walkInterval >= 1800)){
+        if (!(Number.isInteger(validationObj.walkInterval)) || (validationObj.walkInterval < 1800 || validationObj.walkInterval > 604800)){
             isValid = false;
-            errors.walkInterval.push("Walk Interval number must be an integer greater than or equal 1800");
+            errors.walkInterval.push("Walk Interval number must be an integer in range 1800-604800.");
         }
     }
 
