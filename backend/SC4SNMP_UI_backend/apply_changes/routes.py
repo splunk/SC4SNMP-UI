@@ -12,7 +12,7 @@ def apply_changes():
     changes = ApplyChanges()
     job_delay, currently_scheduled = changes.apply_changes()
     if job_delay <= 1 and currently_scheduled:
-        message = "There might be previous kubernetes job still present in the namespace. Configuration update will be" \
+        message = "There might be previous kubernetes job still present in the namespace. Configuration update will be " \
                   f"retried {JOB_CREATION_RETRIES} times. If your configuration won't be updated in a few minutes, make sure that " \
                   f"snmp-splunk-connect-for-snmp-inventory job isn't present in your kubernetes deployment namespace and " \
                   f"click 'Apply changes' button once again."
