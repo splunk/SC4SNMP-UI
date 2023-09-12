@@ -39,6 +39,16 @@ describe("AddGroupModal", () => {
             "numbers and two special characters: '-' and '_'. No spaces are allowed. Group name can't start with a number.")).toBeInTheDocument();
     })
 
+    it("Test too long group name", async () => {
+        renderModal();
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const groupNameInput = screen.getByDataTest('sc4snmp:form:group-name-input').querySelector("input");
+
+        fireEvent.change(groupNameInput, {target: {value: "group1111111aaaaaaaaaaaa"}})
+        fireEvent.click(submitButton);
+        expect(screen.queryByText("Group name can have maximum length of 22 characters.")).toBeInTheDocument();
+    })
+
     it("Test no group name provided", () => {
         renderModal();
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");

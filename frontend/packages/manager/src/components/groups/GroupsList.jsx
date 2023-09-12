@@ -226,7 +226,7 @@ function GroupsList() {
 
     const groupsList = groups.map((group) => (
         <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
-            <P>
+            <P onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
             <div>
