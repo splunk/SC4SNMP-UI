@@ -2,23 +2,23 @@ import React from 'react';
 
 const sameConditions = (configuredConditions, fieldName, newConditionKeys) => {
     /*
-        configuredConditions: {"fieldName1": [["fieldName1", "value1"], ["fieldName1", "value2", "value3"]]}
+        configuredConditions: {"fieldName1": [["fieldName1", "value1", "<operation_type>"], ["fieldName1", "value2", "value3", "<operation_type>"]]}
         fieldName: "fieldName1"
-        newConditionKeys: ["fieldName1", "value5"]
+        newConditionKeys: ["fieldName1", "value5", "<operation_type>"]
     */
+    let result = false;
     if (fieldName in configuredConditions && fieldName.length > 0){
         for (const keys of configuredConditions[fieldName]){
             if (keys.length === newConditionKeys.length){
-                return keys.every(element => {
-                    return !!newConditionKeys.includes(element);
+                result = keys.every((element, i) => {
+                    return !!newConditionKeys.includes(element) && !!keys.includes(newConditionKeys[i]);
                 });
             }
-            return false
         }
     } else{
         console.log("fieldName not in configuredConditions")
-        return false
     }
+    return result;
 }
 
 const validateProfiles = (validationObj) => {
@@ -145,7 +145,8 @@ const validateProfiles = (validationObj) => {
                 fieldKey = `${field}`;
                 conditionKeys = [fieldKey];
                 values.forEach(v => {conditionKeys.push(`${v}`)});
-                conditionKeys.push(validationObj.conditions.conditions[i].operation)
+                conditionKeys.push(validationObj.conditions.conditions[i].operation);
+                conditionKeys.push(`negateOperation=${validationObj.conditions.conditions[i].negateOperation}`);
                 if (sameConditions(configuredConditions, fieldKey, conditionKeys)){
                     message = "The same condition has been already configured for this profile"
                     if (i in errors.varBinds){

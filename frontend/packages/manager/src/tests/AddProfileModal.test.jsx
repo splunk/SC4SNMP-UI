@@ -453,4 +453,41 @@ describe("AddProfileModal", () => {
         const sameConditionalError = screen.getByDataTest("sc4snmp:conditional-condition-error")
         expect(sameConditionalError.textContent).toBe("The same value has been already configured for this condition")
     })
+
+    it("Test statement negation makes two profiles different", async () => {
+        renderModal({profileType: "conditional"})
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const addConditionalButton = screen.getByDataTest("sc4snmp:form:add-conditional-profile").querySelector(`[data-test="add-row"]`)
+
+        fireEvent.click(addConditionalButton);
+        fireEvent.click(addConditionalButton);
+        await sleep(10)
+
+        const fieldInput0 =
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[0].querySelector('[data-test="textbox"]')
+        const valueInput0 =
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[0].querySelector('[data-test="textbox"]')
+        fireEvent.change(fieldInput0, {target: {value: "test"}})
+        fireEvent.change(valueInput0, {target: {value: "a"}})
+
+        const fieldInput1 =
+            screen.getAllByDataTest("sc4snmp:form:conditional-field")[1].querySelector('[data-test="textbox"]')
+        const valueInput1 =
+            screen.getAllByDataTest("sc4snmp:form:conditional-condition")[1].querySelector('[data-test="textbox"]')
+        fireEvent.change(fieldInput1, {target: {value: "test"}})
+        fireEvent.change(valueInput1, {target: {value: "a"}})
+
+        fireEvent.click(submitButton)
+        await sleep(5);
+
+        expect(screen.queryByText("The same condition has been already configured for this profile")).toBeInTheDocument();
+
+        const negation0 = screen.getAllByDataTest("sc4snmp:conditional-negation")[0].querySelector('[data-test="button"]')
+        fireEvent.click(negation0)
+        await sleep(5);
+        fireEvent.click(submitButton)
+        await sleep(5);
+
+        expect(screen.queryByText("The same condition has been already configured for this profile")).not.toBeInTheDocument();
+    })
 })

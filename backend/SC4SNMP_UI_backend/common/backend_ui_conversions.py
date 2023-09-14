@@ -57,7 +57,8 @@ class ProfileConversion(Conversion):
             "lt": "less than",
             "gt": "greater than",
             "equals": "equals",
-            "in": "in"
+            "in": "in",
+            "regex": "regex"
         }
         self.__ui2backend_conditional_operations = {}
         for key, value in self.__backend2ui_conditional_operations.items():
@@ -107,6 +108,7 @@ class ProfileConversion(Conversion):
                 for back_condition in document[profile_name]["conditions"]:
                     field = back_condition["field"]
                     operation = self.__backend2ui_conditional_operations[back_condition["operation"]]
+                    negate_operation = back_condition.get("negate_operation", False)
                     value = []
                     if operation == "in":
                         for v in back_condition["value"]:
@@ -114,7 +116,7 @@ class ProfileConversion(Conversion):
                     else:
                         value.append(str(back_condition["value"]))
                     conditional.append(
-                        {"field": field, "operation": operation, "value": value}
+                        {"field": field, "operation": operation, "value": value, "negateOperation": negate_operation}
                     )
                 conditions = {
                     "condition": "conditional",
@@ -160,9 +162,14 @@ class ProfileConversion(Conversion):
                         value.append(string_value_to_numeric(v))
                 else:
                     value = string_value_to_numeric(ui_condition["value"][0])
-                conditions.append(
-                    {"field": field, "operation": operation, "value": value}
-                )
+                if ui_condition["negateOperation"]:
+                    conditions.append(
+                        {"field": field, "operation": operation, "value": value, "negate_operation": True}
+                    )
+                else:
+                    conditions.append(
+                        {"field": field, "operation": operation, "value": value}
+                    )
         elif document['conditions']['condition'] != "standard":
             condition = {
                 'type': document['conditions']['condition']

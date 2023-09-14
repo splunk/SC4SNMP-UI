@@ -74,10 +74,10 @@ class TestConversions(TestCase):
                 "field": "",
                 "patterns": [],
                 "conditions": [
-                    {"field": "field: IF-MIB.ifAdminStatus", "operation": "in", "value":["0", "down"]},
-                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": ["up"]},
-                    {"field": "field: IF-MIB.ifIndex", "operation": "less than", "value": ["3"]},
-                    {"field": "field: IF-MIB.ifIndex", "operation": "greater than", "value": ["5"]}
+                    {"field": "field: IF-MIB.ifAdminStatus", "operation": "in", "value":["0", "down"], 'negateOperation': False,},
+                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": ["up"], 'negateOperation': True,},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "less than", "value": ["3"], 'negateOperation': False,},
+                    {"field": "field: IF-MIB.ifIndex", "operation": "greater than", "value": ["5"], 'negateOperation': True,}
                 ]
             },
             "varBinds": [{"component": "IF-MIB", "object": "ifInDiscards", "index": "1"},
@@ -123,9 +123,9 @@ class TestConversions(TestCase):
                 "frequency": 30,
                 "conditions": [
                     {"field": "field: IF-MIB.ifAdminStatus", "operation": "in", "value": [0, "down"]},
-                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": "up"},
+                    {"field": "field: IF-MIB.ifOperStatus", "operation": "equals", "value": "up", 'negate_operation': True},
                     {"field": "field: IF-MIB.ifIndex", "operation": "lt", "value": 3},
-                    {"field": "field: IF-MIB.ifIndex", "operation": "gt", "value": 5}
+                    {"field": "field: IF-MIB.ifIndex", "operation": "gt", "value": 5, 'negate_operation': True}
                 ],
                 "varBinds": [["IF-MIB", "ifInDiscards", "1"], ["IF-MIB"], ["IF-MIB", "ifOutErrors"]]
             }
