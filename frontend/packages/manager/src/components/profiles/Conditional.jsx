@@ -9,6 +9,7 @@ import {useProfileContext} from "../../store/profile-contxt";
 import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 import ConditionalIn from "./ConditionalIn";
+import Switch from '@splunk/react-ui/Switch';
 
 function Conditional(props){
     const ProfCtx = useProfileContext();
@@ -93,12 +94,19 @@ function Conditional(props){
         const newIndex = rowItems.length;
         const keyID = createDOMID();
         const conditionalCopy = ProfCtx.conditional;
-        conditionalCopy.push({field: "", operation: "equals", value: [""]});
+        conditionalCopy.push({field: "", operation: "equals", value: [""], negateOperation: false});
         indicesCopy[`${keyID}`] = newIndex;
         setIndices(indicesCopy);
         ProfCtx.setConditional(conditionalCopy);
         setReload((prev)=>{return !prev});
     };
+
+    const handleNegation = (index) => {
+        const conditionalCopy = ProfCtx.conditional;
+        conditionalCopy[index].negateOperation = !conditionalCopy[index].negateOperation
+        ProfCtx.setConditional(conditionalCopy);
+        setReload((prev)=>{return !prev});
+    }
 
     const loadFormRows = () => {
         let index = -1;
@@ -125,6 +133,7 @@ function Conditional(props){
                                     <Select.Option data-test="sc4snmp:form:conditional-equals" label="equals" value="equals"/>
                                     <Select.Option data-test="sc4snmp:form:conditional-lt" label="less than" value="less than"/>
                                     <Select.Option data-test="sc4snmp:form:conditional-gt" label="greater than" value="greater than"/>
+                                    <Select.Option  data-test="sc4snmp:form:conditional-regex" label="regex" value="regex"/>
                                     <Select.Option  data-test="sc4snmp:form:conditional-in" label="in" value="in"/>
                                 </Select>
                                 <P/>
@@ -149,6 +158,15 @@ function Conditional(props){
                                     </div>
                                 )
                             }
+                            <Switch
+                                data-test="sc4snmp:conditional-negation"
+                                value="statementNegation"
+                                onClick={() => handleNegation(newIndices[`${keyID}`])}
+                                selected={condition.negateOperation}
+                                appearance="toggle"
+                            >
+                                Statement negation
+                            </Switch>
                         </Card.Body>
                     </Card>
                 </FormRows.Row>
