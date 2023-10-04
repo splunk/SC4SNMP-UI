@@ -1,4 +1,4 @@
-import React, {useState, createContext, useRef, useContext} from 'react';
+import React, {useState, createContext, useContext} from 'react';
 
 const MenuHeaderContxt = createContext();
 
@@ -17,4 +17,5 @@ export function MenuHeaderContxtProvider(props){
     )
 };
 
+export const useMenuHeaderContxt = () => useContext(MenuHeaderContxt);
 export default MenuHeaderContxt;

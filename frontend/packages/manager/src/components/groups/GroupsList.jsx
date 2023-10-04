@@ -39,7 +39,7 @@ function GroupsList() {
     const [totalPages, setTotalPages] = useState(1);
     const [openedGroupId, setOpenedGroupId] = useState(null);
     const [pageNum, setPageNum] = useState(1);
-    const [devicesPerPage, setDevicesPerPage] = useState('3');
+    const [devicesPerPage, setDevicesPerPage] = useState('20');
 
     useEffect(() => {
         let isMounted = true;
@@ -96,15 +96,19 @@ function GroupsList() {
         GrCtx.resetDevice();
     };
 
-    const groupDeleteHandler = (groupId, groupName) => {
+    const groupDeleteHandler = (groupId, groupName, groupInInventory) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
         GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
+        if (groupInInventory){
+            GrCtx.setGroupWarning(`WARNING: This group is configured in the inventory`);
+        }else{
+            GrCtx.setGroupWarning(null);
+        }
         GrCtx.makeGroupsChange();
     };
 
     const selectGroup = (groupId, groupName, page) => {
-        console.log(`passed ${page}, state ${pageNum}`)
         setOpenedGroupId(groupId)
         GrCtx.setGroupName(groupName);
         const selected = {};
@@ -115,7 +119,7 @@ function GroupsList() {
             }
             return {...prev, ...selected}}
         );
-        // If last item from the current page was deleted, page variable
+        // If the last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
         axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
@@ -130,6 +134,32 @@ function GroupsList() {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
                         setTotalPages(maxPages);
+                        let inventoryRecord = {
+                                        port: "",
+                                        version: "",
+                                        community: "",
+                                        secret: "",
+                                        securityEngine: ""
+                                    };
+                        axios.get(`http://${backendHost}/group/inventory/${groupName}`)
+                            .then((response3) => {
+                                if (response3.status === 200){
+                                    inventoryRecord = response3.data;
+                                    Object.keys(inventoryRecord).forEach((key) => {
+                                        if (`${inventoryRecord[key]}`.length > 0){
+                                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
+                                        }else{
+                                            inventoryRecord[key] = "";
+                                        }
+                                    })
+                                    GrCtx.setInventoryConfig(inventoryRecord);
+                                }else{
+                                    GrCtx.setInventoryConfig(inventoryRecord);
+                                }
+                            })
+                            .catch(() => {
+                                GrCtx.setInventoryConfig(inventoryRecord);
+                            })
                     })
             });
     }
@@ -172,6 +202,7 @@ function GroupsList() {
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
             }
             GrCtx.makeGroupsChange();
@@ -194,14 +225,14 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
-            <P>
+        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+            <P onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
             <div>
-                <Button style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName))} appearance="pill" icon={<Trash />} />
+                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
+                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
+                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -211,9 +242,9 @@ function GroupsList() {
         <GroupsContent>
             <GroupsNames>
                 <GroupsNamesHeader>
-                    <P>Group name</P>
+                    <P>Group</P>
                     <div>
-                        <Button onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
+                        <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
                     </div>
                 </GroupsNamesHeader>
                 {groupsList}
@@ -221,14 +252,13 @@ function GroupsList() {
             <GroupDevices>
                 <div style={{width: '100%' }}>
                     <Pagination>
-                        <Select appearance="pill" suffixLabel="inventory items per page"
+                        <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
-                                defaultValue="3">
-                            <Select.Option label="3" value="3" />
-                            <Select.Option label="10" value="10" />
-                            <Select.Option label="50" value="50" />
-                            <Select.Option label="100" value="100" />
-                            <Select.Option label="200" value="200" />
+                                defaultValue="20">
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="10" value="10" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="20" value="20" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="50" value="50" />
+                            <Select.Option data-test="sc4snmp:group-pagination-option" label="100" value="100" />
                         </Select>
                         <Paginator
                             onChange={(event, { page }) => (paginationHandler(page, openedGroupId))}
@@ -237,7 +267,7 @@ function GroupsList() {
                             totalPages={totalPages}
                         />
                     </Pagination>
-                    <Table stripeRows resizableFillLayout>
+                    <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
                                 <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -248,16 +278,16 @@ function GroupsList() {
                         <Table.Body>
                             {GrCtx.devices
                                 .map((row) => (
-                                    <Table.Row key={createDOMID()} >
-                                        <Table.Cell>{row.address}</Table.Cell>
-                                        <Table.Cell>{row.port}</Table.Cell>
-                                        <Table.Cell>{row.version}</Table.Cell>
-                                        <Table.Cell>{row.community}</Table.Cell>
-                                        <Table.Cell>{row.secret}</Table.Cell>
-                                        <Table.Cell>{row.securityEngine}</Table.Cell>
-                                        <Table.Cell>
-                                            <Button onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                            <Button onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <Table.Row data-test="sc4snmp:group-row" key={createDOMID()} >
+                                        <Table.Cell data-test="sc4snmp:host-address" >{row.address}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-port" >{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-version" >{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-community" >{(row.community === '') ? GrCtx.inventoryConfig.community  : row.community}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-secret" >{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-security-engine" >{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
+                                        <Table.Cell data-test="sc4snmp:host-actions" >
+                                            <Button data-test="sc4snmp:group-row-edit" onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                            <Button data-test="sc4snmp:group-row-delete" onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
@@ -266,7 +296,7 @@ function GroupsList() {
                 </div>
             </GroupDevices>
             <AddDeviceModal />
-            <DeleteModal deleteName={GrCtx.deleteName}
+            <DeleteModal deleteName={GrCtx.deleteName} customWarning={GrCtx.groupWarning}
                              handleDelete={() => (deleteModalRequest())}/>
         </GroupsContent>
     );

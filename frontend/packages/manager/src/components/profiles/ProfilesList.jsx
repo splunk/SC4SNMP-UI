@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import Select from "@splunk/react-ui/Select";
 import Trash from '@splunk/react-icons/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
@@ -7,8 +7,8 @@ import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from "@splunk/react-ui/Button";
 import axios from "axios";
-import ProfileContext from "../../store/profile-contxt";
-import ErrorsModalContext from "../../store/errors-modal-contxt";
+import {useProfileContext} from "../../store/profile-contxt";
+import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {backendHost} from "../../host";
 import {Pagination} from "../../styles/groups/GroupsStyle";
 import DeleteModal from "../DeleteModal";
@@ -17,32 +17,29 @@ import P from "@splunk/react-ui/Paragraph";
 
 function getExpansionRow(row) {
     return (
-        <Table.Row key={`${row._id}-expansion`}>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{/* Empty cell */}</Table.Cell>
-            <Table.Cell>{row.conditions.field}</Table.Cell>
-            <Table.Cell>{row.conditions.patterns && row.conditions.patterns.map(value =>
-                                <P key={createDOMID()}>{value.pattern}</P>)}</Table.Cell>
-            <Table.Cell>
+        <Table.Row data-test="sc4snmp:profile-row-expanded" key={`${row._id}-expansion`}>
+            <Table.Cell data-test="sc4snmp:profile-name-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-frequency-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-type-expanded" >{/* Empty cell */}</Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-component-expanded" >
                 {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.family}</P>
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.component}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-object_expanded" >
                 {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.category}</P>
+                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.object}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell>
+            <Table.Cell data-test="sc4snmp:profile-mib-index-expanded" >
                 {row.varBinds.map((value) => (
                     <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.index}</P>
                 ))}
             </Table.Cell>
 
-            <Table.Cell />
+            <Table.Cell data-test="sc4snmp:profile-actions-expanded" />
         </Table.Row>
     );
 }
@@ -52,22 +49,20 @@ function ProfilesList() {
     const columns = [
         {sortKey: 'profileName', label: 'Profile name'},
         {sortKey: 'frequency', label: 'Frequency'},
-        {sortKey: 'condition', label: 'Condition'},
-        {sortKey: 'field', label: 'Field'},
-        {sortKey: 'patterns', label: 'Patterns'},
-        {sortKey: `mibFamily`, label: 'MIB family'},
-        {sortKey: `mibCategory`, label: 'MIB category'},
-        {sortKey: `index`, label: 'Index'},
+        {sortKey: 'profileType', label: 'Profile type'},
+        {sortKey: `mibComponent`, label: 'MIB Component'},
+        {sortKey: `mibObject`, label: 'MIB Object'},
+        {sortKey: `index`, label: 'MIB Index'},
         {sortKey: `actions`, label: 'Actions'},
     ];
 
-    const [profilesPerPage, setProfilesPerPage] = useState('3');
+    const [profilesPerPage, setProfilesPerPage] = useState('20');
     const [pageNum, setPageNum] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [profilesRecords, setProfilesRecords] = useState([]);
     const [expandedRowId, setExpandedRowId] = useState(null);
-    const ProfCtx = useContext(ProfileContext);
-    const ErrCtx = useContext(ErrorsModalContext);
+    const ProfCtx = useProfileContext();
+    const ErrCtx = useErrorsModalContext();
 
     const getProfileRows = (page) => {
         const urlCount = `http://${backendHost}/profiles/count`;
@@ -109,7 +104,10 @@ function ProfilesList() {
         ProfCtx.setProfileName(row.profileName);
         ProfCtx.setFrequency(row.frequency);
         ProfCtx.setVarBinds(row.varBinds);
-        ProfCtx.setConditions(row.conditions);
+        ProfCtx.setCondition(row.conditions.condition);
+        ProfCtx.setConditionField(row.conditions.field);
+        ProfCtx.setConditionPatterns(row.conditions.patterns);
+        ProfCtx.setConditional(row.conditions.conditions);
         ProfCtx.setIsEdit(true);
         ProfCtx.setAddOpen(true);
     };
@@ -117,6 +115,11 @@ function ProfilesList() {
     const profileDeleteHandler = (row) => {
         ProfCtx.setProfileId(row._id);
         ProfCtx.setProfileName(row.profileName);
+        if (row.profileInInventory){
+            ProfCtx.setProfileWarning(`WARNING: This profile is configured in some records in the inventory`);
+        }else{
+            ProfCtx.setProfileWarning(null);
+        }
         ProfCtx.setDeleteOpen(true);
     };
 
@@ -125,6 +128,7 @@ function ProfilesList() {
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
             }
             ProfCtx.makeProfilesChange();
@@ -148,14 +152,13 @@ function ProfilesList() {
     return (
         <div style={{width: '100%' }}>
             <Pagination>
-                <Select appearance="pill" suffixLabel="profiles per page"
+                <Select data-test="sc4snmp:profiles-pagination" appearance="pill" suffixLabel="profiles per page"
                         value={profilesPerPage} onChange={profilesPerPageHandler}
-                        defaultValue="3">
-                    <Select.Option label="3" value="3" />
-                    <Select.Option label="10" value="10" />
-                    <Select.Option label="50" value="50" />
-                    <Select.Option label="100" value="100" />
-                    <Select.Option label="200" value="200" />
+                        defaultValue="20">
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="10" value="10" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="20" value="20" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="50" value="50" />
+                    <Select.Option data-test="sc4snmp:profiles-pagination-option" label="100" value="100" />
                 </Select>
                 <Paginator
                     onChange={(event, { page }) => (paginationHandler(page))}
@@ -164,7 +167,7 @@ function ProfilesList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table stripeRows resizableFillLayout rowExpansion="single">
+            <Table data-test="sc4snmp:profiles-table" stripeRows resizableFillLayout rowExpansion="single">
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -176,29 +179,28 @@ function ProfilesList() {
                     {profilesRecords
                         .map((row) => (
                             <Table.Row
+                                data-test="sc4snmp:profile-row"
                                 key={row._id}
                                 expansionRow={getExpansionRow(row)}
                                 onExpansion={() => handleRowExpansion(row._id)}
                                 expanded={row._id === expandedRowId}
                             >
-                                <Table.Cell>{row.profileName}</Table.Cell>
-                                <Table.Cell>{row.frequency}</Table.Cell>
-                                <Table.Cell>{row.conditions.condition}</Table.Cell>
-                                <Table.Cell>{/* Condition field is empty in this view */}</Table.Cell>
-                                <Table.Cell>{/* Condition patterns is empty in this view */}</Table.Cell>
-                                <Table.Cell>{(row.varBinds.length === 1) ? `1 MIB family` :
-                                    `${row.varBinds.length} MIB families`}</Table.Cell>
-                                <Table.Cell>{/* MIB category is empty in this view */}</Table.Cell>
-                                <Table.Cell>{/* MIB index is empty in this view */}</Table.Cell>
-                                <Table.Cell>
-                                    <Button onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                <Table.Cell data-test="sc4snmp:profile-name" >{row.profileName}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-frequency" >{(row.conditions.condition !=="walk" ? row.frequency : <P>N/A</P>)}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-type" >{row.conditions.condition}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-component" >{(row.varBinds.length === 1) ? `1 MIB component` :
+                                    `${row.varBinds.length} MIB components`}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-object" >{/* MIB object is empty in this view */}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-mib-index" >{/* MIB index is empty in this view */}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:profile-actions" >
+                                    <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                    <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
                                 </Table.Cell>
                             </Table.Row>
                         ))}
                 </Table.Body>
             </Table>
-            <DeleteModal deleteName={`${ProfCtx.profileName}`}
+            <DeleteModal deleteName={`${ProfCtx.profileName}`} customWarning={ProfCtx.profileWarning}
                              handleDelete={deleteModalRequest}/>
         </div>
     );

@@ -1,15 +1,13 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
-import ButtonsContext from "./buttons-contx";
+import { useButtonsContext } from "./buttons-contx";
 
 const InventoryContext = createContext();
 
 export function InventoryContextProvider(props){
-    const BtnCtx = useContext(ButtonsContext);
+    const BtnCtx = useButtonsContext();
 
     // data for DeleteInventoryModal
     const [inventoryId, setInventoryId] = useState(null);
-
-    const rowToggle = useRef(null);
 
     // data for AddInventoryModal
     const [addOpen, setAddOpen] = useState(false);
@@ -34,6 +32,7 @@ export function InventoryContextProvider(props){
     const [walkInterval, setWalkInterval] = useState(1800);
     const [profiles, setProfiles] = useState([]);
     const [smartProfiles, setSmartProfiles] = useState(false);
+    const [inventoryType, setInventoryType] = useState("Host");
 
     function resetFormData() {
         setInventoryId(null);
@@ -49,43 +48,42 @@ export function InventoryContextProvider(props){
     }
 
     const context = {
-        inventoryId: inventoryId,
-        setInventoryId: setInventoryId,
+        inventoryId,
+        setInventoryId,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
 
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
+        addOpen,
+        setAddOpen,
+        addModalToggle,
 
-        addOpen: addOpen,
-        setAddOpen: setAddOpen,
-        addModalToggle: addModalToggle,
-
-        inventoryChange: inventoryChange,
+        inventoryChange,
         makeInventoryChange: inventoryChangeHandler,
 
-        isEdit: isEdit,
-        setIsEdit: setIsEdit,
-        address: address,
-        setAddress: setAddress,
-        port: port,
-        setPort: setPort,
-        version: version,
-        setVersion: setVersion,
-        community: community,
-        setCommunity: setCommunity,
-        secret: secret,
-        setSecret: setSecret,
-        securityEngine: securityEngine,
-        setSecurityEngine: setSecurityEngine,
-        walkInterval: walkInterval,
-        setWalkInterval: setWalkInterval,
-        profiles: profiles,
-        setProfiles: setProfiles,
-        smartProfiles: smartProfiles,
-        setSmartProfiles: setSmartProfiles,
+        isEdit,
+        setIsEdit,
+        address,
+        setAddress,
+        port,
+        setPort,
+        version,
+        setVersion,
+        community,
+        setCommunity,
+        secret,
+        setSecret,
+        securityEngine,
+        setSecurityEngine,
+        walkInterval,
+        setWalkInterval,
+        profiles,
+        setProfiles,
+        smartProfiles,
+        setSmartProfiles,
+        inventoryType,
+        setInventoryType,
 
-        resetFormData:resetFormData
+        resetFormData
     };
 
     return (
@@ -95,4 +93,5 @@ export function InventoryContextProvider(props){
     )
 };
 
+export const useInventoryContext = () => useContext(InventoryContext);
 export default InventoryContext;

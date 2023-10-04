@@ -1,0 +1,12 @@
+group1:
+- address: 52.14.243.157
+  port: 1163
+- address: 20.14.10.0
+  port: 161
+group2:
+- address: 0.10.20.30
+- address: 52.14.243.157
+  port: 1165
+  version: '3'
+  secret: 'mysecret'
+  security_engine: aabbccdd1234

@@ -1,10 +1,10 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
-import ButtonsContext from "./buttons-contx";
+import { useButtonsContext } from "./buttons-contx";
 
 const GroupContext = createContext();
 
 export function GroupContextProvider(props){
-    const BtnCtx = useContext(ButtonsContext);
+    const BtnCtx = useButtonsContext();
 
     // Controling Modals
     const [addGroupOpen, setAddGroupOpen] = useState(false);
@@ -22,6 +22,14 @@ export function GroupContextProvider(props){
     const [groupName, setGroupName] = useState('');
     const [devices, setDevices] = useState([]);
     const [groupId, setGroupId] = useState(null);
+    const [inventoryConfig, setInventoryConfig] = useState({
+                                        port: "",
+                                        version: "",
+                                        community: "",
+                                        secret: "",
+                                        securityEngine: ""
+                                    });
+    const [groupWarning, setGroupWarning] = useState(null);
 
     // Variables for device
     const [deviceId, setDeviceId] = useState(null);
@@ -58,8 +66,6 @@ export function GroupContextProvider(props){
         setAddDeviceOpen,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
-        buttonsOpen: BtnCtx.buttonsOpen,
-        setButtonsOpen: BtnCtx.setButtonsOpen,
         deleteUrl,
         setDeleteUrl,
         deleteName,
@@ -80,6 +86,10 @@ export function GroupContextProvider(props){
         setGroupName,
         devices,
         setDevices,
+        inventoryConfig,
+        setInventoryConfig,
+        groupWarning,
+        setGroupWarning,
 
         // Variables for device
         deviceId,
@@ -112,5 +122,6 @@ export function GroupContextProvider(props){
     )
 };
 
+export const useGroupContext = () => useContext(GroupContext);
 export default GroupContext;
 

@@ -1,4 +1,4 @@
-import React, {useState, createContext} from 'react';
+import React, {useState, createContext, useContext} from 'react';
 
 const InventoryDevicesValidationContxt = createContext();
 
@@ -100,4 +100,5 @@ export function InventoryDevicesValidationContxtProvider(props){
     )
 };
 
+export const useInventoryDevicesValidationContxt = () => useContext(InventoryDevicesValidationContxt);
 export default InventoryDevicesValidationContxt;

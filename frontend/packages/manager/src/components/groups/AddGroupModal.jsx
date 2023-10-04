@@ -3,17 +3,16 @@ import Button from '@splunk/react-ui/Button';
 import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
-import Select from '@splunk/react-ui/Select';
-import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
-import GroupContext from "../../store/group-contxt";
 import axios from "axios";
+import { createDOMID } from '@splunk/ui-utils/id';
+import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
-import { createDOMID } from '@splunk/ui-utils/id';
-import { validationGroup, validationMessage } from "../../styles/ValidationStyles";
+import { validationMessage } from "../../styles/ValidationStyles";
 import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
+import ValidationGroup from "../validation/ValidationGroup";
 
 function AddGroupModal() {
     const GrCtx = useContext(GroupContext);
@@ -31,6 +30,7 @@ function AddGroupModal() {
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
+                ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
     };
@@ -40,12 +40,14 @@ function AddGroupModal() {
             .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("info");
                     ErrCtx.setMessage(response.data.message);
                 }
                 GrCtx.makeGroupsChange();
             })
             .catch((error) => {
                     ErrCtx.setOpen(true);
+                    ErrCtx.setErrorType("error");
                     ErrCtx.setMessage(error.response.data.message);
                 })
     };
@@ -88,18 +90,18 @@ function AddGroupModal() {
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} style={{ width: '600px' }}>
-                <Modal.Header title="Add a new group" onRequestClose={handleRequestClose} />
+                <Modal.Header title={((GrCtx.isGroupEdit) ? `Edit group` : `Add a new group`)} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <ControlGroup label="Group Name">
-                        <div style={validationGroup}>
-                            <Text value={GrCtx.groupName} onChange={handleGroupNameChange} error={((ValCtx.groupNameErrors) ? true : false)}/>
-                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
-                        </div>
+                        <ValidationGroup>
+                            <Text data-test="sc4snmp:form:group-name-input" value={GrCtx.groupName} onChange={handleGroupNameChange} error={(!!(ValCtx.groupNameErrors))}/>
+                            {((ValCtx.groupNameErrors) ? ValCtx.groupNameErrors.map((el) => <P data-test="sc4snmp:group-name-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                        </ValidationGroup>
                     </ControlGroup>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button appearance="secondary" onClick={handleRequestClose} label="Cancel" />
-                    <Button appearance="primary" onClick={handleRequestSubmit} label="Submit" />
+                    <Button data-test="sc4snmp:form:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Cancel" />
+                    <Button data-test="sc4snmp:form:submit-form-button" appearance="primary" onClick={handleRequestSubmit} label="Submit" />
                 </Modal.Footer>
             </Modal>
         </div>

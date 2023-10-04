@@ -2,7 +2,8 @@ import React from 'react';
 
 const validationGroup = {
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    width: "100%"
 };
 
 const validationMessage = {
