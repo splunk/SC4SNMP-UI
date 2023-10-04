@@ -37,25 +37,25 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: false
           persist-credentials: false
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Packages Docker Registry
-        uses: docker/login-action@v1.9.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta - frontend
         id: docker_meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/splunk/sc4snmp-ui/frontend/container
           tags: |
@@ -68,7 +68,7 @@ jobs:
             type=ref,event=branch
       - name: Build and push action - frontend
         id: docker_action_build_frontend
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: frontend
           push: false
@@ -76,7 +76,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: "14"
 
@@ -87,25 +87,25 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: false
           persist-credentials: false
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Packages Docker Registry
-        uses: docker/login-action@v1.9.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta - backend
         id: docker_meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/splunk/sc4snmp-ui/backend/container
           tags: |
@@ -118,7 +118,7 @@ jobs:
             type=ref,event=branch
       - name: Build and push action - backend
         id: docker_action_build_backend
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: backend
           push: false
@@ -126,6 +126,6 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: "14"
