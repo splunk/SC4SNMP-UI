@@ -242,7 +242,7 @@ function GroupsList() {
         <GroupsContent>
             <GroupsNames>
                 <GroupsNamesHeader>
-                    <P>Group name</P>
+                    <P>Group</P>
                     <div>
                         <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
                     </div>
@@ -252,7 +252,7 @@ function GroupsList() {
             <GroupDevices>
                 <div style={{width: '100%' }}>
                     <Pagination>
-                        <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="group items per page"
+                        <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
                                 defaultValue="20">
                             <Select.Option data-test="sc4snmp:group-pagination-option" label="10" value="10" />

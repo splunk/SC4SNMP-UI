@@ -120,7 +120,7 @@ function AddDeviceModal(){
     return (
         <div>
             <Modal onRequestClose={handleRequestClose} open={GrCtx.addDeviceOpen} style={{ width: '600px' }}>
-                <StyledModalHeader title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add a new device to group ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
+                <StyledModalHeader title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add a new device to ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address">
                         <ValidationGroup>
