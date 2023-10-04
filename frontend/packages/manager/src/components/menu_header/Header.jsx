@@ -57,9 +57,9 @@ function Header(){
     };
 
     const addButtonLabel = {
-        Profiles: "Add new profile",
-        Groups: "Add new group",
-        Inventory: "Add new device/group"
+        Profiles: "Add profile",
+        Groups: "Add group",
+        Inventory: "Add device/group"
     };
 
     const addButtonHandler = {
@@ -79,10 +79,9 @@ function Header(){
                         </span>
                         <span id="project-description">
                             <P>
-                                Collect SNMP data for Splunk Enterprise, Splunk Enterprise Cloud and Splunk
-                                Infrastructure Monitoring. Make any changes to Profiles, Groups and Inventory. Then select
-                                Apply changes to put the changes into effect. Applying changes can only be done every
-                                5 minutes.
+                                Collect SNMP data for Splunk Enterprise, Splunk Enterprise Cloud, and Splunk Infrastructure Monitoring.
+                                Make any changes to Profiles, Groups, and Inventory, then select Apply changes.
+                                You can only apply changes every 5 minutes.
                             </P>
                         </span>
                     </div>
