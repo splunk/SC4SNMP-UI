@@ -4,7 +4,7 @@ import axios from "axios";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
-import Trash from '@splunk/react-icons/Trash';
+import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
 import { backendHost } from "../../host";

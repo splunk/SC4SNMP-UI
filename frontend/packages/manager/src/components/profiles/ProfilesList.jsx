@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import Select from "@splunk/react-ui/Select";
-import Trash from '@splunk/react-icons/Trash';
+import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Paginator from "@splunk/react-ui/Paginator";
 import Table from "@splunk/react-ui/Table";
