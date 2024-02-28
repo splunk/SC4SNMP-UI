@@ -2,7 +2,7 @@ import React, {useState, useContext, useEffect} from 'react';
 import P from '@splunk/react-ui/Paragraph';
 import Select from '@splunk/react-ui/Select';
 import Plus from '@splunk/react-icons/Plus';
-import Trash from '@splunk/react-icons/Trash';
+import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Paginator from '@splunk/react-ui/Paginator';
 import Button from '@splunk/react-ui/Button';
