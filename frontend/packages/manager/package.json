@@ -22,7 +22,7 @@
   "dependencies": {
     "@splunk/react-ui": "^4.25.0",
     "@splunk/themes": "^0.11.0",
-    "axios": "^1.6.0",
+    "axios": "^1.6.8",
     "css-loader": "^6.7.1",
     "history": "5.3.0",
     "mongodb": "^5.8.0",
