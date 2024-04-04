@@ -141,13 +141,13 @@ jobs:
           node-version: "20.12.0"
       - name: Semantic Release
         id: version
-        uses: cycjimmy/semantic-release-action@v4.0.0
+        uses: cycjimmy/semantic-release-action@v4.1.0
         with:
-          semantic_version: 17
+          semantic_version: 21.1.1
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
-            semantic-release-replace-plugin@1.2.7
+            @jpoehnelt/semantic-release-replace-plugin@1.2.7
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
 
