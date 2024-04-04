@@ -84,3 +84,4 @@
     ["@semantic-release/github", { "assets": ["NOTICE"] }],
   ],
 }
+
