@@ -12,19 +12,19 @@
     "test": "lerna run test --stream --no-sort"
   },
   "devDependencies": {
-    "lerna": "^6.6.2",
+    "lerna": "^8.1.2",
     "prettier": "^2.0.5"
   },
   "workspaces": [
     "packages/*"
   ],
   "engines": {
-    "node": ">=8"
+    "node": "18.20.0"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.1",
-    "mongodb": "^5.8.0",
-    "mongoose": "^6.4.4"
+    "mongodb": "^6.5.0",
+    "mongoose": "^8.3.0"
   }
 }

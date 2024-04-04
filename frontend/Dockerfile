@@ -1,4 +1,4 @@
-FROM node:16-alpine as build-step
+FROM node:18.20-alpine3.18 as build-step
 WORKDIR /frontend
 ENV PATH /frontend/node_modules/.bin:$PATH
 COPY package.json yarn.lock lerna.json ./
