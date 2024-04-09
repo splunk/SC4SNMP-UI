@@ -18,6 +18,17 @@ mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 mongo_profiles = mongo_client.sc4snmp.profiles_ui
 
+
+class EmptyValuesFileException(Exception):
+    def __init__(self, filename):
+        self.message = f"{filename} cannot be empty. Check sc4snmp documentation for template."
+        super().__init__(self.message)
+
+class YamlParserException(Exception):
+    def __init__(self, filename):
+        self.message = f"Error occurred while reading {filename}. Check yaml syntax."
+        super().__init__(self.message)
+
 class Handler(ABC):
     @abstractmethod
     def set_next(self, handler):
@@ -71,8 +82,15 @@ class SaveConfigToFileHandler(AbstractHandler):
             values_file_resolved = False
         values = {}
         if values_file_resolved:
-            with open(values_file_path, "r") as file:
-                values = yaml.load(file)
+            try:
+                with open(values_file_path, "r") as file:
+                    values = yaml.load(file)
+            except ruamel.yaml.parser.ParserError as e:
+                current_app.logger.error(f"Error occurred while reading {VALUES_FILE}. Check yaml syntax.")
+                raise YamlParserException(VALUES_FILE)
+            if values is None:
+                current_app.logger.error(f"{VALUES_FILE} cannot be empty. Check sc4snmp documentation for template.")
+                raise EmptyValuesFileException(VALUES_FILE)
 
         if not values_file_resolved or KEEP_TEMP_FILES.lower() in ["t", "true", "y", "yes", "1"]:
             delete_temp_files = False
