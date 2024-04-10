@@ -78,7 +78,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v4.0.2
         with:
-          node-version: "20.12.0"
+          node-version: "20.12"
 
   build-backend:
     name: build-backend
@@ -128,4 +128,4 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v4.0.2
         with:
-          node-version: "20.12.0"
+          node-version: "20.12"

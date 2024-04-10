@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- add error handling for apply changes action
+
 ## [1.0.2]
 
 ### Changed
