@@ -54,6 +54,12 @@ function Header(){
                     ErrCtx.setMessage(response.data.message);
                 }
             })
+        .catch((error) => {
+            console.log(error)
+            ErrCtx.setOpen(true);
+            ErrCtx.setErrorType("error");
+            ErrCtx.setMessage("Error: " + error.response.data.message);
+            })
     };
 
     const addButtonLabel = {

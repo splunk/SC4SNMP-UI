@@ -68,6 +68,7 @@ source venv/bin/activate
 Next step is to install required `python3` packages:
 
 ```shell
+cd backend
 pip3 install -r requirements.txt 
 ```
 
@@ -80,7 +81,6 @@ docker run --rm -d -p 27017:27017 --name example-mongo mongo:4.4.6
 To start backend service run:
 
 ```yaml
-cd backend
 flask run
 ```
 
