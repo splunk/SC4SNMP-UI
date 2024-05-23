@@ -1,11 +1,14 @@
 from unittest import mock
-from unittest.mock import call
+from unittest.mock import call, Mock
 from bson import ObjectId
 from copy import copy
 import ruamel
 import datetime
 import os
+from kubernetes.client import ApiException
 from SC4SNMP_UI_backend.apply_changes.handling_chain import TMP_FILE_PREFIX
+import pytest
+from SC4SNMP_UI_backend.apply_changes.apply_changes import SingletonMeta
 
 VALUES_TEST_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                              "../../yamls_for_tests/values_test")
@@ -56,6 +59,12 @@ def reset_generated_values():
         original_data = yaml.load(file)
     with open(edited_values_path, "w") as file:
         yaml.dump(original_data, file)
+
+
+@pytest.fixture(autouse=True)
+def reset_singleton():
+    yield  # The code after yield is executed after the test
+    SingletonMeta._instances = {}
 
 
 common_id = "635916b2c8cb7a15f28af40a"
@@ -171,24 +180,26 @@ inventory_collection = [
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_FILE", "values.yaml")
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.KEEP_TEMP_FILES", "true")
 @mock.patch("datetime.datetime")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.create_job")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.get_job_config")
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_apply_changes_first_call(m_find, m_update, m_run_job, m_datetime, client):
+def test_apply_changes_first_call_no_job_in_namespace(m_find, m_update, m_run_job, m_get_job_config, m_create_job, m_datetime, client):
     datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
     m_datetime.utcnow = mock.Mock(return_value=datetime_object)
     collection = {
         "_id": ObjectId(common_id),
         "previous_job_start_time": None,
-        "currently_scheduled": False
+        "currently_scheduled": False,
+        "task_id": None
     }
     m_find.side_effect = [
         groups_collection, # call from SaveConfigToFileHandler
         profiles_collection,  # call from SaveConfigToFileHandler
         inventory_collection,  # call from SaveConfigToFileHandler
-        [collection],
-        [collection],
-        [collection]
+        [collection], # call from CheckJobHandler
+        [collection], # call from ScheduleHandler
     ]
     calls_find = [
         call(),
@@ -196,19 +207,93 @@ def test_apply_changes_first_call(m_find, m_update, m_run_job, m_datetime, clien
         call()
     ]
     calls_update = [
-        call({"_id": ObjectId(common_id)},{"$set": {"previous_job_start_time": datetime_object}}),
-        call({"_id": ObjectId(common_id)},{"$set": {"currently_scheduled": True}})
+        call({'previous_job_start_time': {'$exists': True}, 'currently_scheduled': {'$exists': True},
+              'task_id': {'$exists': True}},
+             {'$set': {'previous_job_start_time': None, 'currently_scheduled': False, 'task_id': None}}, upsert=True), # call from ApplyChanges
+        call({"_id": ObjectId(common_id)}, {"$set": {"previous_job_start_time": datetime_object, "currently_scheduled": False, "task_id": None}}) # call from CheckJobHandler
     ]
-    apply_async_calls = [
-        call(countdown=300, queue='apply_changes')
+    create_job_calls = [
+        call("val1", "val2", "sc4snmp")
     ]
 
+    m_get_job_config.return_value = ("val2", "val1")
+    m_create_job.return_value = None
     m_run_job.apply_async.return_value = None
     m_update.return_value = None
 
     response = client.post("/apply-changes")
     m_find.assert_has_calls(calls_find)
+    assert m_get_job_config.called
     m_update.assert_has_calls(calls_update)
+    m_create_job.assert_has_calls(create_job_calls)
+    assert not m_run_job.apply_async.called
+    assert response.json == {"message": "Configuration will be updated in approximately 1 seconds."}
+    reference_files, generated_files = return_generated_and_reference_files()
+    for ref_f, gen_f in zip(reference_files, generated_files):
+        assert ref_f == gen_f
+    delete_generated_files()
+    reset_generated_values()
+
+
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_DIRECTORY", VALUES_TEST_DIRECTORY)
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.TMP_DIR", VALUES_TEST_DIRECTORY)
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_FILE", "values.yaml")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.KEEP_TEMP_FILES", "true")
+@mock.patch("datetime.datetime")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.create_job")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.get_job_config")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_apply_changes_first_call_job_present_in_namespace(m_find, m_update, m_run_job, m_get_job_config, m_create_job, m_datetime, client):
+    datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
+    m_datetime.utcnow = mock.Mock(return_value=datetime_object)
+    collection = {
+        "_id": ObjectId(common_id),
+        "previous_job_start_time": None,
+        "currently_scheduled": False,
+        "task_id": None
+    }
+    m_find.side_effect = [
+        groups_collection, # call from SaveConfigToFileHandler
+        profiles_collection,  # call from SaveConfigToFileHandler
+        inventory_collection,  # call from SaveConfigToFileHandler
+        [collection], # call from CheckJobHandler
+        [collection], # call from ScheduleHandler
+    ]
+    calls_find = [
+        call(),
+        call(),
+        call()
+    ]
+    calls_update = [
+        call({'previous_job_start_time': {'$exists': True}, 'currently_scheduled': {'$exists': True},
+              'task_id': {'$exists': True}},
+             {'$set': {'previous_job_start_time': None, 'currently_scheduled': False, 'task_id': None}}, upsert=True), # call from ApplyChanges
+        call({"_id": ObjectId(common_id)},{"$set": {"previous_job_start_time": datetime_object}}), # call from CheckJobHandler
+        call({"_id": ObjectId(common_id)}, {"$set": {"currently_scheduled": True, "task_id": "id_val"}}) # call from ScheduleHandler
+
+    ]
+    apply_async_calls = [
+        call(countdown=300, queue='apply_changes')
+    ]
+    create_job_calls = [
+        call("val1", "val2", "sc4snmp")
+    ]
+
+    m_get_job_config.return_value = ("val2", "val1")
+    m_create_job.side_effect = ApiException()
+
+    apply_async_result = Mock()
+    apply_async_result.id = "id_val"
+    m_run_job.apply_async.return_value = apply_async_result
+    m_update.return_value = None
+
+    response = client.post("/apply-changes")
+    m_find.assert_has_calls(calls_find)
+    assert m_get_job_config.called
+    m_update.assert_has_calls(calls_update)
+    m_create_job.assert_has_calls(create_job_calls)
     m_run_job.apply_async.assert_has_calls(apply_async_calls)
     assert response.json == {"message": "Configuration will be updated in approximately 300 seconds."}
     reference_files, generated_files = return_generated_and_reference_files()
@@ -220,80 +305,43 @@ def test_apply_changes_first_call(m_find, m_update, m_run_job, m_datetime, clien
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_DIRECTORY", VALUES_TEST_DIRECTORY)
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.TMP_DIR", VALUES_TEST_DIRECTORY)
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.datetime")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.create_job")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.get_job_config")
 @mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_apply_changes_job_currently_scheduled(m_find, m_update, m_run_job, m_datetime, client):
+def test_apply_changes_job_currently_scheduled_job_present_in_namespace(m_find, m_update, m_run_job, m_get_job_config, m_create_job, m_datetime, client):
     datetime_object_old = datetime.datetime(2020, 7, 10, 10, 27, 10, 0)
     datetime_object_new = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
     m_datetime.datetime.utcnow = mock.Mock(return_value=datetime_object_new)
     collection = {
         "_id": ObjectId(common_id),
         "previous_job_start_time": datetime_object_old,
-        "currently_scheduled": True
+        "currently_scheduled": True,
+        "task_id": "test_id"
     }
     m_find.side_effect = [
         groups_collection,  # call from SaveConfigToFileHandler
         profiles_collection,  # call from SaveConfigToFileHandler
         inventory_collection,  # call from SaveConfigToFileHandler
-        [collection],
-        [collection],
-        [collection]
+        [collection], # call from CheckJobHandler
+        [collection], # call from ScheduleHandler
     ]
     calls_find = [
         call(),
         call(),
         call()
     ]
-    m_run_job.apply_async.return_value = None
-    m_update.return_value = None
+    create_job_calls = [
+        call("val1", "val2", "sc4snmp")
+    ]
+    m_get_job_config.return_value = ("val2", "val1")
+    m_create_job.side_effect = ApiException()
 
     response = client.post("/apply-changes")
     m_find.assert_has_calls(calls_find)
+    m_create_job.assert_has_calls(create_job_calls)
     assert not m_run_job.apply_async.called
     assert response.json == {"message": "Configuration will be updated in approximately 130 seconds."}
-    delete_generated_files()
-    reset_generated_values()
-
-
-@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_DIRECTORY", VALUES_TEST_DIRECTORY)
-@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.TMP_DIR", VALUES_TEST_DIRECTORY)
-@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.datetime")
-@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
-@mock.patch("pymongo.collection.Collection.update_one")
-@mock.patch("pymongo.collection.Collection.find")
-def test_apply_changes_new_job_delay_1(m_find, m_update, m_run_job, m_datetime, client):
-    datetime_object_old = datetime.datetime(2020, 7, 10, 10, 20, 0, 0)
-    datetime_object_new = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
-    m_datetime.datetime.utcnow = mock.Mock(return_value=datetime_object_new)
-    collection = {
-        "_id": ObjectId(common_id),
-        "previous_job_start_time": datetime_object_old,
-        "currently_scheduled": False
-    }
-    m_find.side_effect = [
-        groups_collection,  # call from SaveConfigToFileHandler
-        profiles_collection,  # call from SaveConfigToFileHandler
-        inventory_collection,  # call from SaveConfigToFileHandler
-        [collection],
-        [collection],
-        [collection]
-    ]
-    calls_find = [
-        call(),
-        call(),
-        call()
-    ]
-    apply_async_calls = [
-        call(countdown=1, queue='apply_changes')
-    ]
-
-    m_run_job.apply_async.return_value = None
-    m_update.return_value = None
-
-    response = client.post("/apply-changes")
-    m_find.assert_has_calls(calls_find)
-    m_run_job.apply_async.assert_has_calls(apply_async_calls)
-    assert response.json == {"message": "Configuration will be updated in approximately 1 seconds."}
     delete_generated_files()
     reset_generated_values()

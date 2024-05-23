@@ -4,6 +4,7 @@
 
 ### Changed
 - add error handling for apply changes action
+- after clicking 'Apply changes' workflow is initially attempting to create new job immediately, if it is impossible, schedule it for the future
 
 ## [1.0.2]
 

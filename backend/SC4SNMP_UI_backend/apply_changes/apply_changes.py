@@ -43,11 +43,13 @@ class ApplyChanges(metaclass=SingletonMeta):
         mongo_config_collection.update_one(
             {
                 "previous_job_start_time": {"$exists": True},
-                "currently_scheduled": {"$exists": True}}
+                "currently_scheduled": {"$exists": True},
+                "task_id": {"$exists": True}}
             ,{
                 "$set":{
                     "previous_job_start_time": None,
-                    "currently_scheduled": False
+                    "currently_scheduled": False,
+                    "task_id": None
                 }
             },
             upsert=True
