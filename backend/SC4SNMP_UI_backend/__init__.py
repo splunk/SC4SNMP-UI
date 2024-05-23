@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "1.0.2-beta.4"
+__version__ = "1.0.3-beta.1"
 
 MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
