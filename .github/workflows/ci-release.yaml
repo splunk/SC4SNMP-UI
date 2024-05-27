@@ -21,7 +21,7 @@ on:
       - "main"
       - "develop"
       - "next"
-    tags-ignore:
+    tags:
       - "v*"
 
 jobs:
@@ -61,6 +61,7 @@ jobs:
             type=semver,pattern={{major}}
             type=semver,pattern={{version}}
             type=ref,event=branch
+            type=ref,event=pr
       - name: Build and push action - frontend
         id: docker_action_build_frontend
         uses: docker/build-push-action@v5
@@ -73,7 +74,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v4.0.2
         with:
-          node-version: "20.12.0"
+          node-version: "20.12"
 
   build-backend:
     name: build-backend
@@ -111,6 +112,7 @@ jobs:
             type=semver,pattern={{major}}
             type=semver,pattern={{version}}
             type=ref,event=branch
+            type=ref,event=pr
       - name: Build and push action - backend
         id: docker_action_build_backend
         uses: docker/build-push-action@v5
@@ -123,7 +125,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v4.0.2
         with:
-          node-version: "20.12.0"
+          node-version: "20.12"
   release:
     name: Release
     needs: [build-frontend, build-backend]
@@ -138,15 +140,16 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4.0.2
         with:
-          node-version: "20.12.0"
+          node-version: "20.12"
       - name: Semantic Release
         id: version
-        uses: cycjimmy/semantic-release-action@v4.1.0
+        uses: splunk/semantic-release-action@v1.3.4
         with:
-          semantic_version: 21.1.1
+          git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
+          git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
+          gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
           extra_plugins: |
-            @semantic-release/exec
-            @semantic-release/git
             semantic-release-replace-plugin@1.2.7
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}

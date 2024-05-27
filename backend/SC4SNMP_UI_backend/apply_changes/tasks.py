@@ -15,8 +15,11 @@ JOB_CREATION_RETRIES = int(os.getenv("JOB_CREATION_RETRIES", 10))
 JOB_CONFIG_PATH = os.getenv("JOB_CONFIG_PATH", "/config/job_config.yaml")
 celery_logger = get_task_logger(__name__)
 
-@shared_task()
-def run_job():
+def get_job_config():
+    """
+    :return: job - configuration of the job
+             batch_v1 - BatchV1Api object from kubernetes client
+    """
     job = None
     batch_v1 = None
     with open(JOB_CONFIG_PATH, encoding="utf-8") as file:
@@ -26,6 +29,13 @@ def run_job():
         config.load_incluster_config()
         batch_v1 = client.BatchV1Api()
         job = create_job_object(config_file)
+    return job, batch_v1
+
+@shared_task()
+def run_job():
+    job, batch_v1 = get_job_config()
+    if job is None or batch_v1 is None:
+        raise ValueError("Scheduled kubernetes job: Job configuration is empty")
 
     with MongoClient(MONGO_URI) as connection:
         try_creating = True
@@ -39,8 +49,9 @@ def run_job():
                 try:
                     record = list(connection.sc4snmp.config_collection.find())[0]
                     connection.sc4snmp.config_collection.update_one({"_id": record["_id"]},
-                                                 {"$set": {"previous_job_start_time": datetime.datetime.utcnow(),
-                                                           "currently_scheduled": False}})
+                                                   {"$set": {"previous_job_start_time": datetime.datetime.utcnow(),
+                                                             "currently_scheduled": False,
+                                                             "task_id": None}})
                 except Exception as e:
                     celery_logger.info(f"Error occurred while updating job state after job creation: {str(e)}")
             except ApiException:
@@ -50,6 +61,6 @@ def run_job():
                     celery_logger.info(f"Kubernetes job was not created. Max retries ({JOB_CREATION_RETRIES}) exceeded.")
                     record = list(connection.sc4snmp.config_collection.find())[0]
                     connection.sc4snmp.config_collection.update_one({"_id": record["_id"]},
-                                                                    {"$set": {"currently_scheduled": False}})
+                                                                    {"$set": {"currently_scheduled": False, "task_id": None}})
                 else:
                     time.sleep(10)
