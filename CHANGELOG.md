@@ -1,5 +1,8 @@
 # Changelog
 
+### Changed
+- create REDIS connection string from environment variables instead of full REDIS_URL variable
+
 ## 1.1.0
 
 ### Changed
