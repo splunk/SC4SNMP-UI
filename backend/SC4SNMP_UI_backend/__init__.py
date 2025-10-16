@@ -12,10 +12,24 @@ __version__ = "1.1.0"
 
 MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672//")
-REDIS_URL = os.getenv("REDIS_URL")
+
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
 KEEP_TEMP_FILES = os.getenv("KEEP_TEMP_FILES", "false")
+
+REDIS_HOST = os.getenv("REDIS_HOST", "snmp-redis")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+REDIS_DB = os.getenv("REDIS_DB", "1")
+CELERY_DB = os.getenv("CELERY_DB", "0")
+
+if REDIS_PASSWORD:
+    redis_base = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}"
+else:
+    redis_base = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
+REDBEAT_URL = f"{redis_base}/{REDIS_DB}"
+CELERY_BROKER_URL = f"{redis_base}/{CELERY_DB}"
+
 
 class NoValuesDirectoryException(Exception):
     pass
@@ -31,7 +45,7 @@ def create_app():
             task_default_queue="apply_changes",
             broker_url=CELERY_BROKER_URL,
             beat_scheduler="redbeat.RedBeatScheduler",
-            redbeat_redis_url = REDIS_URL,
+            redbeat_redis_url = REDBEAT_URL,
             task_ignore_result=True,
             redbeat_lock_key=None,
         ),

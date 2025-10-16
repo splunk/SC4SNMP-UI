@@ -35,8 +35,14 @@ spec:
           env:
           - name: CONFIG_PATH
             value: /app/config/config.yaml
-          - name: REDIS_URL
-            value: redis://release-name-redis-headless:6379/1
+          - name: REDIS_HOST
+            value: snmp-redis
+          - name: REDIS_PORT
+            value: 6379
+          - name: REDIS_DB
+            value: 1
+          - name: CELERY_DB
+            value: 0
           - name: INVENTORY_PATH
             value: /app/inventory/inventory.csv
           - name: CELERY_BROKER_URL
@@ -128,7 +134,10 @@ def test_create_job_object():
                             args=["inventory"],
                             env=[
                                 client.V1EnvVar(name="CONFIG_PATH",value="/app/config/config.yaml"),
-                                client.V1EnvVar(name="REDIS_URL", value="redis://release-name-redis-headless:6379/1"),
+                                client.V1EnvVar(name="REDIS_HOST", value="snmp-redis"),
+                                client.V1EnvVar(name="REDIS_PORT", value="6379"),
+                                client.V1EnvVar(name="REDIS_DB", value="1"),
+                                client.V1EnvVar(name="CELERY_DB", value="0"),
                                 client.V1EnvVar(name="INVENTORY_PATH", value="/app/inventory/inventory.csv"),
                                 client.V1EnvVar(name="CELERY_BROKER_URL", value="redis://release-name-redis-headless:6379/0"),
                                 client.V1EnvVar(name="MONGO_URI", value="mongodb://release-name-mongodb:27017"),
