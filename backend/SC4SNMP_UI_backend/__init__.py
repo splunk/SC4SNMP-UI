@@ -27,8 +27,9 @@ if REDIS_PASSWORD:
 else:
     redis_base = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 
-REDBEAT_URL = f"{redis_base}/{REDIS_DB}"
-CELERY_BROKER_URL = f"{redis_base}/{CELERY_DB}"
+# fallback
+REDBEAT_URL = os.getenv("REDIS_URL", f"{redis_base}/{REDIS_DB}")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", f"{redis_base}/{CELERY_DB}")
 
 
 class NoValuesDirectoryException(Exception):
