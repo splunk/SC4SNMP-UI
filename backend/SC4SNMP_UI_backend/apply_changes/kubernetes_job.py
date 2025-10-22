@@ -21,8 +21,26 @@ def create_container(container: dict):
     args = container["args"]
     env = []
     for e in container["env"]:
-        env_var = client.V1EnvVar(name=e["name"],
-                                  value=e["value"])
+        if "value" in e:
+            env_var = client.V1EnvVar(name=e["name"],
+                                      value=e["value"])
+        elif "valueFrom" in e:
+            value_from = None
+            if "secretKeyRef" in e["valueFrom"]:
+                value_from = client.V1EnvVarSource(
+                    secret_key_ref=client.V1SecretKeySelector(
+                        name=e["valueFrom"]["secretKeyRef"]["name"],
+                        key=e["valueFrom"]["secretKeyRef"]["key"]
+                    )
+                )
+            elif "configMapKeyRef" in e["valueFrom"]:
+                value_from = client.V1EnvVarSource(
+                    config_map_key_ref=client.V1ConfigMapKeySelector(
+                        name=e["valueFrom"]["configMapKeyRef"]["name"],
+                        key=e["valueFrom"]["configMapKeyRef"]["key"]
+                    )
+                )
+            env_var = client.V1EnvVar(name=e["name"], value_from=value_from)
         env.append(copy(env_var))
     volume_mounts = []
     for v in container["volumeMounts"]:
