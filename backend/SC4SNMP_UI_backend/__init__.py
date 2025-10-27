@@ -47,6 +47,11 @@ def create_app():
             broker_url=CELERY_BROKER_URL,
             beat_scheduler="redbeat.RedBeatScheduler",
             redbeat_redis_url = REDBEAT_URL,
+            broker_transport_options={
+                "priority_steps": list(range(10)),
+                "sep": ":",
+                "queue_order_strategy": "priority",
+            },
             task_ignore_result=True,
             redbeat_lock_key=None,
         ),
