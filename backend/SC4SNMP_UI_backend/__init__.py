@@ -16,20 +16,10 @@ mongo_client = MongoClient(MONGO_URI)
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
 KEEP_TEMP_FILES = os.getenv("KEEP_TEMP_FILES", "false")
 
-REDIS_HOST = os.getenv("REDIS_HOST", "snmp-redis")
-REDIS_PORT = os.getenv("REDIS_PORT", "6379")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
-REDIS_DB = os.getenv("REDIS_DB", "1")
-CELERY_DB = os.getenv("CELERY_DB", "0")
-
-if REDIS_PASSWORD:
-    redis_base = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}"
-else:
-    redis_base = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-
-# fallback
-REDBEAT_URL = os.getenv("REDIS_URL", f"{redis_base}/{REDIS_DB}")
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", f"{redis_base}/{CELERY_DB}")
+REDBEAT_URL = os.getenv("REDIS_URL", "redis://snmp-redis-headless:6379")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://snmp-redis-sentinel:26379")
+REDIS_SENTINEL_SERVICE = os.getenv("REDIS_SENTINEL_SERVICE", "snmp-redis-sentinel")
+REDIS_MODE = os.getenv("REDIS_MODE", "standalone")
 
 
 class NoValuesDirectoryException(Exception):
@@ -41,17 +31,38 @@ def create_app():
 
     app = Flask(__name__)
 
+    if REDIS_MODE == "replication":
+        broker_transport_options = {
+            "priority_steps": list(range(10)),
+            "sep": ":",
+            "queue_order_strategy": "priority",
+            "service_name": "mymaster",
+            "master_name": "mymaster",
+            "socket_timeout": 5,
+            "retry_policy": {
+                "max_retries": 100,
+                "interval_start": 0,
+                "interval_step": 2,
+                "interval_max": 5,
+            },
+            "db": 1,
+            "sentinels": [(REDIS_SENTINEL_SERVICE, 26379)],
+            "password": os.getenv("REDIS_PASSWORD", None),
+        }
+    else:
+        broker_transport_options = {
+            "priority_steps": list(range(10)),
+            "sep": ":",
+            "queue_order_strategy": "priority"
+        }
+
     app.config.from_mapping(
         CELERY=dict(
             task_default_queue="apply_changes",
             broker_url=CELERY_BROKER_URL,
             beat_scheduler="redbeat.RedBeatScheduler",
             redbeat_redis_url = REDBEAT_URL,
-            broker_transport_options={
-                "priority_steps": list(range(10)),
-                "sep": ":",
-                "queue_order_strategy": "priority",
-            },
+            broker_transport_options=broker_transport_options,
             task_ignore_result=True,
             redbeat_lock_key=None,
         ),
