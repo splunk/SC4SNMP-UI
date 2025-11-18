@@ -17,7 +17,7 @@ VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
 KEEP_TEMP_FILES = os.getenv("KEEP_TEMP_FILES", "false")
 
 REDBEAT_URL = os.getenv("REDIS_URL", "redis://snmp-redis-headless:6379")
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://snmp-redis-sentinel:26379")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "sentinel://snmp-redis-sentinel:26379")
 REDIS_SENTINEL_SERVICE = os.getenv("REDIS_SENTINEL_SERVICE", "snmp-redis-sentinel")
 REDIS_MODE = os.getenv("REDIS_MODE", "standalone")
 

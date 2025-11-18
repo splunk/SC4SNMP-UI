@@ -58,6 +58,9 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
     REDIS_DEPENDENCIES="${REDIS_URL} ${CELERY_BROKER_URL}"
   fi
 
+  echo "Constructed REDIS_URL: $REDIS_URL"
+  echo "Constructed CELERY_BROKER_URL: $CELERY_BROKER_URL"
+
   export REDIS_URL
   export CELERY_BROKER_URL
   export REDIS_DEPENDENCIES
