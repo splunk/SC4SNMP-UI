@@ -6,15 +6,18 @@ COPY SC4SNMP_UI_backend ./SC4SNMP_UI_backend
 RUN pip install -r ./requirements.txt
 ENV FLASK_DEBUG production
 
+# Copy scripts
 COPY ./flask_start.sh /flask_start.sh
 COPY ./celery_start.sh /celery_start.sh
-COPY ./entrypoint.sh /entrypoint.sh
 COPY ./construct-redis-url.sh /app/construct-redis-url.sh
 
+# Set permissions BEFORE USER switch
 RUN chmod +x /flask_start.sh /celery_start.sh /app/construct-redis-url.sh
 
+# Switch to non-root
 USER 10000:10000
 
 EXPOSE 5000
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "-b", ":5000", "app:flask_app", "--log-level", "INFO"]
+
+# Use flask_start.sh which sources construct-redis-url.sh
+CMD ["/flask_start.sh"]
