@@ -13,5 +13,5 @@ kubernetes~=26.1.0
 python-dotenv~=0.21.0
 PyYAML~=6.0
 celery==5.5.3
-redis==4.5.5
+redis~=4.5, !=4.5.5
 ruamel.yaml===0.17.32
