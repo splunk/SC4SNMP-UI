@@ -1,5 +1,9 @@
+import sys
+import time
+
 from flask import Flask
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 import os
 import logging
 from celery import Celery
@@ -11,6 +15,7 @@ load_dotenv()
 __version__ = "1.1.2-beta.1"
 
 MONGO_URI = os.getenv("MONGO_URI")
+wait_for_mongodb_replicaset(logging.getLogger())
 mongo_client = MongoClient(MONGO_URI)
 
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
@@ -93,3 +98,56 @@ def celery_init_app(app: Flask) -> Celery:
     celery_app.set_default()
     app.extensions["celery"] = celery_app
     return celery_app
+
+def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
+    """
+    Wait for MongoDB to be ready before starting the application.
+    For replica sets, waits for PRIMARY to be elected.
+    """
+    mongo_mode = os.getenv("MONGODB_MODE", "standalone").lower()
+    if mongo_mode == "standalone":
+        logger.info("MongoDB is in standalone mode, skipping ReplicaSet wait")
+        return
+
+    mongo_uri = os.getenv("MONGO_URI")
+
+    if not mongo_uri:
+        logger.warning("MONGO_URI not set, exiting application")
+        sys.exit(1)
+
+    logger.info(f"Waiting for MongoDB ReplicaSet to be ready and elect the primary...")
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            # Try to connect
+            client = MongoClient(
+                mongo_uri, serverSelectionTimeoutMS=5000, connectTimeoutMS=5000
+            )
+
+            # Execute a simple operation to verify PRIMARY exists
+            client.admin.command("ping")
+
+            # For replica sets, verify PRIMARY exists
+            if "replicaSet=" in mongo_uri:
+                if client.primary is None:
+                    raise Exception("No PRIMARY elected yet")
+                logger.info(f"PRIMARY found: {client.primary}")
+
+            client.close()
+            logger.info("MongoDB is ready")
+            return
+
+        except (ServerSelectionTimeoutError, ConnectionFailure, Exception) as e:
+            if attempt >= max_retries:
+                logger.info(
+                    f"MongoDB not ready after {max_retries * retry_interval}s"
+                )
+                logger.info(f"   Error: {e}")
+                sys.exit(1)
+
+            if attempt % 6 == 0:  # Print every 30 seconds
+                logger.info(
+                    f"  Still waiting... ({attempt}/{max_retries}) - {e.__class__.__name__}"
+                )
+
+            time.sleep(retry_interval)
