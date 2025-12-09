@@ -1,6 +1,7 @@
 # Changelog
 
 ### Changed
+- create MONGODB connection string from environment variables instead of full MONGO_URI variable
 - create REDIS connection string from environment variables instead of full REDIS_URL variable
 
 ## 1.1.0

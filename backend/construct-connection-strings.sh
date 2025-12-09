@@ -21,23 +21,19 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
 
     if [ -n "$REDIS_PASSWORD" ]; then
       SENTINEL_SCHEME="sentinel://:${REDIS_PASSWORD}@${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
-      REDBEAT_SCHEME="redis-sentinel://:${REDIS_PASSWORD}@${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
       REDIS_HA_CHECK="redis://:${REDIS_PASSWORD}@${REDIS_HEADLESS_SERVICE}:${REDIS_PORT}"
     else
       SENTINEL_SCHEME="sentinel://${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
-      REDBEAT_SCHEME="redis-sentinel://${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
       REDIS_HA_CHECK="redis://${REDIS_HEADLESS_SERVICE}:${REDIS_PORT}"
-
     fi
+
+    REDBEAT_SCHEME="redis-sentinel://${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
 
     # Celery broker uses sentinel://
     : "${CELERY_BROKER_URL:=${SENTINEL_SCHEME}/${CELERY_DB}#master_name=${REDIS_MASTER_NAME}}"
 
     # RedBeat uses redis-sentinel:// with master_name query
     : "${REDIS_URL:=${REDBEAT_SCHEME}/${REDIS_DB}#master_name=${REDIS_MASTER_NAME}}"
-    SENTINEL_CHECK="redis://${REDIS_SENTINEL_SERVICE}:${REDIS_SENTINEL_PORT}"
-    # For healthcheck / wait-for-dep - space-separated list
-    REDIS_DEPENDENCIES="${SENTINEL_CHECK} ${REDIS_HA_CHECK}"
 
   else
     # Standalone mode
@@ -53,16 +49,30 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
 
     : "${REDIS_URL:=$BASE/${REDIS_DB:-1}}"
     : "${CELERY_BROKER_URL:=$BASE/${CELERY_DB:-0}}"
-
-    # For healthcheck / wait-for-dep - space-separated list
-    REDIS_DEPENDENCIES="${REDIS_URL} ${CELERY_BROKER_URL}"
   fi
 
-  echo "Constructed REDIS_URL: $REDIS_URL"
-  echo "Constructed CELERY_BROKER_URL: $CELERY_BROKER_URL"
+  # Build MongoDB URI from environment variables
+  if [ -n "$MONGODB_PASSWORD" ]; then
+    # With authentication
+    if [ -n "$MONGODB_REPLICA_SET" ]; then
+      # Replica set
+      export MONGO_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}&authSource=${MONGODB_AUTH_SOURCE:-admin}&readPreference=primary"
+    else
+      # Standalone
+      export MONGO_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin"
+    fi
+  else
+    # Without authentication
+    if [ -n "$MONGODB_REPLICA_SET" ]; then
+      export MONGO_URI="mongodb://${MONGODB_HOST}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}&authSource=admin&retryWrites=false"
+    else
+      export MONGO_URI="mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin"
+    fi
+  fi
 
+  export MONGO_URI
   export REDIS_URL
   export CELERY_BROKER_URL
-  export REDIS_DEPENDENCIES
   export REDIS_MODE
+
 fi
