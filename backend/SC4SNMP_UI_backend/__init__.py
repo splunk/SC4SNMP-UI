@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "1.1.2-beta.1"
+__version__ = "1.1.2-beta.2"
 
 MONGO_URI = os.getenv("MONGO_URI")
 
