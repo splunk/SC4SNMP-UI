@@ -17,8 +17,7 @@ __version__ = "1.1.2-beta.2"
 MONGO_URI = os.getenv("MONGO_URI")
 
 
-
-def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
+def wait_for_mongodb_replicaset(logger, mongo_uri, max_retries=120, retry_interval=5):
     """
     Wait for MongoDB to be ready before starting the application.
     For replica sets, waits for PRIMARY to be elected.
@@ -28,8 +27,6 @@ def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
         logger.info("MongoDB is in standalone mode, skipping ReplicaSet wait")
         return
 
-    mongo_uri = os.getenv("MONGO_URI")
-
     if not mongo_uri:
         logger.warning("MONGO_URI not set, exiting application")
         sys.exit(1)
@@ -37,6 +34,8 @@ def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
     logger.info(f"Waiting for MongoDB ReplicaSet to be ready and elect the primary...")
 
     for attempt in range(1, max_retries + 1):
+        if attempt != 1:
+            time.sleep(retry_interval)
         try:
             # Try to connect
             client = MongoClient(
@@ -49,7 +48,7 @@ def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
             # For replica sets, verify PRIMARY exists
             if "replicaSet=" in mongo_uri:
                 if client.primary is None:
-                    raise Exception("No PRIMARY elected yet")
+                    continue
                 logger.info(f"PRIMARY found: {client.primary}")
 
             client.close()
@@ -58,20 +57,13 @@ def wait_for_mongodb_replicaset(logger, max_retries=120, retry_interval=5):
 
         except (ServerSelectionTimeoutError, ConnectionFailure, Exception) as e:
             if attempt >= max_retries:
-                logger.info(
-                    f"MongoDB not ready after {max_retries * retry_interval}s"
-                )
+                logger.info(f"MongoDB not ready after {max_retries * retry_interval}s")
                 logger.info(f"   Error: {e}")
                 sys.exit(1)
 
-            if attempt % 6 == 0:  # Print every 30 seconds
-                logger.info(
-                    f"  Still waiting... ({attempt}/{max_retries}) - {e.__class__.__name__}"
-                )
+        logger.info(f"  Still waiting... ({attempt}/{max_retries})")
 
-            time.sleep(retry_interval)
-
-wait_for_mongodb_replicaset(logging.getLogger())
+wait_for_mongodb_replicaset(logging.getLogger(), MONGO_URI)
 mongo_client = MongoClient(MONGO_URI)
 
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")

@@ -50,7 +50,13 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
     : "${REDIS_URL:=$BASE/${REDIS_DB:-1}}"
     : "${CELERY_BROKER_URL:=$BASE/${CELERY_DB:-0}}"
   fi
+  export REDIS_URL
+  export CELERY_BROKER_URL
+  export REDIS_MODE
+fi
 
+# Only construct if MONGO_URI not already set
+if [ -z "$MONGO_URI" ]
   # Build MongoDB URI from environment variables
   if [ -n "$MONGODB_PASSWORD" ]; then
     # With authentication
@@ -59,20 +65,17 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
       export MONGO_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}&authSource=${MONGODB_AUTH_SOURCE:-admin}&readPreference=primary"
     else
       # Standalone
-      export MONGO_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin"
+      export MONGO_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=${MONGODB_AUTH_SOURCE:-admin}"
     fi
   else
     # Without authentication
     if [ -n "$MONGODB_REPLICA_SET" ]; then
-      export MONGO_URI="mongodb://${MONGODB_HOST}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}&authSource=admin&retryWrites=false"
+      export MONGO_URI="mongodb://${MONGODB_HOST}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}&authSource=${MONGODB_AUTH_SOURCE:-admin}&retryWrites=false&readPreference=primary"
     else
-      export MONGO_URI="mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin"
+      export MONGO_URI="mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=${MONGODB_AUTH_SOURCE:-admin}"
     fi
   fi
 
   export MONGO_URI
-  export REDIS_URL
-  export CELERY_BROKER_URL
-  export REDIS_MODE
 
 fi
