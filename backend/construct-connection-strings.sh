@@ -56,7 +56,7 @@ if [ -z "$REDIS_URL" ] || [ -z "$CELERY_BROKER_URL" ]; then
 fi
 
 # Only construct if MONGO_URI not already set
-if [ -z "$MONGO_URI" ]
+if [ -z "$MONGO_URI" ]; then
   # Build MongoDB URI from environment variables
   if [ -n "$MONGODB_PASSWORD" ]; then
     # With authentication
