@@ -15,7 +15,7 @@ load_dotenv()
 __version__ = "1.1.2-beta.2"
 
 MONGO_URI = os.getenv("MONGO_URI")
-
+logging.basicConfig(level=logging.INFO)
 
 def wait_for_mongodb_replicaset(logger, mongo_uri, max_retries=120, retry_interval=5):
     """
