@@ -15,7 +15,8 @@ load_dotenv()
 __version__ = "1.1.2-beta.2"
 
 MONGO_URI = os.getenv("MONGO_URI")
-logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('gunicorn.error')
+log.setLevel(logging.INFO)
 
 def wait_for_mongodb_replicaset(logger, mongo_uri, max_retries=120, retry_interval=5):
     """
@@ -63,7 +64,7 @@ def wait_for_mongodb_replicaset(logger, mongo_uri, max_retries=120, retry_interv
 
         logger.info(f"  Still waiting... ({attempt}/{max_retries})")
 
-wait_for_mongodb_replicaset(logging.getLogger(), MONGO_URI)
+wait_for_mongodb_replicaset(log, MONGO_URI)
 mongo_client = MongoClient(MONGO_URI)
 
 VALUES_DIRECTORY = os.getenv("VALUES_DIRECTORY", "")
