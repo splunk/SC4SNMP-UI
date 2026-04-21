@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app
-from flask_cors import cross_origin
+from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.apply_changes.apply_changes import ApplyChanges
 from SC4SNMP_UI_backend.apply_changes.handling_chain import EmptyValuesFileException, YamlParserException
 import os
@@ -9,7 +9,7 @@ apply_changes_blueprint = Blueprint('common_blueprint', __name__)
 JOB_CREATION_RETRIES = int(os.getenv("JOB_CREATION_RETRIES", 10))
 
 @apply_changes_blueprint.route("/apply-changes", methods=['POST'])
-@cross_origin()
+@login_required
 def apply_changes():
     changes = ApplyChanges()
     job_delay, currently_scheduled = changes.apply_changes()
@@ -24,7 +24,6 @@ def apply_changes():
     return result, 200
 
 @apply_changes_blueprint.errorhandler(Exception)
-@cross_origin()
 def handle_exception(e):
     current_app.logger.error(traceback.format_exc())
     if isinstance(e, (EmptyValuesFileException, YamlParserException)):

@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask import request, Blueprint, jsonify
-from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
+from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import ProfileConversion, get_group_or_profile_name_from_backend
 from SC4SNMP_UI_backend.common.inventory_utils import update_profiles_in_inventory
 
@@ -11,9 +11,8 @@ profile_conversion = ProfileConversion()
 mongo_profiles = mongo_client.sc4snmp.profiles_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
-# @cross_origin(origins='*', headers=['access-control-allow-origin', 'Content-Type'])
 @profiles_blueprint.route('/profiles/names')
-@cross_origin()
+@login_required
 def get_profile_names():
     profiles = list(mongo_profiles.find())
     profiles_list = []
@@ -24,13 +23,13 @@ def get_profile_names():
     return jsonify([el["profileName"] for el in profiles_list])
 
 @profiles_blueprint.route('/profiles/count')
-@cross_origin()
+@login_required
 def get_profiles_count():
     total_count = mongo_profiles.count_documents({})
     return jsonify(total_count)
 
 @profiles_blueprint.route('/profiles/<page_num>/<prof_per_page>')
-@cross_origin()
+@login_required
 def get_profiles_list(page_num, prof_per_page):
     page_num = int(page_num)
     prof_per_page = int(prof_per_page)
@@ -49,7 +48,7 @@ def get_profiles_list(page_num, prof_per_page):
 
 
 @profiles_blueprint.route('/profiles')
-@cross_origin()
+@login_required
 def get_all_profiles_list():
     profiles = list(mongo_profiles.find())
     profiles_list = []
@@ -61,7 +60,7 @@ def get_all_profiles_list():
 
 
 @profiles_blueprint.route('/profiles/add', methods=['POST'])
-@cross_origin()
+@login_required
 def add_profile_record():
     profile_obj = request.json
     same_name_profiles = list(mongo_profiles.find({f"{profile_obj['profileName']}": {"$exists": True}}))
@@ -75,7 +74,7 @@ def add_profile_record():
     return result
 
 @profiles_blueprint.route('/profiles/delete/<profile_id>', methods=['POST'])
-@cross_origin()
+@login_required
 def delete_profile_record(profile_id):
     profile = list(mongo_profiles.find({'_id': ObjectId(profile_id)}, {"_id": 0}))[0]
     profile_name = list(profile.keys())[0]
@@ -95,7 +94,7 @@ def delete_profile_record(profile_id):
 
 
 @profiles_blueprint.route('/profiles/update/<profile_id>', methods=['POST'])
-@cross_origin()
+@login_required
 def update_profile_record(profile_id):
     profile_obj = request.json
     new_profile_name = profile_obj['profileName']

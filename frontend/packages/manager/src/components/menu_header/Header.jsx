@@ -4,12 +4,12 @@ import ProfileContext from "../../store/profile-contxt";
 import GroupContext from "../../store/group-contxt";
 import InventoryContext from "../../store/inventory-contxt";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
+import AuthContext from "../../store/auth-contxt";
 import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/menu_header/HeaderStyle";
 import Button from '@splunk/react-ui/Button';
 import Plus from '@splunk/react-icons/Plus';
 import P from '@splunk/react-ui/Paragraph';
-import axios from "axios";
-import {backendHost} from "../../host";
+import api from "../../api";
 
 function Header(){
     const MenuCtx = useContext(MenuHeaderContxt);
@@ -17,6 +17,7 @@ function Header(){
     const GrCtx = useContext(GroupContext);
     const InvCtx = useContext(InventoryContext);
     const ErrCtx = useContext(ErrorsModalContext);
+    const authCtx = useContext(AuthContext);
 
     const handleRequestOpenProfile = () => {
         ProfCtx.setProfileName("");
@@ -45,8 +46,7 @@ function Header(){
     };
 
     const handleApplyChanges = () => {
-        console.log("Applying changes")
-        axios.post(`http://${backendHost}/apply-changes`)
+        api.post("/apply-changes")
         .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
@@ -60,6 +60,10 @@ function Header(){
             ErrCtx.setErrorType("error");
             ErrCtx.setMessage("Error: " + error.response.data.message);
             })
+    };
+
+    const handleLogout = () => {
+        authCtx.logout();
     };
 
     const addButtonLabel = {
@@ -100,6 +104,8 @@ function Header(){
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
                         <Button data-test="sc4snmp:apply-changes-button" label="Apply changes" onClick={handleApplyChanges}
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
+                        <Button data-test="sc4snmp:logout-button" appearance="secondary" label="Logout" onClick={handleLogout}
+                                style={{ fontFamily: "Proxima Nova Sbold", marginLeft: "8px" }}/>
                     </div>
                 </StyledHeaderRight>
             </StyledHeader>)

@@ -1,7 +1,11 @@
+import re
 import sys
 import time
 
-from flask import Flask
+from flask import Flask, g
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 import os
@@ -79,11 +83,59 @@ REDIS_MODE = os.getenv("REDIS_MODE", "standalone")
 class NoValuesDirectoryException(Exception):
     pass
 
+
+class AuthNotConfiguredException(Exception):
+    pass
+
+
+limiter = Limiter(key_func=get_remote_address, default_limits=[])
+
+
 def create_app():
     if len(VALUES_DIRECTORY) == 0:
         raise NoValuesDirectoryException
 
     app = Flask(__name__)
+
+    auth_enabled = os.getenv("AUTH_ENABLED", "true").lower() == "true"
+    if auth_enabled:
+        missing = []
+        for var in ("AUTH_USERNAME", "AUTH_PASSWORD_HASH", "JWT_SECRET"):
+            if not os.getenv(var):
+                missing.append(var)
+        if missing:
+            raise AuthNotConfiguredException(
+                f"AUTH_ENABLED=true but {', '.join(missing)} not set. "
+                "Set these env vars or set AUTH_ENABLED=false to disable authentication."
+            )
+    else:
+        log.warning(
+            "SECURITY: AUTH_ENABLED=false. All endpoints are accessible without authentication. "
+            "Do NOT use this configuration in production or on any network-exposed deployment. "
+            "Restrict access via ClusterIP/NetworkPolicy and use only for local development."
+        )
+
+    allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
+    if allowed_origins_env == "*":
+        # Reflect any origin. Intended for local development only.
+        log.warning(
+            "SECURITY: ALLOWED_ORIGINS=* reflects any browser Origin. "
+            "Do NOT use in production; set an explicit allow-list."
+        )
+        cors_origins = [re.compile(r".*")]
+    elif allowed_origins_env:
+        cors_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+    elif not auth_enabled:
+        # When auth is disabled (dev mode), reflect any origin so the UI works
+        # out of the box on NodePort setups. Security warning already logged above.
+        cors_origins = [re.compile(r".*")]
+    else:
+        cors_origins = ["http://localhost:8080"]
+
+    CORS(app, origins=cors_origins, supports_credentials=True)
+
+    limiter.init_app(app)
+    limiter.storage_uri = REDBEAT_URL
 
     if REDIS_MODE == "replication":
         broker_transport_options = {
@@ -122,14 +174,40 @@ def create_app():
         ),
     )
     celery_init_app(app)
+
+    from SC4SNMP_UI_backend.auth.routes import auth_blueprint
     from SC4SNMP_UI_backend.profiles.routes import profiles_blueprint
     from SC4SNMP_UI_backend.groups.routes import groups_blueprint
     from SC4SNMP_UI_backend.inventory.routes import inventory_blueprint
     from SC4SNMP_UI_backend.apply_changes.routes import apply_changes_blueprint
+    app.register_blueprint(auth_blueprint)
     app.register_blueprint(profiles_blueprint)
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(inventory_blueprint)
     app.register_blueprint(apply_changes_blueprint)
+
+    from SC4SNMP_UI_backend.auth.utils import (
+        AUTH_ENABLED as _auth_on,
+        refresh_token_payload,
+        make_cookie_kwargs,
+        COOKIE_NAME,
+        JWT_EXPIRY_HOURS as _jwt_hours,
+    )
+
+    @app.after_request
+    def refresh_idle_token(response):
+        if not _auth_on:
+            return response
+        try:
+            should_refresh = g.get("refresh_token", False)
+            payload = g.get("token_payload")
+        except RuntimeError:
+            return response
+        if should_refresh and payload:
+            new_token = refresh_token_payload(payload)
+            response.set_cookie(**make_cookie_kwargs(new_token, max_age=_jwt_hours * 3600))
+        return response
+
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)

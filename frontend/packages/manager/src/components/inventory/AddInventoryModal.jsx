@@ -5,7 +5,7 @@ import Select from '@splunk/react-ui/Select';
 import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import RadioBar from '@splunk/react-ui/RadioBar';
-import axios from "axios";
+import api from "../../api";
 import Button from '@splunk/react-ui/Button';
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
@@ -15,7 +15,6 @@ import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../st
 import {useInventoryDevicesValidationContxt} from "../../store/inventory-devices-validation-contxt";
 import { validationMessage } from "../../styles/ValidationStyles";
 import ValidationGroup from "../validation/ValidationGroup";
-import { backendHost } from "../../host";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 
 
@@ -67,7 +66,7 @@ function AddInventoryModal() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get(`http://${backendHost}/profiles/names`)
+        api.get("/profiles/names")
         .then((response) => {
             if (isMounted) {
                 setInitProfiles(response.data);
@@ -77,7 +76,7 @@ function AddInventoryModal() {
     }, []);
 
     const postInventory = (inventoryObj) => {
-        axios.post(`http://${backendHost}/inventory/add`, inventoryObj)
+        api.post("/inventory/add", inventoryObj)
             .then((response) => {
                 if (response.data !== "success" && 'message' in response.data){
                     ErrCtx.setOpen(true);
@@ -94,7 +93,7 @@ function AddInventoryModal() {
     };
 
     const updateInventory = (inventoryObj, inventoryId) => {
-        axios.post(`http://${backendHost}/inventory/update/${inventoryId}`, inventoryObj)
+        api.post(`/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
                 console.log(response.data)
                 if (response.data !== "success" && 'message' in response.data){

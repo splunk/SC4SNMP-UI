@@ -1,10 +1,10 @@
-FROM python:3.9
+FROM python:3.10
 WORKDIR /app
 
 COPY requirements.txt app.py ./
 COPY SC4SNMP_UI_backend ./SC4SNMP_UI_backend
 RUN pip install -r ./requirements.txt
-ENV FLASK_DEBUG production
+ENV FLASK_DEBUG=production
 
 # Copy scripts
 COPY ./flask_start.sh /flask_start.sh

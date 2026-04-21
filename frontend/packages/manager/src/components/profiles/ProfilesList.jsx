@@ -6,10 +6,9 @@ import Paginator from "@splunk/react-ui/Paginator";
 import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from "@splunk/react-ui/Button";
-import axios from "axios";
+import api from "../../api";
 import {useProfileContext} from "../../store/profile-contxt";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
-import {backendHost} from "../../host";
 import {Pagination} from "../../styles/groups/GroupsStyle";
 import DeleteModal from "../DeleteModal";
 import P from "@splunk/react-ui/Paragraph";
@@ -65,16 +64,14 @@ function ProfilesList() {
     const ErrCtx = useErrorsModalContext();
 
     const getProfileRows = (page) => {
-        const urlCount = `http://${backendHost}/profiles/count`;
-        axios.get(urlCount)
+        api.get("/profiles/count")
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(profilesPerPage));
                 if (maxPages === 0) maxPages = 1;
                 if (page > maxPages){
                     page = maxPages;
                 };
-                const urlGet = `http://${backendHost}/profiles/${page.toString()}/${profilesPerPage.toString()}`;
-                axios.get(urlGet)
+                api.get(`/profiles/${page.toString()}/${profilesPerPage.toString()}`)
                     .then((response2) => {
                         setPageNum(page);
                         setTotalPages(maxPages);
@@ -124,7 +121,7 @@ function ProfilesList() {
     };
 
     const deleteModalRequest = () => {
-        axios.post(`http://${backendHost}/profiles/delete/${ProfCtx.profileId}`)
+        api.post(`/profiles/delete/${ProfCtx.profileId}`)
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
