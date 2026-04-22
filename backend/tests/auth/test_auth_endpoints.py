@@ -11,7 +11,7 @@ def test_login_success(client):
     )
     assert response.status_code == 200
     assert response.json["username"] == TEST_USERNAME
-    assert "id" in {c.name for c in client.cookie_jar}
+    assert client.get_cookie("id") is not None
 
 
 def test_login_wrong_password(client):
