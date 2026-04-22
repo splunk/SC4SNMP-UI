@@ -115,7 +115,16 @@ def test_csrf_header_allows_post(client):
         with mock.patch("pymongo.collection.Collection.insert_one"):
             response = client.post(
                 "/profiles/add",
-                json={"profileName": "test"},
+                json={
+                    "profileName": "test",
+                    "frequency": 10,
+                    "conditions": {
+                        "condition": "standard",
+                        "field": "",
+                        "patterns": None,
+                    },
+                    "varBinds": [],
+                },
                 headers={"X-Requested-With": "XMLHttpRequest"},
             )
     assert response.status_code == 200
