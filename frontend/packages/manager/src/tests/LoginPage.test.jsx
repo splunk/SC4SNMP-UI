@@ -3,7 +3,7 @@ import { expect, describe, jest, it, beforeEach } from '@jest/globals';
 import { fireEvent } from '@testing-library/dom';
 import { act } from 'react-dom/test-utils';
 import { render, screen } from './custom_testing_lib/custom-testing-lib';
-import "@testing-library/jest-dom/extend-expect";
+import "@testing-library/jest-dom";
 import "@testing-library/jest-dom";
 import LoginPage from "../components/auth/LoginPage";
 import { MockAuthContextProvider } from "./mock_context_providers/MockAuthContextProvider";

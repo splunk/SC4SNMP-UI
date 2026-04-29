@@ -1,9 +1,9 @@
-FROM python:3.10
+FROM python:3.12-slim
 WORKDIR /app
 
 COPY requirements.txt app.py ./
 COPY SC4SNMP_UI_backend ./SC4SNMP_UI_backend
-RUN pip install -r ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 ENV FLASK_DEBUG=production
 
 # Copy scripts
