@@ -17,8 +17,8 @@ def test_add_group_record_success(m_find, m_insert, client):
     }
 
     find_calls = [
-        call({'address': 'group_1', 'delete': False}),
         call({f"group_1": {"$exists": True}}),
+        call({'address': 'group_1', 'delete': False}),
     ]
     m_find.side_effect = [[],[]]
 
