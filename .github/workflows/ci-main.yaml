@@ -37,13 +37,15 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.10"
+          - "3.12"
     steps:
       - uses: actions/checkout@v4
       - name: Setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
       - name: Install packages
         working-directory: ./backend
         run: pip install -r ./requirements.txt
@@ -56,25 +58,21 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 20.12
+          - 22
     steps:
       - uses: actions/checkout@v4
       - name: Set Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Run install
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install
-          dir: 'frontend'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: yarn install --frozen-lockfile
       - name: Build
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build
-          dir: 'frontend'
-      - name: Run test in sub-folder
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: test
-          dir: 'frontend'
+        working-directory: ./frontend
+        run: yarn build
+      - name: Run tests
+        working-directory: ./frontend
+        run: yarn test
