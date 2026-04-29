@@ -1,18 +1,18 @@
-FROM python:3.10
+FROM python:3.12-slim
 WORKDIR /app
 
-COPY requirements.txt app.py ./
-COPY SC4SNMP_UI_backend ./SC4SNMP_UI_backend
-RUN pip install -r ./requirements.txt
+COPY --chown=10000:10000 requirements.txt app.py ./
+COPY --chown=10000:10000 SC4SNMP_UI_backend ./SC4SNMP_UI_backend
+RUN pip install --no-cache-dir -r ./requirements.txt
 ENV FLASK_DEBUG=production
 
-# Copy scripts
-COPY ./flask_start.sh /flask_start.sh
-COPY ./celery_start.sh /celery_start.sh
-COPY construct-connection-strings.sh /app/construct-connection-strings.sh
+# Copy scripts (executable, owned by non-root user)
+COPY --chown=10000:10000 ./flask_start.sh /flask_start.sh
+COPY --chown=10000:10000 ./celery_start.sh /celery_start.sh
+COPY --chown=10000:10000 construct-connection-strings.sh /app/construct-connection-strings.sh
 
-# Set permissions BEFORE USER switch
-RUN chmod +x /flask_start.sh /celery_start.sh /app/construct-connection-strings.sh
+# Set executable bit BEFORE USER switch
+RUN chmod 0755 /flask_start.sh /celery_start.sh /app/construct-connection-strings.sh
 
 # Switch to non-root
 USER 10000:10000
