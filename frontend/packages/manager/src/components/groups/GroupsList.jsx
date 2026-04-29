@@ -8,13 +8,12 @@ import Paginator from '@splunk/react-ui/Paginator';
 import Button from '@splunk/react-ui/Button';
 import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
-import axios from "axios";
+import api from "../../api";
 import ButtonsContext from "../../store/buttons-contx";
 import GroupContext from "../../store/group-contxt";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import AddDeviceModal from "./AddDeviceModal";
 import DeleteModal from "../DeleteModal";
-import { backendHost } from "../../host";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
 
@@ -43,7 +42,7 @@ function GroupsList() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get(`http://${backendHost}/groups`)
+        api.get("/groups")
         .then((response) => {
             if (isMounted){
                 setGroups(response.data);
@@ -99,7 +98,7 @@ function GroupsList() {
     const groupDeleteHandler = (groupId, groupName, groupInInventory) => {
         BtnCtx.setDeleteOpen(true);
         GrCtx.setDeleteName(groupName);
-        GrCtx.setDeleteUrl(`http://${backendHost}/groups/delete/${groupId}`);
+        GrCtx.setDeleteUrl(`/groups/delete/${groupId}`);
         if (groupInInventory){
             GrCtx.setGroupWarning(`WARNING: This group is configured in the inventory`);
         }else{
@@ -122,14 +121,14 @@ function GroupsList() {
         // If the last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
-        axios.get(`http://${backendHost}/group/${groupId}/devices/count`)
+        api.get(`/group/${groupId}/devices/count`)
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(devicesPerPage));
                 if (maxPages === 0) {maxPages = 1;}
                 if (page > maxPages){
                     page = maxPages;
                 };
-                axios.get(`http://${backendHost}/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
+                api.get(`/group/${groupId}/devices/${page}/${devicesPerPage.toString()}`)
                     .then((response2) => {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
@@ -141,7 +140,7 @@ function GroupsList() {
                                         secret: "",
                                         securityEngine: ""
                                     };
-                        axios.get(`http://${backendHost}/group/inventory/${groupName}`)
+                        api.get(`/group/inventory/${groupName}`)
                             .then((response3) => {
                                 if (response3.status === 200){
                                     inventoryRecord = response3.data;
@@ -193,12 +192,12 @@ function GroupsList() {
         GrCtx.setDeleteName(`${row.address}:${row.port}`);
         GrCtx.setDeviceId(row._id);
         GrCtx.setGroupId(openedGroupId);
-        GrCtx.setDeleteUrl(`http://${backendHost}/devices/delete/${row._id}`)
+        GrCtx.setDeleteUrl(`/devices/delete/${row._id}`)
         GrCtx.setDeleteOpen(true);
     };
 
     const deleteModalRequest = () => {
-        axios.post(GrCtx.deleteUrl)
+        api.post(GrCtx.deleteUrl)
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);

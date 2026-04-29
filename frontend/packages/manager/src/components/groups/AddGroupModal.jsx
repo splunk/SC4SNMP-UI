@@ -4,13 +4,12 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
 import Text from '@splunk/react-ui/Text';
-import axios from "axios";
+import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { validationMessage } from "../../styles/ValidationStyles";
-import { backendHost } from "../../host";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import ValidationGroup from "../validation/ValidationGroup";
 
@@ -24,7 +23,7 @@ function AddGroupModal() {
     }, [GrCtx.setGroupName]);
 
     const postGroup = (groupObj) => {
-        axios.post(`http://${backendHost}/groups/add`, groupObj)
+        api.post("/groups/add", groupObj)
             .then((response) => {
                 GrCtx.makeGroupsChange();
             })
@@ -36,7 +35,7 @@ function AddGroupModal() {
     };
 
     const updateGroup = (groupObj, groupId) => {
-        axios.post(`http://${backendHost}/groups/update/${groupId}`, groupObj)
+        api.post(`/groups/update/${groupId}`, groupObj)
             .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);

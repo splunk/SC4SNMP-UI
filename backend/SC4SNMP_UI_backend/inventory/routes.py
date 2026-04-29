@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask import request, Blueprint, jsonify
-from flask_cors import cross_origin
 from SC4SNMP_UI_backend import mongo_client
+from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
 from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
 
@@ -12,7 +12,7 @@ mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
 @inventory_blueprint.route('/inventory/<page_num>/<dev_per_page>')
-@cross_origin()
+@login_required
 def get_inventory_list(page_num, dev_per_page):
     page_num = int(page_num)
     dev_per_page = int(dev_per_page)
@@ -27,14 +27,14 @@ def get_inventory_list(page_num, dev_per_page):
 
 
 @inventory_blueprint.route('/inventory/count')
-@cross_origin()
+@login_required
 def get_inventory_count():
     total_count = mongo_inventory.count_documents({"delete": False})
     return jsonify(total_count)
 
 
 @inventory_blueprint.route('/inventory/add', methods=['POST'])
-@cross_origin()
+@login_required
 def add_inventory_record():
     inventory_obj = request.json
     inventory_type = inventory_obj["inventoryType"]
@@ -56,7 +56,7 @@ def add_inventory_record():
 
 
 @inventory_blueprint.route('/inventory/delete/<inventory_id>', methods=['POST'])
-@cross_origin()
+@login_required
 def delete_inventory_record(inventory_id):
     mongo_inventory.update_one({"_id": ObjectId(inventory_id)}, {"$set": {"delete": True}})
     inventory_item = list(mongo_inventory.find({"_id": ObjectId(inventory_id)}))[0]
@@ -66,7 +66,7 @@ def delete_inventory_record(inventory_id):
 
 
 @inventory_blueprint.route('/inventory/update/<inventory_id>', methods=['POST'])
-@cross_origin()
+@login_required
 def update_inventory_record(inventory_id):
     inventory_obj = request.json
     inventory_type = inventory_obj["inventoryType"]

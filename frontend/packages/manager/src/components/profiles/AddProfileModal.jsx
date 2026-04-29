@@ -5,14 +5,13 @@ import Number from '@splunk/react-ui/Number';
 import Text from '@splunk/react-ui/Text';
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
-import axios from "axios";
+import api from "../../api";
 import VarBinds from "./VarBinds";
 import Condition from "./Condition";
 import {useProfileContext} from "../../store/profile-contxt";
 import validateProfiles from "../validation/ValidateProfiles";
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 import { validationMessage } from "../../styles/ValidationStyles";
-import { backendHost } from "../../host";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
 import ValidationGroup from "../validation/ValidationGroup";
@@ -34,7 +33,7 @@ function AddProfileModal(props) {
     }, []);
 
     const postProfile = (profileObj) => {
-        axios.post(`http://${backendHost}/profiles/add`, profileObj)
+        api.post("/profiles/add", profileObj)
             .then((response) => {
                 console.log(response);
                 ProfCtx.makeProfilesChange();
@@ -48,7 +47,7 @@ function AddProfileModal(props) {
     };
 
     const updateProfile = (profileObj, profileId) => {
-        axios.post(`http://${backendHost}/profiles/update/${profileId}`, profileObj)
+        api.post(`/profiles/update/${profileId}`, profileObj)
             .then((response) => {
                 ProfCtx.makeProfilesChange();
                 if (typeof response.data !== 'string' && 'message' in response.data){

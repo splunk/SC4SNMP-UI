@@ -1,13 +1,12 @@
 import React, {useContext, useEffect, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
-import axios from "axios";
+import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
-import { backendHost } from "../../host";
 import DeleteModal from "../DeleteModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
@@ -37,20 +36,15 @@ function InventoryList() {
     const [totalPages, setTotalPages] = useState(1);
     const [devicesPerPage, setDevicesPerPage] = useState("20");
 
-    const BASE_URL_GET_ALL = `http://${backendHost}/inventory/`;
-    const BASE_URL_DELETE = `http://${backendHost}/inventory/delete/`;
-
     const getFetchInventoryRows = (page) => {
-        const urlCount = `${BASE_URL_GET_ALL}count`
-        axios.get(urlCount)
+        api.get("/inventory/count")
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(devicesPerPage));
                 if (maxPages === 0) {maxPages = 1;}
                 if (page > maxPages){
                     page = maxPages;
                 };
-                const urlGet = `${BASE_URL_GET_ALL+page.toString()}/${devicesPerPage.toString()}`
-                axios.get(urlGet)
+                api.get(`/inventory/${page.toString()}/${devicesPerPage.toString()}`)
                     .then((response2) => {
                         setAllInventoryRecords(response2.data);
                         setPageNum(page);
@@ -89,8 +83,8 @@ function InventoryList() {
     };
 
     const deleteModalRequest = () => {
-        const url = `${BASE_URL_DELETE}${InvCtx.inventoryId.toString()}`;
-        axios.post(url)
+        const url = `/inventory/delete/${InvCtx.inventoryId.toString()}`;
+        api.post(url)
           .then(function (response) {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);

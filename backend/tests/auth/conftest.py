@@ -1,27 +1,36 @@
+import os
 import pytest
+from argon2 import PasswordHasher
+
+
+TEST_USERNAME = "testadmin"
+TEST_PASSWORD = "testpassword123"
+TEST_JWT_SECRET = "test-jwt-secret-for-unit-tests-only"
+
+_ph = PasswordHasher()
+TEST_PASSWORD_HASH = _ph.hash(TEST_PASSWORD)
 
 
 @pytest.fixture(autouse=True)
-def _disable_auth(monkeypatch, tmp_path):
-    # These tests exercise the UI handlers, not authentication. Disable auth so
-    # create_app() does not require AUTH_USERNAME / AUTH_PASSWORD_HASH /
-    # JWT_SECRET to be present in the environment.
-    monkeypatch.setenv("AUTH_ENABLED", "false")
+def auth_env_vars(monkeypatch, tmp_path):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("AUTH_USERNAME", TEST_USERNAME)
+    monkeypatch.setenv("AUTH_PASSWORD_HASH", TEST_PASSWORD_HASH)
+    monkeypatch.setenv("JWT_SECRET", TEST_JWT_SECRET)
     monkeypatch.setenv("SECURE_COOKIES", "false")
-    monkeypatch.setenv("MONGODB_MODE", "standalone")
     monkeypatch.setenv("VALUES_DIRECTORY", str(tmp_path))
     monkeypatch.setenv("MONGO_URI", "mongodb://localhost:27017/test")
     monkeypatch.setenv("REDIS_URL", "memory://")
+    monkeypatch.setenv("MONGODB_MODE", "standalone")
 
 
 @pytest.fixture()
-def app(_disable_auth):
-    # The auth module-level constant AUTH_ENABLED is captured at import time.
-    # The route modules apply @login_required at import time, capturing a
-    # closure over auth.utils' module globals. If tests/auth/* ran first,
-    # those routes are bound to AUTH_ENABLED=True. We must reload auth.utils
-    # first, then reload every blueprint module so the decorators re-bind to
-    # the new (AUTH_ENABLED=False) utils module.
+def app(auth_env_vars):
+    # Ensure auth.utils and all blueprint modules re-read AUTH_ENABLED and
+    # re-decorate routes via @login_required against the freshly-reloaded
+    # utils module. This matters because Python caches modules in sys.modules;
+    # without reloading, @login_required closures may still point at a prior
+    # test run's utils module (with stale AUTH_ENABLED).
     import importlib
     import sys
 
@@ -38,15 +47,15 @@ def app(_disable_auth):
 
     from unittest import mock
     with mock.patch("SC4SNMP_UI_backend.wait_for_mongodb_replicaset"):
-        # Do NOT mock pymongo.MongoClient here. Tests rely on
-        # @mock.patch("pymongo.collection.Collection.find") which only works
-        # when `mongo_client.sc4snmp.profiles_ui` is a real Collection
-        # instance. MongoClient is lazy and does not open a connection until
-        # a command runs, so constructing it against a fake URI is safe.
+        # Do NOT mock pymongo.MongoClient. Tests rely on
+        # @mock.patch("pymongo.collection.Collection.<method>") which only
+        # works when `mongo_client.sc4snmp.*` returns a real Collection
+        # instance. MongoClient is lazy so constructing against a fake URI
+        # is safe.
         import SC4SNMP_UI_backend
         importlib.reload(SC4SNMP_UI_backend)
-        # Re-reload route modules after SC4SNMP_UI_backend reload so they
-        # pick up the fresh mongo_client/limiter globals.
+        # Re-reload route modules after package reload so they pick up the
+        # fresh mongo_client/limiter globals.
         for mod_name in (
             "SC4SNMP_UI_backend.auth.utils",
             "SC4SNMP_UI_backend.auth.routes",
@@ -73,14 +82,4 @@ def app(_disable_auth):
 
 @pytest.fixture()
 def client(app):
-    client = app.test_client()
-    # The backend enforces the CSRF header (X-Requested-With) on state-changing
-    # requests even when AUTH_ENABLED is false. Set it once so existing tests
-    # don't need to add it to every POST/PUT/DELETE/PATCH call.
-    client.environ_base["HTTP_X_REQUESTED_WITH"] = "XMLHttpRequest"
-    return client
-
-
-@pytest.fixture()
-def runner(app):
-    return app.test_cli_runner()
+    return app.test_client()
