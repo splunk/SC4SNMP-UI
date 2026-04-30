@@ -23,5 +23,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5"
+  },
+  "resolutions": {
+    "uuid": "^14.0.0",
+    "follow-redirects": "^1.16.0"
   }
 }
