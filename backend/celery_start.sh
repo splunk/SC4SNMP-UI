@@ -1,3 +1,9 @@
+#!/bin/bash
+set -e
+
+# Source Redis URL construction
+. /app/construct-connection-strings.sh
+
 set -o errexit
 set -o nounset
 

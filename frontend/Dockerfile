@@ -1,6 +1,6 @@
-FROM node:20.12-alpine as build-step
+FROM node:22-alpine AS build-step
 WORKDIR /frontend
-ENV PATH /frontend/node_modules/.bin:$PATH
+ENV PATH=/frontend/node_modules/.bin:$PATH
 COPY package.json yarn.lock lerna.json ./
 COPY ./packages ./packages
 RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*

@@ -1,10 +1,10 @@
 import React from 'react';
 import {expect, describe, jest, it} from '@jest/globals';
 import {fireEvent} from '@testing-library/dom';
-import axios from "axios";
+import api from "../api";
 import {act} from "react-dom/test-utils";
 import {render, screen} from './custom_testing_lib/custom-testing-lib'
-import "@testing-library/jest-dom/extend-expect"
+import "@testing-library/jest-dom"
 import "@testing-library/jest-dom"
 import AddInventoryModal from "../components/inventory/AddInventoryModal";
 import {MockInventoryContextProvider} from "./mock_context_providers/MockInventoryContextProvider";
@@ -25,12 +25,21 @@ function renderModal(){
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-jest.mock("axios")
+jest.mock("../api", () => ({
+    __esModule: true,
+    default: {
+        get: jest.fn(),
+        post: jest.fn(),
+        interceptors: {
+            response: { use: jest.fn() },
+        },
+    },
+}))
 
 describe("AddInventoryModal", () => {
 
     it("Test wrong host and group name and no community string",  async() => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
 
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
@@ -67,7 +76,7 @@ describe("AddInventoryModal", () => {
     })
 
     it("Test no address and walk interval below 1800", async () => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
@@ -97,7 +106,7 @@ describe("AddInventoryModal", () => {
     })
 
     it("Test walk interval above 604800", async () => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
@@ -114,7 +123,7 @@ describe("AddInventoryModal", () => {
     })
 
     it("Test wrong group name, no port and wrong port", async () => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
@@ -135,7 +144,7 @@ describe("AddInventoryModal", () => {
     })
 
     it("Test wrong security engine", async () => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const securityEngineInput = screen.getByDataTest("sc4snmp:form:security-engine-input").querySelector("input")
@@ -152,7 +161,7 @@ describe("AddInventoryModal", () => {
     })
 
     it("Test no secret in version 3 of snmp", async () => {
-        axios.get.mockResolvedValueOnce({data:[]});
+        api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
 

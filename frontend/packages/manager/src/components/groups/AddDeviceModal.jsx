@@ -3,14 +3,13 @@ import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
-import axios from "axios";
+import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 import { validationMessage } from "../../styles/ValidationStyles";
-import { backendHost } from "../../host";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import ValidationGroup from "../validation/ValidationGroup";
@@ -46,7 +45,7 @@ function AddDeviceModal(){
     }, [GrCtx.setSecurityEngine]);
 
     const postDevice = (deviceObj) => {
-        axios.post(`http://${backendHost}/devices/add`, deviceObj)
+        api.post("/devices/add", deviceObj)
             .then((response) => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
@@ -59,7 +58,7 @@ function AddDeviceModal(){
     };
 
     const updateDevice = (deviceObj, deviceId) => {
-        axios.post(`http://${backendHost}/devices/update/${deviceId}`, deviceObj)
+        api.post(`/devices/update/${deviceId}`, deviceObj)
             .then((response) => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();

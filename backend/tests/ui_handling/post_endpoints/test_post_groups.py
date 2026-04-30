@@ -17,14 +17,14 @@ def test_add_group_record_success(m_find, m_insert, client):
     }
 
     find_calls = [
-        call({'address': 'group_1', 'delete': False}),
         call({f"group_1": {"$exists": True}}),
+        call({'address': 'group_1', 'delete': False}),
     ]
     m_find.side_effect = [[],[]]
 
     response = client.post(f"/groups/add", json=ui_group)
     m_insert.return_value = None
-    m_find.has_calls(find_calls)
+    m_find.assert_has_calls(find_calls)
     assert m_insert.call_args == call(backend_group)
     assert response.json == "success"
 
