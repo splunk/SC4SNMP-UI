@@ -2,6 +2,13 @@
 
 ### Changed
 
+## [1.2.1]
+
+### Changed
+- flask-cors to 6.0.0
+- uuid to 14.0.0
+- follow-redirects 1.16.0
+
 ## [1.2.0]
 
 ### Changed
