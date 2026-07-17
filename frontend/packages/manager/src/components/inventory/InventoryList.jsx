@@ -11,6 +11,7 @@ import DeleteModal from "../DeleteModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
 import { Pagination } from '../../styles/inventory/InventoryStyle';
+import { RowActions } from '../../styles/common/ListStyles';
 
 
 const columns = [
@@ -152,8 +153,10 @@ function InventoryList() {
                                 <Table.Cell data-test="sc4snmp:inventory-profiles" >{row.profiles.toString()}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-smart-profiles" >{row.smartProfiles.toString()}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-actions" >
-                                    <Button data-test="sc4snmp:inventory-row-edit" onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button data-test="sc4snmp:inventory-row-delete" onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <RowActions>
+                                        <Button data-test="sc4snmp:inventory-row-edit" onClick={() => handleEdit(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                        <Button data-test="sc4snmp:inventory-row-delete" onClick={() => handleDelete(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    </RowActions>
                                 </Table.Cell>
                             </Table.Row>
                         ))}
