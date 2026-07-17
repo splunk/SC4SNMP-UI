@@ -1,6 +1,7 @@
 # Changelog
 
 ### Changed
+- fix button misalignment on multilines in table
 
 ## [1.2.1]
 
