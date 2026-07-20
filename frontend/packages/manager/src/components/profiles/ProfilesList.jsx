@@ -10,6 +10,7 @@ import api from "../../api";
 import {useProfileContext} from "../../store/profile-contxt";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {Pagination} from "../../styles/groups/GroupsStyle";
+import {RowActions} from "../../styles/common/ListStyles";
 import DeleteModal from "../DeleteModal";
 import P from "@splunk/react-ui/Paragraph";
 
@@ -190,8 +191,10 @@ function ProfilesList() {
                                 <Table.Cell data-test="sc4snmp:profile-mib-object" >{/* MIB object is empty in this view */}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:profile-mib-index" >{/* MIB index is empty in this view */}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:profile-actions" >
-                                    <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <RowActions>
+                                        <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                        <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    </RowActions>
                                 </Table.Cell>
                             </Table.Row>
                         ))}

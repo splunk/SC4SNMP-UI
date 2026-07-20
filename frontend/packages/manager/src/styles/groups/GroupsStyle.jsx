@@ -32,6 +32,12 @@ const GroupsNamesHeader = styled.div`
         line-height: 16px;
         margin-bottom: 0;
     }
+
+    & > div{
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+    }
 `;
 
 const SingleGroup = styled.div`
@@ -51,6 +57,17 @@ const SingleGroup = styled.div`
         font-size: 14px;
         line-height: 12px;
         margin-bottom: 0;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    & > div{
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
     }
 `;
 

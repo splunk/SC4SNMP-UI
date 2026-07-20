@@ -16,6 +16,7 @@ import AddDeviceModal from "./AddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
+import { RowActions } from "../../styles/common/ListStyles";
 
 
 
@@ -225,7 +226,7 @@ function GroupsList() {
 
     const groupsList = groups.map((group) => (
         <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
-            <P onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
+            <P title={group.groupName} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
             <div>
@@ -285,8 +286,10 @@ function GroupsList() {
                                         <Table.Cell data-test="sc4snmp:host-secret" >{(row.secret === '') ? GrCtx.inventoryConfig.secret  : row.secret}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-security-engine" >{(row.securityEngine === '') ? GrCtx.inventoryConfig.securityEngine  : row.securityEngine}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-actions" >
-                                            <Button data-test="sc4snmp:group-row-edit" onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                            <Button data-test="sc4snmp:group-row-delete" onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                            <RowActions>
+                                                <Button data-test="sc4snmp:group-row-edit" onClick={() => deviceEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                                <Button data-test="sc4snmp:group-row-delete" onClick={() => deviceDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                            </RowActions>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
