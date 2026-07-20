@@ -202,13 +202,48 @@ class ScheduleHandler(AbstractHandler):
         ScheduleHandler schedules the kubernetes job with updated sc4snmp configuration
         """
         record = list(mongo_config_collection.find())[0]
-        if not record["currently_scheduled"] and request["schedule_new_job"]:
+        currently_scheduled = record["currently_scheduled"]
+        if currently_scheduled and not self._is_task_still_scheduled(record.get("task_id")):
+            current_app.logger.info(
+                f"ScheduleHandler: currently_scheduled was True but task_id "
+                f"{record.get('task_id')} is no longer known to any worker; resetting stale state."
+            )
+            mongo_config_collection.update_one({"_id": record["_id"]},
+                                               {"$set": {"currently_scheduled": False, "task_id": None}})
+            currently_scheduled = False
+
+        if not currently_scheduled and request["schedule_new_job"]:
             # If the task isn't currently scheduled, schedule it and update its state in mongo.
             async_result = run_job.apply_async(countdown=request["job_delay"], queue='apply_changes')
             mongo_config_collection.update_one({"_id": record["_id"]},
                                                {"$set": {"currently_scheduled": True, "task_id": async_result.id}})
             current_app.logger.info(
                 f"ScheduleHandler: scheduling new task with the delay of {request['job_delay']} seconds.")
+            currently_scheduled = True
         else:
             current_app.logger.info("ScheduleHandler: new job wasn't scheduled.")
-        return request["job_delay"], record["currently_scheduled"]
+        return request["job_delay"], currently_scheduled
+
+    @staticmethod
+    def _is_task_still_scheduled(task_id):
+        """
+        Check whether task_id is still known to any live Celery worker as a scheduled (ETA)
+        task. Returns False (treat as stale) if there's no task_id, or if no worker reports
+        it - either because it genuinely doesn't exist anymore, or because inspection itself
+        failed (e.g. broker unreachable), which is the same "can't confirm it's alive" case.
+        """
+        if not task_id:
+            return False
+        try:
+            celery_app = current_app.extensions["celery"]
+            scheduled = celery_app.control.inspect().scheduled() or {}
+        except Exception as e:
+            current_app.logger.warning(
+                f"ScheduleHandler: failed to inspect scheduled tasks, treating task_id "
+                f"{task_id} as stale: {e}")
+            return False
+        return any(
+            entry.get("request", {}).get("id") == task_id
+            for worker_tasks in scheduled.values()
+            for entry in worker_tasks
+        )
