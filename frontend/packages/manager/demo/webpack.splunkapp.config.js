@@ -9,4 +9,5 @@ module.exports = webpackMerge(baseConfig, {
         filename: 'demo.js',
     },
     devtool: 'eval-source-map',
+    performance: { hints: false },
 });
