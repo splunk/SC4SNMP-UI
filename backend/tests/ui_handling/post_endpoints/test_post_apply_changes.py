@@ -338,10 +338,74 @@ def test_apply_changes_job_currently_scheduled_job_present_in_namespace(m_find, 
     m_get_job_config.return_value = ("val2", "val1")
     m_create_job.side_effect = ApiException()
 
-    response = client.post("/apply-changes")
+    inspect_mock = Mock()
+    inspect_mock.scheduled.return_value = {"worker1": [{"request": {"id": "test_id"}}]}
+    fake_celery = Mock(control=Mock(inspect=Mock(return_value=inspect_mock)))
+    with mock.patch.dict(client.application.extensions, {"celery": fake_celery}):
+        response = client.post("/apply-changes")
     m_find.assert_has_calls(calls_find)
     m_create_job.assert_has_calls(create_job_calls)
     assert not m_run_job.apply_async.called
+    assert response.json == {"message": "Configuration will be updated in approximately 130 seconds."}
+    delete_generated_files()
+    reset_generated_values()
+
+
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_DIRECTORY", VALUES_TEST_DIRECTORY)
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.TMP_DIR", VALUES_TEST_DIRECTORY)
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.datetime")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.create_job")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.get_job_config")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_apply_changes_stale_currently_scheduled_is_reset_and_rescheduled(m_find, m_update, m_run_job, m_get_job_config, m_create_job, m_datetime, client):
+    """
+    currently_scheduled can get stuck True in mongo if Redis (the Celery broker) was reset
+    independently of this backend process - e.g. only Redis was wiped during an environment
+    rebuild. In that case the recorded task_id is no longer known to any worker, so
+    ScheduleHandler must treat the stuck flag as stale, reset it, and schedule a fresh job
+    instead of leaving apply-changes permanently blocked.
+    """
+    datetime_object_old = datetime.datetime(2020, 7, 10, 10, 27, 10, 0)
+    datetime_object_new = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
+    m_datetime.datetime.utcnow = mock.Mock(return_value=datetime_object_new)
+    collection = {
+        "_id": ObjectId(common_id),
+        "previous_job_start_time": datetime_object_old,
+        "currently_scheduled": True,
+        "task_id": "stale_task_id"
+    }
+    m_find.side_effect = [
+        groups_collection,  # call from SaveConfigToFileHandler
+        profiles_collection,  # call from SaveConfigToFileHandler
+        inventory_collection,  # call from SaveConfigToFileHandler
+        [collection], # call from CheckJobHandler
+        [collection], # call from ScheduleHandler
+    ]
+    create_job_calls = [
+        call("val1", "val2", "sc4snmp")
+    ]
+    m_get_job_config.return_value = ("val2", "val1")
+    m_create_job.side_effect = ApiException()
+
+    apply_async_result = Mock()
+    apply_async_result.id = "new_task_id"
+    m_run_job.apply_async.return_value = apply_async_result
+    m_update.return_value = None
+
+    inspect_mock = Mock()
+    inspect_mock.scheduled.return_value = {}
+    fake_celery = Mock(control=Mock(inspect=Mock(return_value=inspect_mock)))
+    with mock.patch.dict(client.application.extensions, {"celery": fake_celery}):
+        response = client.post("/apply-changes")
+
+    m_create_job.assert_has_calls(create_job_calls)
+    reset_call = call({"_id": ObjectId(common_id)}, {"$set": {"currently_scheduled": False, "task_id": None}})
+    reschedule_call = call({"_id": ObjectId(common_id)}, {"$set": {"currently_scheduled": True, "task_id": "new_task_id"}})
+    assert reset_call in m_update.call_args_list
+    assert reschedule_call in m_update.call_args_list
+    m_run_job.apply_async.assert_called_with(countdown=130, queue='apply_changes')
     assert response.json == {"message": "Configuration will be updated in approximately 130 seconds."}
     delete_generated_files()
     reset_generated_values()

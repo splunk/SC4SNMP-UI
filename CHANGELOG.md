@@ -2,6 +2,7 @@
 
 ### Changed
 - fix button misalignment on multilines in table
+- fix schedules not resuming for unchanged inventory records after Redis/RedBeat is reset while MongoDB data is preserved
 
 ## [1.2.1]
 
