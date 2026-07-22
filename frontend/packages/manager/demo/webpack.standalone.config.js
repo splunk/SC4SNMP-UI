@@ -30,5 +30,6 @@ module.exports = webpackMerge(baseConfig, {
             }
         })
     ],
-    devtool: 'eval-source-map'
+    devtool: 'eval-source-map',
+    performance: { hints: false }
 });
