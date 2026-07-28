@@ -9,6 +9,10 @@ const Pagination = styled.div`
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
+
+    & > button {
+        flex-grow: 0;
+    }
 `;
 
 
