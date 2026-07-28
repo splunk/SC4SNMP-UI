@@ -6,18 +6,9 @@ import Modal from '@splunk/react-ui/Modal';
 const Pagination = styled.div`
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
-
-    & > button{
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    & > button > span > span:nth-child(1){
-        margin-right: 6px;
-        padding: 0;
-    }
 `;
 
 

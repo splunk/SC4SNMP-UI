@@ -151,7 +151,8 @@ function InventoryList() {
                 <Button data-test="sc4snmp:restore-config-button"
                         appearance="secondary"
                         onClick={() => setRestoreOpen(true)}
-                        label="Restore configuration from section files" />
+                        label="Restore configuration from section files"
+                        style={{ fontFamily: "Proxima Nova Sbold" }} />
             </Pagination>
             <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>

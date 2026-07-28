@@ -104,8 +104,10 @@ function Header(){
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
                         <Button data-test="sc4snmp:apply-changes-button" label="Apply changes" onClick={handleApplyChanges}
                                 style={{ fontFamily: "Proxima Nova Sbold" }}/>
-                        <Button data-test="sc4snmp:logout-button" appearance="secondary" label="Logout" onClick={handleLogout}
-                                style={{ fontFamily: "Proxima Nova Sbold", marginLeft: "8px" }}/>
+                        {authCtx.authEnabled && (
+                            <Button data-test="sc4snmp:logout-button" appearance="secondary" label="Logout" onClick={handleLogout}
+                                    style={{ fontFamily: "Proxima Nova Sbold", marginLeft: "8px" }}/>
+                        )}
                     </div>
                 </StyledHeaderRight>
             </StyledHeader>)

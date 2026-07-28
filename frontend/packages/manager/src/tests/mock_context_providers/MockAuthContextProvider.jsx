@@ -5,6 +5,7 @@ const defaultAuthContext = {
     isAuthenticated: false,
     isLoading: false,
     username: "",
+    authEnabled: true,
     login: jest.fn(() => Promise.resolve({ data: { username: "admin" } })),
     logout: jest.fn(() => Promise.resolve()),
     checkAuth: jest.fn(),

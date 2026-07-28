@@ -7,6 +7,7 @@ export function AuthContextProvider(props) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [username, setUsername] = useState("");
+    const [authEnabled, setAuthEnabled] = useState(true);
     const [sessionExpiredMessage, setSessionExpiredMessage] = useState("");
 
     const checkAuth = useCallback(() => {
@@ -15,6 +16,7 @@ export function AuthContextProvider(props) {
             .then((response) => {
                 setIsAuthenticated(true);
                 setUsername(response.data.username || "");
+                setAuthEnabled(response.data.authEnabled !== false);
                 setIsLoading(false);
             })
             .catch(() => {
@@ -75,6 +77,7 @@ export function AuthContextProvider(props) {
         isAuthenticated,
         isLoading,
         username,
+        authEnabled,
         login,
         logout,
         checkAuth,
