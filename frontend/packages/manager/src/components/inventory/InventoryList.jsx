@@ -8,7 +8,6 @@ import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
 import DeleteModal from "../DeleteModal";
-import RestoreModal from "./RestoreModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
 import { Pagination } from '../../styles/inventory/InventoryStyle';
@@ -37,7 +36,6 @@ function InventoryList() {
     const [pageNum, setPageNum] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [devicesPerPage, setDevicesPerPage] = useState("20");
-    const [restoreOpen, setRestoreOpen] = useState(false);
 
     const getFetchInventoryRows = (page) => {
         api.get("/inventory/count")
@@ -115,22 +113,6 @@ function InventoryList() {
         InvCtx.makeInventoryChange();
     };
 
-    const handleRestore = () => {
-        api.post("/load-config")
-            .then(function (response) {
-                ErrCtx.setOpen(true);
-                ErrCtx.setErrorType("info");
-                ErrCtx.setMessage(response.data.message);
-                InvCtx.makeInventoryChange();
-            })
-            .catch(function (error) {
-                ErrCtx.setOpen(true);
-                ErrCtx.setErrorType("error");
-                ErrCtx.setMessage(error.response?.data?.message || "Failed to restore configuration from section files.");
-            });
-        setRestoreOpen(false);
-    };
-
     return (
         <div style={{width: '100%' }}>
             <Pagination>
@@ -148,11 +130,6 @@ function InventoryList() {
                     alwaysShowLastPageLink
                     totalPages={totalPages}
                 />
-                <Button data-test="sc4snmp:restore-config-button"
-                        appearance="secondary"
-                        onClick={() => setRestoreOpen(true)}
-                        label="Restore configuration from section files"
-                        style={{ fontFamily: "Proxima Nova Sbold" }} />
             </Pagination>
             <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>
@@ -187,7 +164,6 @@ function InventoryList() {
             </Table>
             <DeleteModal deleteName={`${InvCtx.address}:${InvCtx.port}`}
                          handleDelete={deleteModalRequest}/>
-            <RestoreModal open={restoreOpen} setOpen={setRestoreOpen} handleRestore={handleRestore} />
         </div>
     );
 }

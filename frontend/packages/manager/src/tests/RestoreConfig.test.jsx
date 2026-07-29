@@ -5,25 +5,33 @@ import {act} from "react-dom/test-utils";
 import api from "../api";
 import {render, screen} from './custom_testing_lib/custom-testing-lib'
 import "@testing-library/jest-dom"
-import InventoryList from "../components/inventory/InventoryList";
+import Header from "../components/menu_header/Header";
 import ErrorsModal from "../components/ErrorsModal";
-import {MockInventoryContextProvider} from "./mock_context_providers/MockInventoryContextProvider";
+import {MockAuthContextProvider} from "./mock_context_providers/MockAuthContextProvider";
 import {MockErrorsContextProvider} from "./mock_context_providers/MockErrorsContextProvider";
-import {ButtonsContextProvider} from "../store/buttons-contx";
+import {MockProfileContextProvider} from "./mock_context_providers/MockProfileContextProvider";
+import {MockGroupContextProvider} from "./mock_context_providers/MockGroupContextProvider";
+import {MockInventoryContextProvider} from "./mock_context_providers/MockInventoryContextProvider";
+import {MenuHeaderContxtProvider} from "../store/menu-header-contxt";
 
-function renderInventoryList(){
-    // InventoryList also renders DeleteModal, which reads ButtonsContext directly
-    // (not exposed through InventoryContext), so the real provider is used here
-    // rather than a mock - it's self-contained and has no external dependencies.
+function renderHeader(){
+    // The Restore button now lives in the Header, which also renders Logout/Add/Apply
+    // changes buttons - so it needs the full provider stack, mirroring HeaderLogout.test.jsx.
     return render(
-        <MockErrorsContextProvider>
-            <ButtonsContextProvider>
-                <MockInventoryContextProvider>
-                    <InventoryList/>
-                    <ErrorsModal/>
-                </MockInventoryContextProvider>
-            </ButtonsContextProvider>
-        </MockErrorsContextProvider>
+        <MockAuthContextProvider>
+            <MockErrorsContextProvider>
+                <MenuHeaderContxtProvider>
+                    <MockProfileContextProvider profileProps={{}}>
+                        <MockGroupContextProvider>
+                            <MockInventoryContextProvider>
+                                <Header/>
+                                <ErrorsModal/>
+                            </MockInventoryContextProvider>
+                        </MockGroupContextProvider>
+                    </MockProfileContextProvider>
+                </MenuHeaderContxtProvider>
+            </MockErrorsContextProvider>
+        </MockAuthContextProvider>
     )
 }
 
@@ -44,18 +52,10 @@ describe("RestoreConfig", () => {
     beforeEach(() => {
         api.get.mockReset();
         api.post.mockReset();
-        // InventoryList issues two sequential gets on mount: total count, then the
-        // current page of rows - mock both so the table has something to render.
-        api.get.mockImplementation((url) => {
-            if (url === "/inventory/count") {
-                return Promise.resolve({data: 0});
-            }
-            return Promise.resolve({data: []});
-        });
     });
 
     it("opens a confirmation dialog when the restore button is clicked", async () => {
-        await act(async () => renderInventoryList());
+        await act(async () => renderHeader());
 
         const restoreButton = screen.getByDataTest("sc4snmp:restore-config-button");
         fireEvent.click(restoreButton);
@@ -65,7 +65,7 @@ describe("RestoreConfig", () => {
     })
 
     it("closes the confirmation dialog without calling the API when cancelled", async () => {
-        await act(async () => renderInventoryList());
+        await act(async () => renderHeader());
 
         const restoreButton = screen.getByDataTest("sc4snmp:restore-config-button");
         fireEvent.click(restoreButton);
@@ -85,7 +85,7 @@ describe("RestoreConfig", () => {
 
     it("calls /load-config and shows the returned message when confirmed", async () => {
         api.post.mockResolvedValueOnce({data: {message: "Configuration was restored from section files."}});
-        await act(async () => renderInventoryList());
+        await act(async () => renderHeader());
 
         const restoreButton = screen.getByDataTest("sc4snmp:restore-config-button");
         fireEvent.click(restoreButton);
@@ -103,7 +103,7 @@ describe("RestoreConfig", () => {
 
     it("shows an error message when /load-config fails", async () => {
         api.post.mockRejectedValueOnce({response: {data: {message: "No section files found in the values directory to restore from."}}});
-        await act(async () => renderInventoryList());
+        await act(async () => renderHeader());
 
         const restoreButton = screen.getByDataTest("sc4snmp:restore-config-button");
         fireEvent.click(restoreButton);
@@ -116,5 +116,13 @@ describe("RestoreConfig", () => {
         });
 
         expect(screen.queryByText("No section files found in the values directory to restore from.")).toBeInTheDocument();
+    })
+
+    it("shows the restore button on all three tabs", async () => {
+        await act(async () => renderHeader());
+
+        // MenuHeaderContxtProvider defaults activeTabId to "Profiles"; the Restore
+        // button must not be gated behind any specific tab.
+        expect(screen.getByDataTest("sc4snmp:restore-config-button")).toBeInTheDocument();
     })
 })
