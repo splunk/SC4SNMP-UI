@@ -20,17 +20,34 @@ function RestoreModal(props) {
                 open={props.open}
                 style={{ width: '600px' }}
             >
-                <Modal.Header title="Restore configuration from section files" onRequestClose={handleRequestClose} />
+                <Modal.Header title="Restore configuration" onRequestClose={handleRequestClose} />
                 <Modal.Body>
-                    <P>Are you sure you want to restore the configuration from the section files on disk?</P>
+                    <P>
+                        Are you sure you want to restore the configuration from the section files on
+                        disk?
+                    </P>
                     <Message appearance="fill" type="warning">
-                        This replaces current Profiles, Groups, and Inventory with the configuration files on disk.
-                        Hosts no longer present in the files will be removed.
+                        This replaces current Profiles, Groups, and Inventory with the 3
+                        configuration files on disk.
+                        Hosts no longer present in the files will be
+                        removed.
+                        Configuration from the values filename will be altered.
                     </Message>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button data-test="sc4snmp:restore-modal:cancel-button" appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="sc4snmp:restore-modal:confirm-button" appearance="primary" onClick={props.handleRestore} label="Restore" />
+                    <Button
+                        data-test="sc4snmp:restore-modal:cancel-button"
+                        appearance="secondary"
+                        elementRef={cancelButtonRef}
+                        onClick={handleRequestClose}
+                        label="Cancel"
+                    />
+                    <Button
+                        data-test="sc4snmp:restore-modal:confirm-button"
+                        appearance="primary"
+                        onClick={props.handleRestore}
+                        label="Restore"
+                    />
                 </Modal.Footer>
             </Modal>
         </div>
