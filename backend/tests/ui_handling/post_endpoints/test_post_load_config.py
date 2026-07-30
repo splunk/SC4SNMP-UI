@@ -104,10 +104,73 @@ def _write_section_files(directory):
 @mock.patch("pymongo.collection.Collection.insert_many")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-@mock.patch("pymongo.MongoClient.start_session")
-def test_load_config_restores_from_section_files(m_session, m_find, m_update, m_insert_many, m_delete_many,
-                                                   m_run_job, m_get_job_config, m_create_job, m_datetime,
+def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many, m_delete_many, m_run_job,
+                                                   m_get_job_config, m_create_job, m_datetime,
                                                    client, tmp_path, monkeypatch):
+    # conftest.py sets MONGODB_MODE=standalone, so this exercises the
+    # non-transactional fallback path (no session threaded through writes).
+    monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
+    monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
+    _write_section_files(tmp_path)
+
+    datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
+    m_datetime.utcnow = mock.Mock(return_value=datetime_object)
+
+    m_find.side_effect = [
+        [],                        # mongo_inventory.find({"delete": False}) - reconciliation read, no existing rows
+        groups_collection_no_id,   # mongo_groups.find() from SaveConfigToFileHandler
+        profiles_collection_no_id, # mongo_profiles.find() from SaveConfigToFileHandler
+        inventory_collection_no_id,  # mongo_inventory.find() from SaveConfigToFileHandler
+        [config_record],           # mongo_config_collection.find() from CheckJobHandler
+        [config_record],           # mongo_config_collection.find() from ScheduleHandler
+    ]
+    m_get_job_config.return_value = ("val2", "val1")
+    m_create_job.return_value = None
+    m_update.return_value = None
+    m_insert_many.return_value = None
+    m_delete_many.return_value = None
+
+    response = client.post("/load-config")
+
+    m_delete_many.assert_has_calls([call({}, session=None), call({}, session=None)])
+    m_insert_many.assert_has_calls([
+        call(groups_collection_no_id, session=None),
+        call(profiles_collection_no_id, session=None),
+    ])
+
+    reconciliation_find_call = call({"delete": False}, session=None)
+    assert reconciliation_find_call in m_find.call_args_list
+
+    upsert_calls = [
+        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True, session=None)
+        for doc in inventory_collection_no_id
+    ]
+    m_update.assert_has_calls(upsert_calls)
+
+    assert response.status_code == 200
+    assert response.json == {
+        "message": "Configuration was restored from section files. It will be updated in approximately 1 seconds."
+    }
+
+
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.VALUES_FILE", "")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.KEEP_TEMP_FILES", "true")
+@mock.patch("datetime.datetime")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.create_job")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.get_job_config")
+@mock.patch("SC4SNMP_UI_backend.apply_changes.handling_chain.run_job")
+@mock.patch("pymongo.collection.Collection.delete_many")
+@mock.patch("pymongo.collection.Collection.insert_many")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+@mock.patch("pymongo.MongoClient.start_session")
+def test_load_config_restores_from_section_files_uses_transaction_in_replication_mode(
+        m_session, m_find, m_update, m_insert_many, m_delete_many, m_run_job,
+        m_get_job_config, m_create_job, m_datetime, client, tmp_path, monkeypatch):
+    # When the deployment is a replica set, the writes must run inside a
+    # Mongo transaction (session threaded through every write) so a
+    # mid-restore failure rolls back instead of leaving partial state.
+    monkeypatch.setenv("MONGODB_MODE", "replication")
     monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
     monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
     _write_section_files(tmp_path)
@@ -165,10 +228,8 @@ def test_load_config_restores_from_section_files(m_session, m_find, m_update, m_
 @mock.patch("pymongo.collection.Collection.insert_many")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-@mock.patch("pymongo.MongoClient.start_session")
-def test_load_config_soft_deletes_hosts_missing_from_files(m_session, m_find, m_update, m_insert_many,
-                                                             m_delete_many, m_run_job, m_get_job_config,
-                                                             m_create_job, m_datetime,
+def test_load_config_soft_deletes_hosts_missing_from_files(m_find, m_update, m_insert_many, m_delete_many, m_run_job,
+                                                             m_get_job_config, m_create_job, m_datetime,
                                                              client, tmp_path, monkeypatch):
     monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
     monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
@@ -176,8 +237,6 @@ def test_load_config_soft_deletes_hosts_missing_from_files(m_session, m_find, m_
 
     datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
     m_datetime.utcnow = mock.Mock(return_value=datetime_object)
-
-    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
 
     orphan_id = ObjectId("635916b2c8cb7a15f28af40b")
     orphan_record = {"_id": orphan_id, "address": "orphan_host", "port": 9999, "delete": False}
@@ -198,12 +257,11 @@ def test_load_config_soft_deletes_hosts_missing_from_files(m_session, m_find, m_
 
     response = client.post("/load-config")
 
-    session = m_session.return_value.__enter__.return_value
-    soft_delete_call = call({"_id": orphan_id}, {"$set": {"delete": True}}, session=session)
+    soft_delete_call = call({"_id": orphan_id}, {"$set": {"delete": True}}, session=None)
     assert soft_delete_call in m_update.call_args_list
 
     upsert_calls = [
-        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True, session=session)
+        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True, session=None)
         for doc in inventory_collection_no_id
     ]
     m_update.assert_has_calls(upsert_calls)

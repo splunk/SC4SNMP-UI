@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, current_app
-from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.apply_changes.apply_changes import ApplyChanges
 from SC4SNMP_UI_backend.apply_changes import handling_chain
@@ -15,6 +14,7 @@ from SC4SNMP_UI_backend.common.file_to_config_utils import (
     profiles_yaml_to_documents,
     inventory_csv_to_documents,
 )
+from SC4SNMP_UI_backend.common.mongo_utils import run_write
 import os
 import traceback
 import yaml
@@ -80,10 +80,9 @@ def _reconcile_inventory(inventory_documents, session=None):
 
 def _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml):
     """
-    Performs all Mongo writes for a restore under the given session so they
-    can be wrapped in a single transaction by the caller (load_config) -
-    mirrors the transactional pattern already used by
-    groups/routes.py::delete_group_and_devices.
+    Performs all Mongo writes for a restore, forwarding session (possibly
+    None) to every write so common.mongo_utils.run_write can commit them
+    atomically when the deployment supports transactions.
     """
     if groups_yaml is not None:
         group_documents = groups_yaml_to_documents(groups_yaml)
@@ -139,9 +138,7 @@ def load_config():
         result = jsonify({"message": "No section files found in the values directory to restore from."})
         return result, 400
 
-    with mongo_client.start_session() as session:
-        with session.start_transaction():
-            _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml)
+    run_write(lambda session: _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml))
 
     changes = ApplyChanges()
     job_delay, currently_scheduled = changes.apply_changes()
