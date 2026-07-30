@@ -55,4 +55,4 @@ def logout():
 def status():
     from flask import g
 
-    return jsonify({"username": g.current_user})
+    return jsonify({"username": g.current_user, "authEnabled": AUTH_ENABLED})

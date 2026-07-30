@@ -6,6 +6,7 @@ from SC4SNMP_UI_backend.common.backend_ui_conversions import GroupConversion, Gr
     get_group_or_profile_name_from_backend
 from copy import copy
 from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
+from SC4SNMP_UI_backend.common.mongo_utils import run_write
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
@@ -74,13 +75,14 @@ def update_group(group_id):
 def delete_group_and_devices(group_id):
     group = list(mongo_groups.find({'_id': ObjectId(group_id)}))[0]
     group_name = get_group_or_profile_name_from_backend(group)
-    configured_in_inventory = False
-    with mongo_client.start_session() as session:
-        with session.start_transaction():
-            mongo_groups.delete_one({'_id': ObjectId(group_id)})
-            if list(mongo_inventory.find({"address": group_name})):
-                configured_in_inventory = True
-            mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}})
+
+    def _delete(session):
+        mongo_groups.delete_one({'_id': ObjectId(group_id)}, session=session)
+        configured = bool(list(mongo_inventory.find({"address": group_name}, session=session)))
+        mongo_inventory.update_one({"address": group_name}, {"$set": {"delete": True}}, session=session)
+        return configured
+
+    configured_in_inventory = run_write(_delete)
     if configured_in_inventory:
         message = f"Group {group_name} was deleted. It was also deleted from the inventory."
     else:

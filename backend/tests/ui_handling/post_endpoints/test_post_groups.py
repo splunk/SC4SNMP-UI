@@ -148,15 +148,15 @@ def test_update_group_record_with_name_existing_in_inventory_as_hostname_failure
 @mock.patch("pymongo.collection.Collection.find")
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.update_one")
-@mock.patch("pymongo.MongoClient.start_session")
-def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client):
+def test_delete_group_and_devices(m_update, m_delete, m_find, client):
+    # conftest.py sets MONGODB_MODE=standalone, so this exercises the
+    # non-transactional fallback path (no session threaded through writes).
     backend_group = {
         "_id": ObjectId(common_id),
         "group_1": [
             {"address": "1.2.3.4"},
         ]
     }
-    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
 
     m_find.side_effect = [
         [backend_group],
@@ -165,7 +165,7 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
 
     calls_find = [
         call({'_id': ObjectId(common_id)}),
-        call({"address": "group_1"})
+        call({"address": "group_1"}, session=None)
     ]
 
     m_delete.return_value = None
@@ -173,8 +173,8 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
 
     response = client.post(f"/groups/delete/{common_id}")
     m_find.assert_has_calls(calls_find)
-    assert m_delete.call_args == call({'_id': ObjectId(common_id)})
-    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
+    assert m_delete.call_args == call({'_id': ObjectId(common_id)}, session=None)
+    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}}, session=None)
     assert response.json == {
         "message": "Group group_1 was deleted."}
 
@@ -185,8 +185,44 @@ def test_delete_group_and_devices(m_session, m_update, m_delete, m_find, client)
 
     response = client.post(f"/groups/delete/{common_id}")
     m_find.assert_has_calls(calls_find)
-    assert m_delete.call_args == call({'_id': ObjectId(common_id)})
-    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}})
+    assert m_delete.call_args == call({'_id': ObjectId(common_id)}, session=None)
+    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}}, session=None)
+    assert response.json == {
+        "message": "Group group_1 was deleted. It was also deleted from the inventory."}
+
+
+@mock.patch("pymongo.collection.Collection.find")
+@mock.patch("pymongo.collection.Collection.delete_one")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.MongoClient.start_session")
+def test_delete_group_and_devices_uses_transaction_in_replication_mode(m_session, m_update, m_delete, m_find,
+                                                                          client, monkeypatch):
+    # When the deployment is a replica set, the writes must run inside a
+    # Mongo transaction (session threaded through every write).
+    monkeypatch.setenv("MONGODB_MODE", "replication")
+
+    backend_group = {
+        "_id": ObjectId(common_id),
+        "group_1": [
+            {"address": "1.2.3.4"},
+        ]
+    }
+    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
+
+    m_find.side_effect = [
+        [backend_group],
+        [{}]
+    ]
+
+    m_delete.return_value = None
+    m_update.return_value = None
+
+    response = client.post(f"/groups/delete/{common_id}")
+
+    session = m_session.return_value.__enter__.return_value
+    assert call({"address": "group_1"}, session=session) in m_find.call_args_list
+    assert m_delete.call_args == call({'_id': ObjectId(common_id)}, session=session)
+    assert m_update.call_args == call({"address": "group_1"}, {"$set": {"delete": True}}, session=session)
     assert response.json == {
         "message": "Group group_1 was deleted. It was also deleted from the inventory."}
 
