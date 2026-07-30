@@ -3,6 +3,7 @@
 ### Changed
 - fix button misalignment on multilines in table
 - fix schedules not resuming for unchanged inventory records after Redis/RedBeat is reset while MongoDB data is preserved
+- fix font flash on page switch by inlining Proxima Nova as WOFF2 instead of loading OTF files on demand
 - add "Restore configuration" button to recover Profiles, Groups, and Inventory from section files on disk when MongoDB data is lost
 - hide Logout button when authentication is disabled
 
