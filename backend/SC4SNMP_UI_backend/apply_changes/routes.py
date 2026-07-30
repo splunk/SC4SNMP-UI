@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, current_app
+from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.apply_changes.apply_changes import ApplyChanges
 from SC4SNMP_UI_backend.apply_changes import handling_chain
@@ -50,7 +51,7 @@ def _load_yaml_section(section_key):
         return yaml.safe_load(file)
 
 
-def _reconcile_inventory(inventory_documents):
+def _reconcile_inventory(inventory_documents, session=None):
     """
     Orphan-safe replace of inventory_ui: hosts/groups no longer present in the
     restored section file are marked delete=True (mirroring the soft-delete
@@ -61,17 +62,45 @@ def _reconcile_inventory(inventory_documents):
     clearing any prior delete=True on rows that reappear.
     """
     parsed_keys = {(doc["address"], doc["port"]) for doc in inventory_documents}
-    existing_records = list(mongo_inventory.find({"delete": False}))
+    existing_records = list(mongo_inventory.find({"delete": False}, session=session))
     for record in existing_records:
         if (record["address"], record["port"]) not in parsed_keys:
-            mongo_inventory.update_one({"_id": record["_id"]}, {"$set": {"delete": True}})
+            mongo_inventory.update_one(
+                {"_id": record["_id"]}, {"$set": {"delete": True}}, session=session
+            )
 
     for doc in inventory_documents:
         mongo_inventory.update_one(
             {"address": doc["address"], "port": doc["port"]},
             {"$set": doc},
             upsert=True,
+            session=session,
         )
+
+
+def _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml):
+    """
+    Performs all Mongo writes for a restore under the given session so they
+    can be wrapped in a single transaction by the caller (load_config) -
+    mirrors the transactional pattern already used by
+    groups/routes.py::delete_group_and_devices.
+    """
+    if groups_yaml is not None:
+        group_documents = groups_yaml_to_documents(groups_yaml)
+        mongo_groups.delete_many({}, session=session)
+        if group_documents:
+            mongo_groups.insert_many(group_documents, session=session)
+
+    if profiles_yaml is not None:
+        profile_documents = profiles_yaml_to_documents(profiles_yaml)
+        mongo_profiles.delete_many({}, session=session)
+        if profile_documents:
+            mongo_profiles.insert_many(profile_documents, session=session)
+
+    if inventory_yaml is not None:
+        inventory_csv = (inventory_yaml or {}).get("inventory", "")
+        inventory_documents = inventory_csv_to_documents(inventory_csv)
+        _reconcile_inventory(inventory_documents, session=session)
 
 
 @apply_changes_blueprint.route("/apply-changes", methods=['POST'])
@@ -110,22 +139,9 @@ def load_config():
         result = jsonify({"message": "No section files found in the values directory to restore from."})
         return result, 400
 
-    if groups_yaml is not None:
-        group_documents = groups_yaml_to_documents(groups_yaml)
-        mongo_groups.delete_many({})
-        if group_documents:
-            mongo_groups.insert_many(group_documents)
-
-    if profiles_yaml is not None:
-        profile_documents = profiles_yaml_to_documents(profiles_yaml)
-        mongo_profiles.delete_many({})
-        if profile_documents:
-            mongo_profiles.insert_many(profile_documents)
-
-    if inventory_yaml is not None:
-        inventory_csv = (inventory_yaml or {}).get("inventory", "")
-        inventory_documents = inventory_csv_to_documents(inventory_csv)
-        _reconcile_inventory(inventory_documents)
+    with mongo_client.start_session() as session:
+        with session.start_transaction():
+            _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml)
 
     changes = ApplyChanges()
     job_delay, currently_scheduled = changes.apply_changes()

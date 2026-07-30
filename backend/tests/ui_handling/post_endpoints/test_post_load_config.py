@@ -2,7 +2,7 @@ import datetime
 import os
 import shutil
 from unittest import mock
-from unittest.mock import call
+from unittest.mock import call, Mock
 
 import pytest
 from bson import ObjectId
@@ -104,8 +104,9 @@ def _write_section_files(directory):
 @mock.patch("pymongo.collection.Collection.insert_many")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many, m_delete_many, m_run_job,
-                                                   m_get_job_config, m_create_job, m_datetime,
+@mock.patch("pymongo.MongoClient.start_session")
+def test_load_config_restores_from_section_files(m_session, m_find, m_update, m_insert_many, m_delete_many,
+                                                   m_run_job, m_get_job_config, m_create_job, m_datetime,
                                                    client, tmp_path, monkeypatch):
     monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
     monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
@@ -113,6 +114,8 @@ def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many
 
     datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
     m_datetime.utcnow = mock.Mock(return_value=datetime_object)
+
+    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
 
     m_find.side_effect = [
         [],                        # mongo_inventory.find({"delete": False}) - reconciliation read, no existing rows
@@ -130,14 +133,18 @@ def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many
 
     response = client.post("/load-config")
 
-    m_delete_many.assert_has_calls([call({}), call({})])
-    m_insert_many.assert_has_calls([call(groups_collection_no_id), call(profiles_collection_no_id)])
+    session = m_session.return_value.__enter__.return_value
+    m_delete_many.assert_has_calls([call({}, session=session), call({}, session=session)])
+    m_insert_many.assert_has_calls([
+        call(groups_collection_no_id, session=session),
+        call(profiles_collection_no_id, session=session),
+    ])
 
-    reconciliation_find_call = call({"delete": False})
+    reconciliation_find_call = call({"delete": False}, session=session)
     assert reconciliation_find_call in m_find.call_args_list
 
     upsert_calls = [
-        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True)
+        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True, session=session)
         for doc in inventory_collection_no_id
     ]
     m_update.assert_has_calls(upsert_calls)
@@ -158,8 +165,10 @@ def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many
 @mock.patch("pymongo.collection.Collection.insert_many")
 @mock.patch("pymongo.collection.Collection.update_one")
 @mock.patch("pymongo.collection.Collection.find")
-def test_load_config_soft_deletes_hosts_missing_from_files(m_find, m_update, m_insert_many, m_delete_many, m_run_job,
-                                                             m_get_job_config, m_create_job, m_datetime,
+@mock.patch("pymongo.MongoClient.start_session")
+def test_load_config_soft_deletes_hosts_missing_from_files(m_session, m_find, m_update, m_insert_many,
+                                                             m_delete_many, m_run_job, m_get_job_config,
+                                                             m_create_job, m_datetime,
                                                              client, tmp_path, monkeypatch):
     monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
     monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
@@ -167,6 +176,8 @@ def test_load_config_soft_deletes_hosts_missing_from_files(m_find, m_update, m_i
 
     datetime_object = datetime.datetime(2020, 7, 10, 10, 30, 0, 0)
     m_datetime.utcnow = mock.Mock(return_value=datetime_object)
+
+    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
 
     orphan_id = ObjectId("635916b2c8cb7a15f28af40b")
     orphan_record = {"_id": orphan_id, "address": "orphan_host", "port": 9999, "delete": False}
@@ -187,11 +198,12 @@ def test_load_config_soft_deletes_hosts_missing_from_files(m_find, m_update, m_i
 
     response = client.post("/load-config")
 
-    soft_delete_call = call({"_id": orphan_id}, {"$set": {"delete": True}})
+    session = m_session.return_value.__enter__.return_value
+    soft_delete_call = call({"_id": orphan_id}, {"$set": {"delete": True}}, session=session)
     assert soft_delete_call in m_update.call_args_list
 
     upsert_calls = [
-        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True)
+        call({"address": doc["address"], "port": doc["port"]}, {"$set": doc}, upsert=True, session=session)
         for doc in inventory_collection_no_id
     ]
     m_update.assert_has_calls(upsert_calls)
