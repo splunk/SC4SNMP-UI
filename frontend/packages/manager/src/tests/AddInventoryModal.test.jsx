@@ -122,13 +122,15 @@ describe("AddInventoryModal", () => {
         expect(screen.queryByText("Walk Interval number must be an integer in range 1800-604800.")).toBeInTheDocument();
     })
 
-    it("Test wrong group name, no port and wrong port", async () => {
+    it("Test wrong host name, no port and wrong port", async () => {
         api.get.mockResolvedValueOnce({data:[]});
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
         const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
         const portInput = screen.getByDataTest("sc4snmp:form:port-input").querySelector("input");
 
+        fireEvent.click(hostButton);
         fireEvent.change(addressInput, {target: {value: "group 1"}})
         fireEvent.change(portInput, {target: {value: ""}})
         fireEvent.click(submitButton);
@@ -139,6 +141,30 @@ describe("AddInventoryModal", () => {
         expect(screen.queryByText("Port number must be an integer in range 1-65535")).toBeInTheDocument();
 
         fireEvent.change(portInput, {target: {value: "65536"}})
+        fireEvent.click(submitButton);
+        expect(screen.queryByText("Port number must be an integer in range 1-65535")).toBeInTheDocument();
+    })
+
+    it("Test port is optional for group records but validated when provided", async () => {
+        api.get.mockResolvedValueOnce({data:[]});
+        api.post.mockResolvedValueOnce({data: "success"});
+        await act( async () => renderModal());
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const groupButton = screen.getByDataTest("sc4snmp:form:inventory-type-group");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const portInput = screen.getByDataTest("sc4snmp:form:port-input").querySelector("input");
+        const communityInput = screen.getByDataTest('sc4snmp:form:community-input').querySelector("input");
+
+        fireEvent.click(groupButton);
+        fireEvent.change(addressInput, {target: {value: "group1"}})
+        fireEvent.change(communityInput, {target: {value: "public"}})
+        fireEvent.change(portInput, {target: {value: ""}})
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Port number must be specified")).not.toBeInTheDocument();
+        expect(api.post).toHaveBeenCalledWith("/inventory/add", expect.objectContaining({port: ""}));
+
+        fireEvent.change(portInput, {target: {value: "70000"}})
         fireEvent.click(submitButton);
         expect(screen.queryByText("Port number must be an integer in range 1-65535")).toBeInTheDocument();
     })

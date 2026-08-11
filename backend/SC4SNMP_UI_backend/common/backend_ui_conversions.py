@@ -270,7 +270,7 @@ class InventoryConversion(Conversion):
                     profiles += ";"
             result = {
                 'address': document['address'],
-                'port': int(document['port']),
+                'port': int(document['port']) if str(document.get('port', "")).strip() else 161,
                 'version': document['version'],
                 'community': document['community'],
                 'secret': document['secret'],
