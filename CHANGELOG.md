@@ -7,6 +7,7 @@
 - add "Restore configuration" button to recover Profiles, Groups, and Inventory from section files on disk when MongoDB data is lost
 - hide Logout button when authentication is disabled
 - fix port being required when adding a Group inventory record
+- fix Groups tab freezing for large device counts by paginating the group list and batching inventory-membership lookups
 
 ## [1.2.1]
 
