@@ -6,6 +6,7 @@
 - fix font flash on page switch by inlining Proxima Nova as WOFF2 instead of loading OTF files on demand
 - add "Restore configuration" button to recover Profiles, Groups, and Inventory from section files on disk when MongoDB data is lost
 - hide Logout button when authentication is disabled
+- fix port being required when adding a Group inventory record
 
 ## [1.2.1]
 

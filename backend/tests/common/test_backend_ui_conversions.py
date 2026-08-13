@@ -335,3 +335,22 @@ class TestConversions(TestCase):
         self.assertDictEqual(inventory_conversion.ui2backend(self.ui_inventory_2, delete=True), back_inv)
 
         self.assertRaises(ValueError, inventory_conversion.ui2backend, self.ui_inventory_1)
+
+    def test_inventory_ui_to_backend_empty_port_defaults_to_161(self):
+        ui_inventory_group_no_port = dict(self.ui_inventory_2)
+        ui_inventory_group_no_port["port"] = ""
+
+        expected = {
+            "address": "group_1",
+            "port": 161,
+            "version": "2c",
+            "community": "public",
+            "secret": "",
+            "walk_interval": 1900,
+            "security_engine": "",
+            "profiles": "prof3",
+            "smart_profiles": True,
+            "delete": True
+        }
+
+        self.assertDictEqual(inventory_conversion.ui2backend(ui_inventory_group_no_port, delete=True), expected)

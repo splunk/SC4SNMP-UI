@@ -52,7 +52,8 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate port
     if ("port" in validationObj){
-        if (!("inGroupConfig" in validationObj) && validationObj.port.length === 0){
+        const portOptional = "inGroupConfig" in validationObj || validationObj.inventoryType === "Group";
+        if (!portOptional && validationObj.port.length === 0){
             isValid = false;
             errors.port.push("Port number must be specified");
         }else if (validationObj.port.length > 0){

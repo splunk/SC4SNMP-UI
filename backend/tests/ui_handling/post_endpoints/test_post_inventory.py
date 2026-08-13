@@ -663,6 +663,47 @@ def test_add_group_success(m_find, m_insert, m_delete, client):
 @mock.patch("pymongo.collection.Collection.delete_one")
 @mock.patch("pymongo.collection.Collection.insert_one")
 @mock.patch("pymongo.collection.Collection.find")
+def test_add_group_with_empty_port_defaults_to_161(m_find, m_insert, m_delete, client):
+    # A Group-type inventory record can be submitted with no port at all (the UI no
+    # longer requires it); the backend should treat it as 161, same as SC4SNMP core does.
+    m_insert.return_value = None
+    m_delete.return_value = None
+
+    new_group_ui_no_port = dict(new_group_ui_inventory())
+    new_group_ui_no_port["port"] = ""
+
+    m_find.side_effect = [
+        [],  # call from HandleNewDevice.add_group_to_inventory
+        [],  # call from HandleNewDevice.add_group_to_inventory
+        [new_group_backend()],  # call from HandleNewDevice.add_group_to_inventory
+        [],  # call from HandleNewDevice._is_host_configured
+        [],  # call from HandleNewDevice._is_host_configured
+        [existing_group_inventory_backend()],  # call from HandleNewDevice._is_host_in_group
+        [existing_group_backend()],  # call from HandleNewDevice._is_host_in_group
+        [],  # call from HandleNewDevice.add_single_host
+    ]
+
+    calls_find = [
+        call({'address': "group_1", "delete": False}),  # call from HandleNewDevice.add_group_to_inventory
+        call({'address': "group_1", "delete": True}),  # call from HandleNewDevice.add_group_to_inventory
+        call({'group_1': {"$exists": 1}}),  # call from HandleNewDevice.add_group_to_inventory
+        call({'address': "1.2.3.4", 'port': 161, "delete": False}),  # call from HandleNewDevice._is_host_configured
+        call({'address': "1.2.3.4", 'port': 161, "delete": True}),  # call from HandleNewDevice._is_host_configured
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),  # call from HandleNewDevice._is_host_in_group
+        call({"group_2": {"$exists": 1}}),  # call from HandleNewDevice._is_host_in_group
+        call({'1.2.3.4': {"$exists": True}}),  # call from HandleNewDevice.add_single_host
+    ]
+
+    response = client.post(f"/inventory/add", json=new_group_ui_no_port)
+    m_find.assert_has_calls(calls_find)
+    assert m_insert.call_args == call(new_group_backend_inventory())  # stored port is 161
+    assert not m_delete.called
+    assert response.json == "success"
+
+
+@mock.patch("pymongo.collection.Collection.delete_one")
+@mock.patch("pymongo.collection.Collection.insert_one")
+@mock.patch("pymongo.collection.Collection.find")
 def test_add_group_which_exists_failure(m_find, m_insert, m_delete, client):
     m_insert.return_value = None
     m_delete.return_value = None
