@@ -75,6 +75,17 @@ const GroupDevices = styled.div`
     width: 100%;
 `;
 
+const GroupsPagination = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    box-shadow: inset 0px -1px 0px #C3CBD4;
+`;
+
 const Pagination = styled.div`
     width: 100%;
     display: flex;
@@ -97,4 +108,4 @@ const Pagination = styled.div`
     }
 `;
 
-export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices, Pagination };
+export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices, Pagination, GroupsPagination };

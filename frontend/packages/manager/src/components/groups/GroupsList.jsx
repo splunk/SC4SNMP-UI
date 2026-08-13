@@ -15,7 +15,7 @@ import ErrorsModalContext from "../../store/errors-modal-contxt";
 import AddDeviceModal from "./AddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
-    SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
+    SingleGroup, GroupDevices, Pagination, GroupsPagination } from "../../styles/groups/GroupsStyle";
 import { RowActions } from "../../styles/common/ListStyles";
 
 
@@ -41,32 +41,53 @@ function GroupsList() {
     const [pageNum, setPageNum] = useState(1);
     const [devicesPerPage, setDevicesPerPage] = useState('20');
 
+    // Pagination for the group list itself (distinct from the device list paging above) -
+    // without it, every group is fetched and rendered at once, which is what makes the tab
+    // freeze once a customer has hundreds/thousands of groups.
+    const [groupsPageNum, setGroupsPageNum] = useState(1);
+    const [groupsTotalPages, setGroupsTotalPages] = useState(1);
+    const groupsPerPage = '50';
+
+    const getFetchGroups = (page) => {
+        api.get("/groups/count")
+            .then((response) => {
+                let maxPages = Math.ceil(response.data/Number(groupsPerPage));
+                if (maxPages === 0) {maxPages = 1;}
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                api.get(`/groups/${page}/${groupsPerPage}`)
+                    .then((response2) => {
+                        setGroups(response2.data);
+                        setGroupsPageNum(page);
+                        setGroupsTotalPages(maxPages);
+                        const existingGroups = [];
+                        const selected = {};
+                        for (const group of response2.data){
+                            // eslint-disable-next-line no-underscore-dangle
+                            selected[group._id] = false;
+                            GrCtx.setDevices([]);
+                            // eslint-disable-next-line no-underscore-dangle
+                            existingGroups.push(group._id);
+                        }
+                        // If page was reloaded after updating one of devices, open tab of that group
+                        if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
+                            selectGroup(GrCtx.editedGroupId, GrCtx.groupName, pageNum);
+                        }else{
+                            setSelectedGroup(selected);
+                        }
+                    });
+            });
+    };
+
     useEffect(() => {
-        let isMounted = true;
-        api.get("/groups")
-        .then((response) => {
-            if (isMounted){
-                setGroups(response.data);
-                const existingGroups = [];
-                const selected = {};
-                for (const group of response.data){
-                    // eslint-disable-next-line no-underscore-dangle
-                    selected[group._id] = false;
-                    GrCtx.setDevices([]);
-                    // eslint-disable-next-line no-underscore-dangle
-                    existingGroups.push(group._id);
-                }
-                // If page was reloaded after updating one of devices, open tab of that group
-                if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
-                    selectGroup(GrCtx.editedGroupId, GrCtx.groupName, pageNum);
-                }else{
-                    setSelectedGroup(selected);
-                }
-            }
-        });
+        getFetchGroups(groupsPageNum);
         GrCtx.setEditedGroupId(null);
-        return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
+
+    const groupsPaginationHandler = (event, { page }) => {
+        getFetchGroups(page);
+    };
 
     useEffect(() => {
         setPageNum(1);
@@ -225,7 +246,7 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={group._id}>
             <P title={group.groupName} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
@@ -247,6 +268,15 @@ function GroupsList() {
                         <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
                     </div>
                 </GroupsNamesHeader>
+                <GroupsPagination>
+                    <Paginator
+                        data-test="sc4snmp:groups-pagination"
+                        onChange={groupsPaginationHandler}
+                        current={groupsPageNum}
+                        alwaysShowLastPageLink
+                        totalPages={groupsTotalPages}
+                    />
+                </GroupsPagination>
                 {groupsList}
             </GroupsNames>
             <GroupDevices>

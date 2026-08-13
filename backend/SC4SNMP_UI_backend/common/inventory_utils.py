@@ -2,7 +2,7 @@ from SC4SNMP_UI_backend import mongo_client
 from enum import Enum
 from typing import Callable
 from bson import ObjectId
-from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
+from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion, get_group_or_profile_name_from_backend
 
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
@@ -18,6 +18,19 @@ def get_inventory_type(document):
     else:
         result = "Host"
     return result
+
+def get_inventory_types_bulk(records):
+    """
+    Resolve Host/Group type for a page of inventory records with a single groups_ui
+    query instead of one per-record query (see get_inventory_type). Returns a dict
+    mapping each record's address to "Group" or "Host".
+    """
+    addresses = [record["address"] for record in records]
+    if not addresses:
+        return {}
+    matched_groups = mongo_groups.find({"$or": [{address: {"$exists": True}} for address in addresses]})
+    matched_names = {get_group_or_profile_name_from_backend(group) for group in matched_groups}
+    return {address: ("Group" if address in matched_names else "Host") for address in addresses}
 
 def update_profiles_in_inventory(profile_to_search: str, process_record: Callable, **kwargs):
     """
