@@ -56,7 +56,7 @@ describe("GroupsList pagination", () => {
         await sleep(5);
 
         expect(api.get).toHaveBeenNthCalledWith(1, "/groups/count");
-        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/50");
+        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/20");
         expect(screen.queryByText("group1")).toBeInTheDocument();
         expect(screen.queryByText("group2")).toBeInTheDocument();
     })
@@ -71,7 +71,7 @@ describe("GroupsList pagination", () => {
         await sleep(5);
 
         expect(api.get).toHaveBeenCalledTimes(2);
-        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/50");
+        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/20");
     })
 
     it("requests the next page of groups when the paginator is used", async () => {
@@ -92,7 +92,7 @@ describe("GroupsList pagination", () => {
         });
 
         expect(api.get).toHaveBeenNthCalledWith(3, "/groups/count");
-        expect(api.get).toHaveBeenNthCalledWith(4, "/groups/2/50");
+        expect(api.get).toHaveBeenNthCalledWith(4, "/groups/2/20");
         expect(screen.queryByText("group2")).toBeInTheDocument();
         expect(screen.queryByText("group1")).not.toBeInTheDocument();
     })
@@ -105,7 +105,7 @@ describe("GroupsList pagination", () => {
         await act(async () => renderGroupsList());
         await sleep(5);
 
-        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/50");
+        expect(api.get).toHaveBeenNthCalledWith(2, "/groups/1/20");
         expect(screen.queryByText("group1")).not.toBeInTheDocument();
     })
 })

@@ -7,7 +7,6 @@ import Pencil from '@splunk/react-icons/Pencil';
 import Paginator from '@splunk/react-ui/Paginator';
 import Button from '@splunk/react-ui/Button';
 import Table from "@splunk/react-ui/Table";
-import { createDOMID } from '@splunk/ui-utils/id';
 import api from "../../api";
 import ButtonsContext from "../../store/buttons-contx";
 import GroupContext from "../../store/group-contxt";
@@ -46,7 +45,7 @@ function GroupsList() {
     // freeze once a customer has hundreds/thousands of groups.
     const [groupsPageNum, setGroupsPageNum] = useState(1);
     const [groupsTotalPages, setGroupsTotalPages] = useState(1);
-    const groupsPerPage = '50';
+    const groupsPerPage = '20';
 
     const getFetchGroups = (page) => {
         api.get("/groups/count")
@@ -140,6 +139,36 @@ function GroupsList() {
             }
             return {...prev, ...selected}}
         );
+        // The inventory lookup only depends on groupName, not on the device list below -
+        // fire it in parallel with the devices count/page chain instead of chaining it
+        // after, so its latency doesn't stack on top of theirs.
+        let inventoryRecord = {
+                        port: "",
+                        version: "",
+                        community: "",
+                        secret: "",
+                        securityEngine: ""
+                    };
+        api.get(`/group/inventory/${groupName}`)
+            .then((response3) => {
+                if (response3.status === 200){
+                    inventoryRecord = response3.data;
+                    Object.keys(inventoryRecord).forEach((key) => {
+                        if (`${inventoryRecord[key]}`.length > 0){
+                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
+                        }else{
+                            inventoryRecord[key] = "";
+                        }
+                    })
+                    GrCtx.setInventoryConfig(inventoryRecord);
+                }else{
+                    GrCtx.setInventoryConfig(inventoryRecord);
+                }
+            })
+            .catch(() => {
+                GrCtx.setInventoryConfig(inventoryRecord);
+            })
+
         // If the last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
@@ -155,32 +184,6 @@ function GroupsList() {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
                         setTotalPages(maxPages);
-                        let inventoryRecord = {
-                                        port: "",
-                                        version: "",
-                                        community: "",
-                                        secret: "",
-                                        securityEngine: ""
-                                    };
-                        api.get(`/group/inventory/${groupName}`)
-                            .then((response3) => {
-                                if (response3.status === 200){
-                                    inventoryRecord = response3.data;
-                                    Object.keys(inventoryRecord).forEach((key) => {
-                                        if (`${inventoryRecord[key]}`.length > 0){
-                                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
-                                        }else{
-                                            inventoryRecord[key] = "";
-                                        }
-                                    })
-                                    GrCtx.setInventoryConfig(inventoryRecord);
-                                }else{
-                                    GrCtx.setInventoryConfig(inventoryRecord);
-                                }
-                            })
-                            .catch(() => {
-                                GrCtx.setInventoryConfig(inventoryRecord);
-                            })
                     })
             });
     }
@@ -246,7 +249,7 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={group._id}>
+        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFFF" }} key={group._id}>
             <P title={group.groupName} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
@@ -300,7 +303,7 @@ function GroupsList() {
                     <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
-                                <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
+                                <Table.HeadCell key={headData.sortKey} width={headData.label === "Actions" ? 100 : "auto"}>
                                     {headData.label}
                                 </Table.HeadCell>
                             ))}
@@ -308,7 +311,7 @@ function GroupsList() {
                         <Table.Body>
                             {GrCtx.devices
                                 .map((row) => (
-                                    <Table.Row data-test="sc4snmp:group-row" key={createDOMID()} >
+                                    <Table.Row data-test="sc4snmp:group-row" key={row._id} >
                                         <Table.Cell data-test="sc4snmp:host-address" >{row.address}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-port" >{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-version" >{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>
