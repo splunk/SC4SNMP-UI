@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "1.2.3-beta.6"
+__version__ = "1.2.3-beta.7"
 
 MONGO_URI = os.getenv("MONGO_URI")
 log = logging.getLogger('gunicorn.error')
