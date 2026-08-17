@@ -132,10 +132,11 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
     group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
 
     group_name = get_group_or_profile_name_from_backend(group)
-    devices_list = []
-    for i, device in enumerate(group[group_name]):
-        devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
-    devices_list = devices_list[skips:skips+dev_per_page]
+    # Slice to the requested page before converting, so backend2ui only runs on the
+    # devices actually returned instead of the whole group's device array every time.
+    page_devices = list(enumerate(group[group_name]))[skips:skips+dev_per_page]
+    devices_list = [group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i))
+                     for i, device in page_devices]
     return jsonify(devices_list)
 
 
