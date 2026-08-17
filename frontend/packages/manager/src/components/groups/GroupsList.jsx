@@ -7,7 +7,6 @@ import Pencil from '@splunk/react-icons/Pencil';
 import Paginator from '@splunk/react-ui/Paginator';
 import Button from '@splunk/react-ui/Button';
 import Table from "@splunk/react-ui/Table";
-import { createDOMID } from '@splunk/ui-utils/id';
 import api from "../../api";
 import ButtonsContext from "../../store/buttons-contx";
 import GroupContext from "../../store/group-contxt";
@@ -15,7 +14,7 @@ import ErrorsModalContext from "../../store/errors-modal-contxt";
 import AddDeviceModal from "./AddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
-    SingleGroup, GroupDevices, Pagination } from "../../styles/groups/GroupsStyle";
+    SingleGroup, GroupDevices, Pagination, GroupsPagination } from "../../styles/groups/GroupsStyle";
 import { RowActions } from "../../styles/common/ListStyles";
 
 
@@ -41,32 +40,53 @@ function GroupsList() {
     const [pageNum, setPageNum] = useState(1);
     const [devicesPerPage, setDevicesPerPage] = useState('20');
 
+    // Pagination for the group list itself (distinct from the device list paging above) -
+    // without it, every group is fetched and rendered at once, which is what makes the tab
+    // freeze once a customer has hundreds/thousands of groups.
+    const [groupsPageNum, setGroupsPageNum] = useState(1);
+    const [groupsTotalPages, setGroupsTotalPages] = useState(1);
+    const groupsPerPage = '20';
+
+    const getFetchGroups = (page) => {
+        api.get("/groups/count")
+            .then((response) => {
+                let maxPages = Math.ceil(response.data/Number(groupsPerPage));
+                if (maxPages === 0) {maxPages = 1;}
+                if (page > maxPages){
+                    page = maxPages;
+                };
+                api.get(`/groups/${page}/${groupsPerPage}`)
+                    .then((response2) => {
+                        setGroups(response2.data);
+                        setGroupsPageNum(page);
+                        setGroupsTotalPages(maxPages);
+                        const existingGroups = [];
+                        const selected = {};
+                        for (const group of response2.data){
+                            // eslint-disable-next-line no-underscore-dangle
+                            selected[group._id] = false;
+                            GrCtx.setDevices([]);
+                            // eslint-disable-next-line no-underscore-dangle
+                            existingGroups.push(group._id);
+                        }
+                        // If page was reloaded after updating one of devices, open tab of that group
+                        if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
+                            selectGroup(GrCtx.editedGroupId, GrCtx.groupName, pageNum);
+                        }else{
+                            setSelectedGroup(selected);
+                        }
+                    });
+            });
+    };
+
     useEffect(() => {
-        let isMounted = true;
-        api.get("/groups")
-        .then((response) => {
-            if (isMounted){
-                setGroups(response.data);
-                const existingGroups = [];
-                const selected = {};
-                for (const group of response.data){
-                    // eslint-disable-next-line no-underscore-dangle
-                    selected[group._id] = false;
-                    GrCtx.setDevices([]);
-                    // eslint-disable-next-line no-underscore-dangle
-                    existingGroups.push(group._id);
-                }
-                // If page was reloaded after updating one of devices, open tab of that group
-                if (GrCtx.editedGroupId && existingGroups.includes(GrCtx.editedGroupId)){
-                    selectGroup(GrCtx.editedGroupId, GrCtx.groupName, pageNum);
-                }else{
-                    setSelectedGroup(selected);
-                }
-            }
-        });
+        getFetchGroups(groupsPageNum);
         GrCtx.setEditedGroupId(null);
-        return () => { isMounted = false }
     }, [GrCtx.groupsChange]);
+
+    const groupsPaginationHandler = (event, { page }) => {
+        getFetchGroups(page);
+    };
 
     useEffect(() => {
         setPageNum(1);
@@ -119,6 +139,36 @@ function GroupsList() {
             }
             return {...prev, ...selected}}
         );
+        // The inventory lookup only depends on groupName, not on the device list below -
+        // fire it in parallel with the devices count/page chain instead of chaining it
+        // after, so its latency doesn't stack on top of theirs.
+        let inventoryRecord = {
+                        port: "",
+                        version: "",
+                        community: "",
+                        secret: "",
+                        securityEngine: ""
+                    };
+        api.get(`/group/inventory/${groupName}`)
+            .then((response3) => {
+                if (response3.status === 200){
+                    inventoryRecord = response3.data;
+                    Object.keys(inventoryRecord).forEach((key) => {
+                        if (`${inventoryRecord[key]}`.length > 0){
+                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
+                        }else{
+                            inventoryRecord[key] = "";
+                        }
+                    })
+                    GrCtx.setInventoryConfig(inventoryRecord);
+                }else{
+                    GrCtx.setInventoryConfig(inventoryRecord);
+                }
+            })
+            .catch(() => {
+                GrCtx.setInventoryConfig(inventoryRecord);
+            })
+
         // If the last item from the current page was deleted, page variable
         // must be decreased. To do this first we calculate current number
         // of pages and then we load devices for this page.
@@ -134,32 +184,6 @@ function GroupsList() {
                         GrCtx.setDevices(response2.data);
                         setPageNum(page);
                         setTotalPages(maxPages);
-                        let inventoryRecord = {
-                                        port: "",
-                                        version: "",
-                                        community: "",
-                                        secret: "",
-                                        securityEngine: ""
-                                    };
-                        api.get(`/group/inventory/${groupName}`)
-                            .then((response3) => {
-                                if (response3.status === 200){
-                                    inventoryRecord = response3.data;
-                                    Object.keys(inventoryRecord).forEach((key) => {
-                                        if (`${inventoryRecord[key]}`.length > 0){
-                                            inventoryRecord[key] = `${inventoryRecord[key]} (from inventory)`;
-                                        }else{
-                                            inventoryRecord[key] = "";
-                                        }
-                                    })
-                                    GrCtx.setInventoryConfig(inventoryRecord);
-                                }else{
-                                    GrCtx.setInventoryConfig(inventoryRecord);
-                                }
-                            })
-                            .catch(() => {
-                                GrCtx.setInventoryConfig(inventoryRecord);
-                            })
                     })
             });
     }
@@ -225,7 +249,7 @@ function GroupsList() {
     };
 
     const groupsList = groups.map((group) => (
-        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFF" }} key={createDOMID()}>
+        <SingleGroup data-test="sc4snmp:group" onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))} style={{ backgroundColor: (selectedGroup[group._id]) ? "#E1E6EB" : "#FFFFFF" }} key={group._id}>
             <P title={group.groupName} onClick={(event) => (clickGroupHandler(event, group._id, group.groupName, 1))}>
                 {group.groupName}
             </P>
@@ -247,6 +271,15 @@ function GroupsList() {
                         <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
                     </div>
                 </GroupsNamesHeader>
+                <GroupsPagination>
+                    <Paginator
+                        data-test="sc4snmp:groups-pagination"
+                        onChange={groupsPaginationHandler}
+                        current={groupsPageNum}
+                        alwaysShowLastPageLink
+                        totalPages={groupsTotalPages}
+                    />
+                </GroupsPagination>
                 {groupsList}
             </GroupsNames>
             <GroupDevices>
@@ -270,7 +303,7 @@ function GroupsList() {
                     <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
-                                <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
+                                <Table.HeadCell key={headData.sortKey} width={headData.label === "Actions" ? 100 : "auto"}>
                                     {headData.label}
                                 </Table.HeadCell>
                             ))}
@@ -278,7 +311,7 @@ function GroupsList() {
                         <Table.Body>
                             {GrCtx.devices
                                 .map((row) => (
-                                    <Table.Row data-test="sc4snmp:group-row" key={createDOMID()} >
+                                    <Table.Row data-test="sc4snmp:group-row" key={row._id} >
                                         <Table.Cell data-test="sc4snmp:host-address" >{row.address}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-port" >{(row.port === '') ? GrCtx.inventoryConfig.port : row.port}</Table.Cell>
                                         <Table.Cell data-test="sc4snmp:host-version" >{(row.version === '') ? GrCtx.inventoryConfig.version  : row.version}</Table.Cell>

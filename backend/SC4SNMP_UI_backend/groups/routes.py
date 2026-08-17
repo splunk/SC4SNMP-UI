@@ -16,14 +16,38 @@ inventory_conversion = InventoryConversion()
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 
-@groups_blueprint.route('/groups')
+@groups_blueprint.route('/groups/count')
 @login_required
-def get_groups_list():
-    groups = mongo_groups.find()
+def get_groups_count():
+    total_count = mongo_groups.count_documents({})
+    return jsonify(total_count)
+
+
+@groups_blueprint.route('/groups/<page_num>/<groups_per_page>')
+@login_required
+def get_groups_list(page_num, groups_per_page):
+    page_num = int(page_num)
+    groups_per_page = int(groups_per_page)
+    skips = groups_per_page * (page_num - 1)
+
+    # Sorting by _id keeps skip/limit deterministic across refetches (group name is a
+    # dynamic top-level key, so it can't be sorted on directly); _id order matches the
+    # existing insertion-order behavior.
+    page_groups = list(mongo_groups.find().sort("_id", 1).skip(skips).limit(groups_per_page))
+
+    group_names = [get_group_or_profile_name_from_backend(gr) for gr in page_groups]
+    # Single batched lookup instead of one query per group: fetch every non-deleted
+    # inventory address used by this page's groups, then check membership in memory.
+    in_inventory = set()
+    if group_names:
+        in_inventory = {
+            doc["address"] for doc in
+            mongo_inventory.find({"address": {"$in": group_names}, "delete": False}, {"address": 1, "_id": 0})
+        }
+
     groups_list = []
-    for gr in list(groups):
-        group_name = get_group_or_profile_name_from_backend(gr)
-        group_in_inventory = True if list(mongo_inventory.find({"address": group_name, "delete": False})) else False
+    for gr, group_name in zip(page_groups, group_names):
+        group_in_inventory = group_name in in_inventory
         groups_list.append(group_conversion.backend2ui(gr, group_in_inventory=group_in_inventory))
     return jsonify(groups_list)
 

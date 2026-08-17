@@ -3,7 +3,7 @@ from flask import request, Blueprint, jsonify
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
-from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
+from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type, get_inventory_types_bulk
 
 inventory_blueprint = Blueprint('inventory_blueprint', __name__)
 
@@ -19,9 +19,11 @@ def get_inventory_list(page_num, dev_per_page):
     skips = dev_per_page * (page_num - 1)
 
     inventory = list(mongo_inventory.find({"delete": False}).skip(skips).limit(dev_per_page))
+    # One batched groups_ui lookup for the whole page instead of one query per row.
+    inventory_types = get_inventory_types_bulk(inventory)
     inventory_list = []
     for inv in inventory:
-        inventory_type = get_inventory_type(inv)
+        inventory_type = inventory_types[inv["address"]]
         inventory_list.append(inventory_conversion.backend2ui(inv, inventory_type=inventory_type))
     return jsonify(inventory_list)
 
