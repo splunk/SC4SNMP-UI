@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Callable
 from bson import ObjectId
 from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion, get_group_or_profile_name_from_backend
+from SC4SNMP_UI_backend.common.mongo_utils import run_write
 
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
@@ -183,6 +184,80 @@ class HandleNewDevice:
             new_values = {"$set": group}
             self._mongo_groups.update_one({"_id": group_id}, new_values)
         return host_added, message
+
+    def add_group_hosts_bulk(self, group_name: str, group_id: ObjectId, device_objects: list):
+        """
+        Adds multiple devices to a group in a single atomic write, instead of looping
+        add_group_host per device (which would mean N reads + N writes with no
+        atomicity). Reuses the same uniqueness rules as add_group_host - global
+        uniqueness across the whole inventory when the group is activated in the
+        inventory, group-local uniqueness otherwise - plus dedup within the submitted
+        batch itself, since the DB-based checks can't see sibling rows in the same
+        request.
+
+        :param group_name: name of the group (dynamic dict key in the group document)
+        :param group_id: ObjectId of the group document
+        :param device_objects: backend-shaped device dicts (already run through
+            GroupDeviceConversion.ui2backend), in submission order
+        :return: list of dicts, one per device_object in the same order:
+            {"address": str, "port": int|None, "added": bool, "message": str|None}
+        """
+        group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
+        group = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}))
+        group = group[0]
+        in_inventory = len(group_from_inventory) > 0
+
+        seen_in_batch = set()
+        accepted = []
+        results = []
+
+        for device_object in device_objects:
+            address = device_object["address"]
+            port = str(device_object.get("port", ""))
+
+            if in_inventory:
+                device_port = port if len(port) > 0 else str(group_from_inventory[0]["port"])
+                batch_key = f"{address}:{device_port}"
+                if batch_key in seen_in_batch:
+                    host_added, message = False, \
+                        f"Host {address}:{device_port} already exists in the submitted batch. Record was not added."
+                else:
+                    host_added, message = self.add_single_host(address, device_port, add=False)
+            else:
+                new_device_port = int(port) if len(port) > 0 else -1
+                batch_key = f"{address}:{new_device_port}"
+                if batch_key in seen_in_batch:
+                    host_added, message = False, \
+                        f"Host {address}:{port} already exists in the submitted batch. Record was not added."
+                else:
+                    host_added, message = True, None
+                    for existing_device in group[group_name]:
+                        old_device_port = existing_device.get('port', -1)
+                        if existing_device["address"] == address and old_device_port == new_device_port:
+                            host_added = False
+                            message = f"Host {address}:{port} already exists in group {group_name}. Record was not added."
+                            break
+
+            if host_added:
+                seen_in_batch.add(batch_key)
+                accepted.append(device_object)
+
+            results.append({
+                "address": address,
+                "port": device_object.get("port"),
+                "added": host_added,
+                "message": message,
+            })
+
+        if accepted:
+            def _write(session):
+                grp = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}, session=session))[0]
+                grp[group_name].extend(accepted)
+                self._mongo_groups.update_one({"_id": group_id}, {"$set": grp}, session=session)
+
+            run_write(_write)
+
+        return results
 
     def edit_group_host(self, group_name: str, group_id: ObjectId, device_id: str, device_object: dict):
         group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
