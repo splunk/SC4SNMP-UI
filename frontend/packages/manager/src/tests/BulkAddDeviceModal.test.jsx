@@ -7,7 +7,7 @@ import {render, screen} from "./custom_testing_lib/custom-testing-lib";
 import {MockGroupContextProvider} from "./mock_context_providers/MockGroupContextProvider";
 import {MockErrorsContextProvider} from "./mock_context_providers/MockErrorsContextProvider";
 import ErrorsModal from "../components/ErrorsModal";
-import BulkAddDeviceModal from "../components/groups/BulkAddDeviceModal";
+import BulkAddDeviceModal, {parseAddressList, expandAddresses} from "../components/groups/BulkAddDeviceModal";
 
 function renderModal(){
     return render(
@@ -155,5 +155,104 @@ describe("BulkAddDeviceModal", () => {
         });
 
         expect(screen.queryByText("Group with id 1 was not found.")).toBeInTheDocument();
+    })
+
+    it("expands a pasted address list with the shared config into the preview grid", () => {
+        renderModal();
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-paste"));
+
+        const portInput = screen.getByDataTest("sc4snmp:bulk:shared-port-input").querySelector("input");
+        const communityInput = screen.getByDataTest("sc4snmp:bulk:shared-community-input").querySelector("input");
+        const pasteInput = screen.getByDataTest("sc4snmp:bulk:paste-input").querySelector('textarea[data-test="textbox"]');
+
+        fireEvent.change(portInput, {target: {value: "161"}})
+        fireEvent.change(communityInput, {target: {value: "public"}})
+        // Blank line, a comment line, and a duplicate should all be dropped by expandAddresses.
+        fireEvent.change(pasteInput, {target: {value: "1.1.1.1\n\n# a comment\n2.2.2.2\n1.1.1.1"}})
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:expand-button"));
+
+        expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(2);
+        const addressInputs = screen.getAllByDataTest("sc4snmp:bulk:address-input").map((el) => el.querySelector("input"));
+        expect(addressInputs.map((input) => input.value)).toEqual(["1.1.1.1", "2.2.2.2"]);
+        const portInputs = screen.getAllByDataTest("sc4snmp:bulk:port-input").map((el) => el.querySelector("input"));
+        expect(portInputs.every((input) => input.value === "161")).toBe(true);
+        const communityInputs = screen.getAllByDataTest("sc4snmp:bulk:community-input").map((el) => el.querySelector("input"));
+        expect(communityInputs.every((input) => input.value === "public")).toBe(true);
+    })
+
+    it("clears the blank manual row as soon as paste mode is selected, and reseeds it going back", () => {
+        const {container} = renderModal();
+
+        expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(1);
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-paste"));
+        expect(container.querySelectorAll('[data-test="sc4snmp:bulk:row"]')).toHaveLength(0);
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-manual"));
+        expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(1);
+    })
+
+    it("disables Submit and shows a hint while the grid is empty, then re-enables it once addresses are added", () => {
+        renderModal();
+
+        const submitButton = screen.getByDataTest("sc4snmp:bulk:submit-button");
+        expect(submitButton.disabled).toBe(false);
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-paste"));
+        expect(screen.getByDataTest("sc4snmp:bulk:submit-button").disabled).toBe(true);
+        expect(screen.getByDataTest("sc4snmp:bulk:empty-grid-hint")).toBeInTheDocument();
+
+        const pasteInput = screen.getByDataTest("sc4snmp:bulk:paste-input").querySelector('textarea[data-test="textbox"]');
+        fireEvent.change(pasteInput, {target: {value: "1.1.1.1"}})
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:expand-button"));
+
+        expect(screen.getByDataTest("sc4snmp:bulk:submit-button").disabled).toBe(false);
+    })
+
+    it("drops the leftover blank manual row when expanding pasted addresses", () => {
+        renderModal();
+
+        expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(1);
+
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-paste"));
+        const pasteInput = screen.getByDataTest("sc4snmp:bulk:paste-input").querySelector('textarea[data-test="textbox"]');
+        fireEvent.change(pasteInput, {target: {value: "1.1.1.1"}})
+        fireEvent.click(screen.getByDataTest("sc4snmp:bulk:expand-button"));
+
+        // Only the expanded row should remain - the original untouched blank row is dropped.
+        expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(1);
+        expect(screen.getByDataTest("sc4snmp:bulk:address-input").querySelector("input").value).toBe("1.1.1.1");
+    })
+})
+
+describe("parseAddressList", () => {
+    it("splits pasted text on newlines and commas", () => {
+        expect(parseAddressList("1.1.1.1\n2.2.2.2,3.3.3.3")).toEqual(["1.1.1.1", "2.2.2.2", "3.3.3.3"]);
+    })
+})
+
+describe("expandAddresses", () => {
+    const sharedConfig = {port: "161", version: "2c", community: "public", secret: "", securityEngine: ""};
+
+    it("trims, drops blank/#-comment lines, dedups, and applies the shared config to every row", () => {
+        const rows = expandAddresses(
+            ["  1.1.1.1  ", "", "   ", "# a comment", "2.2.2.2", "1.1.1.1"],
+            sharedConfig
+        );
+
+        expect(rows.map((row) => row.address)).toEqual(["1.1.1.1", "2.2.2.2"]);
+        rows.forEach((row) => {
+            expect(row.port).toBe("161");
+            expect(row.version).toBe("2c");
+            expect(row.community).toBe("public");
+            expect(row.errors).toEqual({});
+            expect(row.status).toBeNull();
+        });
+    })
+
+    it("returns an empty array when every address is blank or a comment", () => {
+        expect(expandAddresses(["", "  ", "# nothing here"], sharedConfig)).toEqual([]);
     })
 })
