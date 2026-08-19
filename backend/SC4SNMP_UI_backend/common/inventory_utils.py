@@ -59,8 +59,9 @@ class HandleNewDevice:
         self._mongo_groups = mongo_groups
         self._mongo_inventory = mongo_inventory
 
-    def _is_host_in_group(self, address, port) -> (bool, str, str):
-        groups_from_inventory = list(self._mongo_inventory.find({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}))
+    def _is_host_in_group(self, address, port, session=None) -> (bool, str, str):
+        find_kwargs = {"session": session} if session is not None else {}
+        groups_from_inventory = list(self._mongo_inventory.find({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}, **find_kwargs))
         break_occurred = False
 
         host_in_group = False
@@ -72,7 +73,7 @@ class HandleNewDevice:
             group_config_name = group_config["address"]
             group_name = group_config_name
             group_port = group_config["port"]
-            group = list(self._mongo_groups.find({group_config_name: {"$exists": 1}}))
+            group = list(self._mongo_groups.find({group_config_name: {"$exists": 1}}, **find_kwargs))
             if len(group) > 0:
                 group = group[0]
                 for i, device in enumerate(group[group_config_name]):
@@ -88,9 +89,10 @@ class HandleNewDevice:
 
         return host_in_group, group_id, device_id, group_name
 
-    def _is_host_configured(self, address: str, port: str):
-        existing_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": False}))
-        deleted_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": True}))
+    def _is_host_configured(self, address: str, port: str, session=None):
+        find_kwargs = {"session": session} if session is not None else {}
+        existing_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": False}, **find_kwargs))
+        deleted_inventory_record = list(self._mongo_inventory.find({'address': address, 'port': int(port), "delete": True}, **find_kwargs))
 
         host_configured = False
         host_configuration = None
@@ -102,7 +104,7 @@ class HandleNewDevice:
             host_configuration = HostConfiguration.SINGLE
             existing_id_string = str(existing_inventory_record[0]["_id"])
         else:
-            host_in_group, group_id, device_id, group_name = self._is_host_in_group(address, port)
+            host_in_group, group_id, device_id, group_name = self._is_host_in_group(address, port, session=session)
             if host_in_group:
                 host_configured = True
                 host_configuration = HostConfiguration.GROUP
@@ -110,10 +112,11 @@ class HandleNewDevice:
 
         return host_configured, deleted_inventory_record, host_configuration, existing_id_string, group_name
 
-    def add_single_host(self, address, port, device_object=None, add: bool=True):
+    def add_single_host(self, address, port, device_object=None, add: bool=True, session=None):
         host_configured, deleted_inventory_record, host_configuration, existing_id_string, group_name = \
-            self._is_host_configured(address, port)
-        groups = list(mongo_groups.find({address: {"$exists": True}}))
+            self._is_host_configured(address, port, session=session)
+        find_kwargs = {"session": session} if session is not None else {}
+        groups = list(mongo_groups.find({address: {"$exists": True}}, **find_kwargs))
         if host_configured:
             host_location_message = "in the inventory" if host_configuration == HostConfiguration.SINGLE else \
                 f"in group {group_name}"
@@ -195,6 +198,12 @@ class HandleNewDevice:
         batch itself, since the DB-based checks can't see sibling rows in the same
         request.
 
+        The read, the accept/reject decisions and the write all run inside one
+        run_write callback against a single snapshot. Deciding against an earlier,
+        outer read and only re-reading for the write itself would let a concurrent
+        write - landing after the decision but before the write - go undetected by
+        the duplicate checks, since they only see what was true when first read.
+
         :param group_name: name of the group (dynamic dict key in the group document)
         :param group_id: ObjectId of the group document
         :param device_objects: backend-shaped device dicts (already run through
@@ -202,62 +211,62 @@ class HandleNewDevice:
         :return: list of dicts, one per device_object in the same order:
             {"address": str, "port": int|None, "added": bool, "message": str|None}
         """
-        group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
-        group = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}))
-        group = group[0]
-        in_inventory = len(group_from_inventory) > 0
+        def _write(session):
+            group_from_inventory = list(
+                self._mongo_inventory.find({"address": group_name, "delete": False}, session=session)
+            )
+            grp = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}, session=session))[0]
+            in_inventory = len(group_from_inventory) > 0
 
-        seen_in_batch = set()
-        accepted = []
-        results = []
+            seen_in_batch = set()
+            accepted = []
+            results = []
 
-        for device_object in device_objects:
-            address = device_object["address"]
-            port = str(device_object.get("port", ""))
+            for device_object in device_objects:
+                address = device_object["address"]
+                port = str(device_object.get("port", ""))
 
-            if in_inventory:
-                device_port = port if len(port) > 0 else str(group_from_inventory[0]["port"])
-                batch_key = f"{address}:{device_port}"
-                if batch_key in seen_in_batch:
-                    host_added, message = False, \
-                        f"Host {address}:{device_port} already exists in the submitted batch. Record was not added."
+                if in_inventory:
+                    device_port = port if len(port) > 0 else str(group_from_inventory[0]["port"])
+                    batch_key = f"{address}:{device_port}"
+                    if batch_key in seen_in_batch:
+                        host_added, message = False, \
+                            f"Host {address}:{device_port} already exists in the submitted batch. Record was not added."
+                    else:
+                        host_added, message = self.add_single_host(address, device_port, add=False, session=session)
                 else:
-                    host_added, message = self.add_single_host(address, device_port, add=False)
-            else:
-                new_device_port = int(port) if len(port) > 0 else -1
-                batch_key = f"{address}:{new_device_port}"
-                if batch_key in seen_in_batch:
-                    host_added, message = False, \
-                        f"Host {address}:{port} already exists in the submitted batch. Record was not added."
-                else:
-                    host_added, message = True, None
-                    for existing_device in group[group_name]:
-                        old_device_port = existing_device.get('port', -1)
-                        if existing_device["address"] == address and old_device_port == new_device_port:
-                            host_added = False
-                            message = f"Host {address}:{port} already exists in group {group_name}. Record was not added."
-                            break
+                    new_device_port = int(port) if len(port) > 0 else -1
+                    batch_key = f"{address}:{new_device_port}"
+                    if batch_key in seen_in_batch:
+                        host_added, message = False, \
+                            f"Host {address}:{port} already exists in the submitted batch. Record was not added."
+                    else:
+                        host_added, message = True, None
+                        for existing_device in grp[group_name]:
+                            old_device_port = existing_device.get('port', -1)
+                            if existing_device["address"] == address and old_device_port == new_device_port:
+                                host_added = False
+                                message = f"Host {address}:{port} already exists in group {group_name}. Record was not added."
+                                break
 
-            if host_added:
-                seen_in_batch.add(batch_key)
-                accepted.append(device_object)
+                if host_added:
+                    seen_in_batch.add(batch_key)
+                    accepted.append(device_object)
 
-            results.append({
-                "address": address,
-                "port": device_object.get("port"),
-                "added": host_added,
-                "message": message,
-            })
+                results.append({
+                    "address": address,
+                    "port": device_object.get("port"),
+                    "added": host_added,
+                    "message": message,
+                })
 
-        if accepted:
-            def _write(session):
-                grp = list(self._mongo_groups.find({"_id": group_id}, {"_id": 0}, session=session))[0]
+            if accepted:
                 grp[group_name].extend(accepted)
                 self._mongo_groups.update_one({"_id": group_id}, {"$set": grp}, session=session)
 
-            run_write(_write)
+            return results
 
-        return results
+        return run_write(_write)
 
     def edit_group_host(self, group_name: str, group_id: ObjectId, device_id: str, device_object: dict):
         group_from_inventory = list(self._mongo_inventory.find({"address": group_name, "delete": False}))
