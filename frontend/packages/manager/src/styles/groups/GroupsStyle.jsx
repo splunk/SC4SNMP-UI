@@ -1,4 +1,30 @@
 import styled from "styled-components";
+import RadioBar from '@splunk/react-ui/RadioBar';
+
+const StyledModeSwitch = styled(RadioBar)`
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+
+    & [role='radio']{
+        border: none !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
+    }
+
+    & [role='radio'][aria-checked='true']{
+        background-color: #E1E6EB !important;
+    }
+
+    & [role='radio']:focus{
+        box-shadow: none !important;
+    }
+`;
+
+const sectionTitle = {
+    marginTop: '16px',
+    marginBottom: '4px',
+};
 
 const GroupsContent = styled.div`
     display: flex;
@@ -108,4 +134,5 @@ const Pagination = styled.div`
     }
 `;
 
-export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices, Pagination, GroupsPagination };
+export { GroupsContent, GroupsNames, GroupsNamesHeader, SingleGroup, GroupDevices, Pagination, GroupsPagination,
+    StyledModeSwitch, sectionTitle };

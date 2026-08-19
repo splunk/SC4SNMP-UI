@@ -4,6 +4,7 @@ import Select from '@splunk/react-ui/Select';
 import Plus from '@splunk/react-icons/Plus';
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
+import SquaresLayeredPlus from '@splunk/react-icons/SquaresLayeredPlus';
 import Paginator from '@splunk/react-ui/Paginator';
 import Button from '@splunk/react-ui/Button';
 import Table from "@splunk/react-ui/Table";
@@ -12,6 +13,7 @@ import ButtonsContext from "../../store/buttons-contx";
 import GroupContext from "../../store/group-contxt";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import AddDeviceModal from "./AddDeviceModal";
+import BulkAddDeviceModal from "./BulkAddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination, GroupsPagination } from "../../styles/groups/GroupsStyle";
@@ -114,6 +116,12 @@ function GroupsList() {
         GrCtx.setIsDeviceEdit(false);
         GrCtx.setAddDeviceOpen(true);
         GrCtx.resetDevice();
+    };
+
+    const bulkAddHandler = (groupId, groupName) => {
+        GrCtx.setGroupId(groupId);
+        GrCtx.setGroupName(groupName);
+        GrCtx.setBulkAddOpen(true);
     };
 
     const groupDeleteHandler = (groupId, groupName, groupInInventory) => {
@@ -255,6 +263,7 @@ function GroupsList() {
             </P>
             <div>
                 <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
+                <Button data-test="sc4snmp:group:bulk-add-button" style={{ margin: "0" }} onClick={() => (bulkAddHandler(group._id, group.groupName))} appearance="pill" icon={<SquaresLayeredPlus />} />
                 <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
                 <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
             </div>
@@ -331,6 +340,7 @@ function GroupsList() {
                 </div>
             </GroupDevices>
             <AddDeviceModal />
+            <BulkAddDeviceModal />
             <DeleteModal deleteName={GrCtx.deleteName} customWarning={GrCtx.groupWarning}
                              handleDelete={() => (deleteModalRequest())}/>
         </GroupsContent>

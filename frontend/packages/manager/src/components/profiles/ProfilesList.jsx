@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import Select from "@splunk/react-ui/Select";
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
@@ -63,6 +63,7 @@ function ProfilesList() {
     const [expandedRowId, setExpandedRowId] = useState(null);
     const ProfCtx = useProfileContext();
     const ErrCtx = useErrorsModalContext();
+    const isMountedRef = useRef(true);
 
     const getProfileRows = (page) => {
         api.get("/profiles/count")
@@ -74,17 +75,19 @@ function ProfilesList() {
                 };
                 api.get(`/profiles/${page.toString()}/${profilesPerPage.toString()}`)
                     .then((response2) => {
-                        setPageNum(page);
-                        setTotalPages(maxPages);
-                        setProfilesRecords(response2.data);
+                        if (isMountedRef.current){
+                            setPageNum(page);
+                            setTotalPages(maxPages);
+                            setProfilesRecords(response2.data);
+                        }
                     })
             });
     };
 
     useEffect(() => {
-        let isMounted = true;
+        isMountedRef.current = true;
         getProfileRows(pageNum);
-        return () => { isMounted = false }
+        return () => { isMountedRef.current = false }
     }, [ProfCtx.profilesChange]);
 
     const profilesPerPageHandler = (e, { value }) => {

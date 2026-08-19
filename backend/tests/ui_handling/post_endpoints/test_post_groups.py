@@ -613,3 +613,221 @@ def test_delete_device_from_group_record(m_find, m_update, client):
     assert m_find.call_args == call({'_id': ObjectId(common_id)}, {"_id": 0})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_new2})
     assert response.json == {'message': 'Device 1.1.1.1: from group group_1 was deleted.'}
+
+
+# TEST ADDING DEVICES IN BULK
+ui_bulk_devices_success = lambda: {
+        "groupId": str(common_id),
+        "devices": [
+            {"address": "2.2.2.2", "port": "", "version": "3", "community": "", "secret": "snmpv3", "securityEngine": ""},
+            {"address": "3.3.3.3", "port": "162", "version": "2c", "community": "public", "secret": "", "securityEngine": ""},
+        ]
+    }
+
+backend_group_bulk_success_new = lambda: {
+        "_id": ObjectId(common_id),
+        "group_1": [
+            {"address": "1.2.3.4", "port": 161},
+            {"address": "2.2.2.2", "version": "3", "secret": "snmpv3"},
+            {"address": "3.3.3.3", "port": 162, "version": "2c", "community": "public"},
+        ]
+    }
+
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_devices_to_group_bulk_not_configured_in_inventory_success(m_find, m_update, client):
+    m_find.side_effect = [
+        [backend_group_add_device_old()],  # call from group/routes.add_devices_to_group_bulk
+        [],  # call from HandleNewDevice.add_group_hosts_bulk._write (group_from_inventory)
+        [backend_group_add_device_old()],  # call from HandleNewDevice.add_group_hosts_bulk._write (group read)
+    ]
+    calls_find = [
+        call({'_id': ObjectId(common_id)}, {"_id": 0}),
+        call({"address": "group_1", "delete": False}, session=None),
+        call({'_id': ObjectId(common_id)}, {"_id": 0}, session=None),
+    ]
+    m_update.return_value = None
+
+    response = client.post(f"/devices/add/bulk", json=ui_bulk_devices_success())
+    m_find.assert_has_calls(calls_find)
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_bulk_success_new()}, session=None)
+    assert response.json == {
+        "added": 2,
+        "failed": 0,
+        "results": [
+            {"index": 0, "address": "2.2.2.2", "port": None, "added": True, "message": None},
+            {"index": 1, "address": "3.3.3.3", "port": 162, "added": True, "message": None},
+        ],
+    }
+
+
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_devices_to_group_bulk_configured_in_inventory_partial_success(m_find, m_update, client):
+    ui_devices = {
+        "groupId": str(common_id),
+        "devices": [
+            {"address": "2.2.2.2", "port": "", "version": "3", "community": "", "secret": "snmpv3", "securityEngine": ""},
+            {"address": "5.5.5.5", "port": "161", "version": "3", "community": "", "secret": "snmpv3", "securityEngine": ""},
+        ]
+    }
+
+    existing_device_inventory = {
+        "_id": ObjectId(common_id),
+        "address": "5.5.5.5",
+        "port": 161,
+        "version": "2c",
+        "community": "public",
+        "secret": "",
+        "walk_interval": 1800,
+        "security_engine": "",
+        "profiles": "prof1",
+        "smart_profiles": False,
+        "delete": False
+    }
+
+    m_find.side_effect = [
+        [backend_group_add_device_old()],  # call from group/routes.add_devices_to_group_bulk
+        [group_inventory()],  # call from HandleNewDevice.add_group_hosts_bulk._write (group_from_inventory)
+        [backend_group_add_device_old()],  # call from HandleNewDevice.add_group_hosts_bulk._write (group read)
+        [],  # device 2.2.2.2: HandleNewDevice._is_host_configured
+        [],  # device 2.2.2.2: HandleNewDevice._is_host_configured
+        [group_inventory()],  # device 2.2.2.2: HandleNewDevice._is_host_in_group
+        [backend_group_add_device_old()],  # device 2.2.2.2: HandleNewDevice._is_host_in_group
+        [],  # device 2.2.2.2: HandleNewDevice.add_single_host
+        [existing_device_inventory],  # device 5.5.5.5: HandleNewDevice._is_host_configured
+        [],  # device 5.5.5.5: HandleNewDevice._is_host_configured
+        [],  # device 5.5.5.5: HandleNewDevice.add_single_host
+    ]
+    calls_find = [
+        call({'_id': ObjectId(common_id)}, {"_id": 0}),
+        call({"address": "group_1", "delete": False}, session=None),
+        call({'_id': ObjectId(common_id)}, {"_id": 0}, session=None),
+        call({'address': "2.2.2.2", 'port': 1161, "delete": False}),
+        call({'address': "2.2.2.2", 'port': 1161, "delete": True}),
+        call({"address": {"$regex": "^[a-zA-Z].*"}, "delete": False}),
+        call({"group_1": {"$exists": 1}}),
+        call({"2.2.2.2": {"$exists": True}}),
+        call({'address': "5.5.5.5", 'port': 161, "delete": False}),
+        call({'address': "5.5.5.5", 'port': 161, "delete": True}),
+        call({"5.5.5.5": {"$exists": True}}),
+    ]
+    m_update.return_value = None
+
+    response = client.post(f"/devices/add/bulk", json=ui_devices)
+    m_find.assert_has_calls(calls_find)
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": {
+        "_id": ObjectId(common_id),
+        "group_1": [
+            {"address": "1.2.3.4", "port": 161},
+            {"address": "2.2.2.2", "version": "3", "secret": "snmpv3"},
+        ]
+    }}, session=None)
+    assert response.json == {
+        "added": 1,
+        "failed": 1,
+        "results": [
+            {"index": 0, "address": "2.2.2.2", "port": None, "added": True, "message": None},
+            {"index": 1, "address": "5.5.5.5", "port": 161, "added": False,
+             "message": "Host 5.5.5.5:161 already exists in the inventory. Record was not added."},
+        ],
+    }
+
+
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_devices_to_group_bulk_in_batch_duplicate(m_find, m_update, client):
+    device = {"address": "9.9.9.9", "port": "162", "version": "2c", "community": "public", "secret": "", "securityEngine": ""}
+    ui_devices = {
+        "groupId": str(common_id),
+        "devices": [device, dict(device)]
+    }
+
+    m_find.side_effect = [
+        [backend_group_add_device_old()],  # call from group/routes.add_devices_to_group_bulk
+        [],  # call from HandleNewDevice.add_group_hosts_bulk._write (group_from_inventory, not in inventory)
+        [backend_group_add_device_old()],  # call from HandleNewDevice.add_group_hosts_bulk._write (group read)
+    ]
+    calls_find = [
+        call({'_id': ObjectId(common_id)}, {"_id": 0}),
+        call({"address": "group_1", "delete": False}, session=None),
+        call({'_id': ObjectId(common_id)}, {"_id": 0}, session=None),
+    ]
+    m_update.return_value = None
+
+    response = client.post(f"/devices/add/bulk", json=ui_devices)
+    m_find.assert_has_calls(calls_find)
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": {
+        "_id": ObjectId(common_id),
+        "group_1": [
+            {"address": "1.2.3.4", "port": 161},
+            {"address": "9.9.9.9", "port": 162, "version": "2c", "community": "public"},
+        ]
+    }}, session=None)
+    assert response.json == {
+        "added": 1,
+        "failed": 1,
+        "results": [
+            {"index": 0, "address": "9.9.9.9", "port": 162, "added": True, "message": None},
+            {"index": 1, "address": "9.9.9.9", "port": 162, "added": False,
+             "message": "Host 9.9.9.9:162 already exists in the submitted batch. Record was not added."},
+        ],
+    }
+
+
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_devices_to_group_bulk_missing_group_id_failure(m_find, m_update, client):
+    response = client.post(f"/devices/add/bulk", json={"devices": [{"address": "1.1.1.1"}]})
+    assert not m_find.called
+    assert not m_update.called
+    assert response.status_code == 400
+    assert response.json == {"message": "groupId and a non-empty devices list are required."}
+
+
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.collection.Collection.find")
+def test_add_devices_to_group_bulk_empty_devices_failure(m_find, m_update, client):
+    response = client.post(f"/devices/add/bulk", json={"groupId": str(common_id), "devices": []})
+    assert not m_find.called
+    assert not m_update.called
+    assert response.status_code == 400
+    assert response.json == {"message": "groupId and a non-empty devices list are required."}
+
+
+@mock.patch("pymongo.collection.Collection.find")
+@mock.patch("pymongo.collection.Collection.update_one")
+@mock.patch("pymongo.MongoClient.start_session")
+def test_add_devices_to_group_bulk_uses_transaction_in_replication_mode(m_session, m_update, m_find, client, monkeypatch):
+    # When the deployment is a replica set, the final write inside add_group_hosts_bulk
+    # must run inside a Mongo transaction (session threaded through find + update_one).
+    monkeypatch.setenv("MONGODB_MODE", "replication")
+    m_session.return_value.__enter__.return_value.start_transaction.__enter__ = Mock()
+
+    ui_devices = {
+        "groupId": str(common_id),
+        "devices": [
+            {"address": "2.2.2.2", "port": "", "version": "3", "community": "", "secret": "snmpv3", "securityEngine": ""},
+        ]
+    }
+
+    m_find.side_effect = [
+        [backend_group_add_device_old()],  # call from group/routes.add_devices_to_group_bulk
+        [],  # call from HandleNewDevice.add_group_hosts_bulk._write (group_from_inventory, session=session)
+        [backend_group_add_device_old()],  # call from HandleNewDevice.add_group_hosts_bulk._write (group read, session=session)
+    ]
+    m_update.return_value = None
+
+    response = client.post(f"/devices/add/bulk", json=ui_devices)
+
+    session = m_session.return_value.__enter__.return_value
+    assert call({"address": "group_1", "delete": False}, session=session) in m_find.call_args_list
+    assert call({'_id': ObjectId(common_id)}, {"_id": 0}, session=session) in m_find.call_args_list
+    assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_group_add_device_success_new()}, session=session)
+    assert response.json == {
+        "added": 1,
+        "failed": 0,
+        "results": [
+            {"index": 0, "address": "2.2.2.2", "port": None, "added": True, "message": None},
+        ],
+    }

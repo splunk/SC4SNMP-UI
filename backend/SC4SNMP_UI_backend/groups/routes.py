@@ -132,10 +132,11 @@ def get_devices_of_group(group_id, page_num, dev_per_page):
     group = list(mongo_groups.find({"_id": ObjectId(group_id)}))[0]
 
     group_name = get_group_or_profile_name_from_backend(group)
-    devices_list = []
-    for i, device in enumerate(group[group_name]):
-        devices_list.append(group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i)))
-    devices_list = devices_list[skips:skips+dev_per_page]
+    # Slice to the requested page before converting, so backend2ui only runs on the
+    # devices actually returned instead of the whole group's device array every time.
+    page_devices = list(enumerate(group[group_name]))[skips:skips+dev_per_page]
+    devices_list = [group_device_conversion.backend2ui(device, group_id=group_id, device_id=copy(i))
+                     for i, device in page_devices]
     return jsonify(devices_list)
 
 
@@ -166,6 +167,57 @@ def add_device_to_group():
     else:
         result = jsonify({"message": message}), 400
     return result
+
+
+@groups_blueprint.route('/devices/add/bulk', methods=['POST'])
+@login_required
+def add_devices_to_group_bulk():
+    payload = request.json or {}
+    group_id = payload.get("groupId")
+    devices = payload.get("devices")
+    if not group_id or not devices:
+        return jsonify({"message": "groupId and a non-empty devices list are required."}), 400
+
+    group_records = list(mongo_groups.find({'_id': ObjectId(group_id)}, {"_id": 0}))
+    if not group_records:
+        return jsonify({"message": f"Group with id {group_id} was not found."}), 400
+    group_name = get_group_or_profile_name_from_backend(group_records[0])
+
+    # Normalize each device defensively before ui2backend: it does len(document[key])
+    # and int(port), which raises on a missing/non-string field - a real risk from
+    # the paste/CSV adapters rather than the manual grid. A device missing address
+    # entirely is rejected here rather than crashing ui2backend.
+    backend_devices = []
+    results_by_index = {}
+    for index, device in enumerate(devices):
+        address = str(device.get("address") or "").strip()
+        if not address:
+            results_by_index[index] = {
+                "index": index, "address": address, "port": device.get("port"),
+                "added": False, "message": "Address is required.",
+            }
+            continue
+        normalized = {
+            "address": address,
+            "port": str(device.get("port") or ""),
+            "version": str(device.get("version") or ""),
+            "community": str(device.get("community") or ""),
+            "secret": str(device.get("secret") or ""),
+            "securityEngine": str(device.get("securityEngine") or ""),
+        }
+        backend_devices.append((index, group_device_conversion.ui2backend(normalized)))
+
+    handler = HandleNewDevice(mongo_groups, mongo_inventory)
+    bulk_results = handler.add_group_hosts_bulk(group_name, ObjectId(group_id), [d for _, d in backend_devices])
+
+    for (original_index, _), result in zip(backend_devices, bulk_results):
+        results_by_index[original_index] = {"index": original_index, **result}
+
+    ordered_results = [results_by_index[i] for i in range(len(devices))]
+    added = sum(1 for r in ordered_results if r["added"])
+    failed = len(ordered_results) - added
+
+    return jsonify({"added": added, "failed": failed, "results": ordered_results}), 200
 
 
 @groups_blueprint.route('/devices/update/<device_id>', methods=['POST'])
