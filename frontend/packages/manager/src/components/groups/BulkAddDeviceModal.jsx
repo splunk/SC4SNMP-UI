@@ -8,11 +8,13 @@ import RadioBar from '@splunk/react-ui/RadioBar';
 import FormRows from '@splunk/react-ui/FormRows';
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
+import Message from '@splunk/react-ui/Message';
 import api from "../../api";
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import { validationMessage } from "../../styles/ValidationStyles";
 import { StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
+import { StyledModeSwitch, sectionTitle } from "../../styles/groups/GroupsStyle";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import ValidationGroup from "../validation/ValidationGroup";
 
@@ -106,7 +108,7 @@ function BulkAddDeviceModal(){
         setPasteText('');
         setSharedConfig(emptySharedConfig());
         GrCtx.setBulkAddOpen(false);
-    }, [GrCtx.setBulkAddOpen]);
+    }, [GrCtx]);
 
     const handleRequestAdd = useCallback(() => {
         setRows((prev) => [...prev, emptyRow()]);
@@ -214,7 +216,7 @@ function BulkAddDeviceModal(){
             ErrCtx.setErrorType("error");
             ErrCtx.setMessage(error.response.data.message);
         });
-    }, [rows, GrCtx.groupId, GrCtx.setEditedGroupId, GrCtx.makeGroupsChange, handleRequestClose]);
+    }, [rows, GrCtx, ErrCtx, handleRequestClose]);
 
     return (
         <div>
@@ -226,22 +228,22 @@ function BulkAddDeviceModal(){
                         react-ui form controls consume correctly - RadioBar (a composite of multiple
                         radio inputs) and a plain wrapper div both end up with a <label for> that
                         doesn't match any real element id. */}
-                    <P>Mode</P>
-                    <RadioBar data-test="sc4snmp:bulk:mode" value={mode} onChange={handleModeChange}>
+                    <P style={sectionTitle}>Mode</P>
+                    <StyledModeSwitch data-test="sc4snmp:bulk:mode" value={mode} onChange={handleModeChange}>
                         <RadioBar.Option data-test="sc4snmp:bulk:mode-manual" value="manual" label="Manual grid" />
                         <RadioBar.Option data-test="sc4snmp:bulk:mode-paste" value="paste" label="Address list" />
-                    </RadioBar>
+                    </StyledModeSwitch>
                     {mode === 'paste' ?
                         <div>
-                            <P>Addresses</P>
+                            <P style={sectionTitle}>Addresses</P>
                             <TextArea data-test="sc4snmp:bulk:paste-input" value={pasteText}
                                       onChange={(e, { value }) => setPasteText(value)}
                                       placeholder="One address per line, or comma-separated" rowsMin={4} />
-                            <P>Shared config</P>
+                            <P style={sectionTitle}>Shared config</P>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                                 <Text data-test="sc4snmp:bulk:shared-port-input" placeholder="Port" value={sharedConfig.port}
                                       onChange={(e, { value }) => handleSharedConfigChange('port', value)} />
-                                <Select data-test="sc4snmp:bulk:shared-select-version" defaultValue={sharedConfig.version} value={sharedConfig.version}
+                                <Select data-test="sc4snmp:bulk:shared-select-version" prefixLabel="Version" defaultValue={sharedConfig.version} value={sharedConfig.version}
                                         onChange={(e, { value }) => handleSharedConfigChange('version', value)}>
                                     <Select.Option data-test="sc4snmp:bulk:shared-version-from-inventory" label="From inventory" value="" />
                                     <Select.Option data-test="sc4snmp:bulk:shared-version-1" label="1" value="1" />
@@ -258,6 +260,11 @@ function BulkAddDeviceModal(){
                             <Button data-test="sc4snmp:bulk:expand-button" appearance="secondary" label="Add addresses"
                                     style={{ marginTop: '12px' }} onClick={handleExpandAddresses} />
                         </div> : null}
+                    {rows.length === 0 ?
+                        <Message data-test="sc4snmp:bulk:empty-grid-hint" appearance="fill" type="warning" style={{ marginTop: '12px' }}>
+                            Add at least one device to the grid before submitting - click &quot;Add addresses&quot; above.
+                        </Message> : null}
+                    <P style={sectionTitle}>Devices list</P>
                     <FormRows onRequestAdd={handleRequestAdd} addLabel="Add row" data-test="sc4snmp:bulk:add-row">
                         {rows.map((row, index) => (
                             <FormRows.Row data-test="sc4snmp:bulk:row" index={index} key={row.keyID} onRequestRemove={handleRequestRemove}
@@ -270,7 +277,7 @@ function BulkAddDeviceModal(){
                                         <Text data-test="sc4snmp:bulk:port-input" placeholder="Port" value={row.port}
                                               onChange={(e, { value }) => handleRowFieldChange(index, 'port', value)}
                                               error={!!(row.errors.port && row.errors.port.length)} />
-                                        <Select data-test="sc4snmp:bulk:select-version" defaultValue={row.version} value={row.version}
+                                        <Select data-test="sc4snmp:bulk:select-version" prefixLabel="Version" defaultValue={row.version} value={row.version}
                                                 onChange={(e, { value }) => handleRowFieldChange(index, 'version', value)}>
                                             <Select.Option data-test="sc4snmp:bulk:version-from-inventory" label="From inventory" value="" />
                                             <Select.Option data-test="sc4snmp:bulk:version-1" label="1" value="1" />
@@ -296,10 +303,6 @@ function BulkAddDeviceModal(){
                             </FormRows.Row>
                         ))}
                     </FormRows>
-                    {rows.length === 0 ?
-                        <P data-test="sc4snmp:bulk:empty-grid-hint" style={validationMessage}>
-                            Add at least one device to the grid before submitting - click &quot;Add addresses&quot; above.
-                        </P> : null}
                 </StyledModalBody>
                 <Modal.Footer>
                     <Button data-test="sc4snmp:bulk:cancel-button" appearance="secondary" onClick={handleRequestClose} label="Cancel" />

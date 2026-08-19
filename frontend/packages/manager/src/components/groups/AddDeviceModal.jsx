@@ -1,11 +1,11 @@
-import React, {useCallback, useContext, useState} from 'react';
+import React, {useCallback, useContext} from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
 import Text from '@splunk/react-ui/Text';
-import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import P from '@splunk/react-ui/Paragraph';
+import api from "../../api";
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
@@ -22,31 +22,31 @@ function AddDeviceModal(){
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         GrCtx.setAddress(val);
-    }, [GrCtx.setAddress]);
+    }, [GrCtx]);
 
     const handleChangePort = useCallback((e, { value: val }) => {
         GrCtx.setPort(val);
-    }, [GrCtx.setPort]);
+    }, [GrCtx]);
 
     const handleChangeVersion = useCallback((e, { value: val }) => {
         GrCtx.setVersion(val);
-    }, [GrCtx.setVersion]);
+    }, [GrCtx]);
 
     const handleChangeCommunity = useCallback((e, { value: val }) => {
         GrCtx.setCommunity(val);
-    }, [GrCtx.setCommunity]);
+    }, [GrCtx]);
 
     const handleChangeSecret = useCallback((e, { value: val }) => {
         GrCtx.setSecret(val);
-    }, [GrCtx.setSecret]);
+    }, [GrCtx]);
 
     const handleChangeSecurityEngine = useCallback((e, { value: val }) => {
         GrCtx.setSecurityEngine(val);
-    }, [GrCtx.setSecurityEngine]);
+    }, [GrCtx]);
 
-    const postDevice = (deviceObj) => {
+    const postDevice = useCallback((deviceObj) => {
         api.post("/devices/add", deviceObj)
-            .then((response) => {
+            .then(() => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
@@ -55,11 +55,11 @@ function AddDeviceModal(){
                 ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
-    };
+    }, [GrCtx, ErrCtx]);
 
-    const updateDevice = (deviceObj, deviceId) => {
+    const updateDevice = useCallback((deviceObj, deviceId) => {
         api.post(`/devices/update/${deviceId}`, deviceObj)
-            .then((response) => {
+            .then(() => {
                 GrCtx.setEditedGroupId(GrCtx.groupId);
                 GrCtx.makeGroupsChange();
         })
@@ -68,7 +68,7 @@ function AddDeviceModal(){
                 ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
             })
-    };
+    }, [GrCtx, ErrCtx]);
 
     const handleRequestClose = () => {
         ValCtx.resetAllErrors();
@@ -76,7 +76,7 @@ function AddDeviceModal(){
         GrCtx.setAddDeviceOpen(false);
     }
 
-    const handleApply = useCallback((e) => {
+    const handleApply = useCallback(() => {
         const deviceObj = {
             address: GrCtx.address,
             port: GrCtx.port,
@@ -103,17 +103,16 @@ function AddDeviceModal(){
         }else{
             // form is invalid
             const errors = validation[1];
-            for (const property in errors) {
+            Object.keys(errors).forEach((property) => {
                 if (errors[property].length > 0){
                     ValCtx.setErrors(property, errors[property]);
-                }else {
+                }else{
                     ValCtx.resetErrors(property);
-                };
-            };
+                }
+            });
         };
         },
-        [GrCtx.address, GrCtx.port, GrCtx.version, GrCtx.community, GrCtx.secret, GrCtx.securityEngine, GrCtx.isEdit,
-            GrCtx.deviceId, GrCtx.setAddDeviceOpen, GrCtx.groupId]
+        [GrCtx, ValCtx, postDevice, updateDevice]
     );
 
     return (
