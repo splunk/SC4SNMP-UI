@@ -18,11 +18,7 @@ import { StyledModeSwitch, sectionTitle } from "../../styles/groups/GroupsStyle"
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import ValidationGroup from "../validation/ValidationGroup";
 
-// Rows here are entirely local state, not GroupContext / InventoryDevicesValidationContxt -
-// that context is single-valued per field and can't represent one error set per grid row.
-// Keeping validation errors and save status on the row object itself (rather than a
-// separate index-keyed map, as components/profiles/VarBinds.jsx does for its FormRows grid)
-// means removing a row is a plain filter, with no index-shifting bookkeeping needed.
+
 const emptyRow = () => ({
     keyID: createDOMID(),
     address: '',
@@ -47,16 +43,12 @@ const emptySharedConfig = () => ({
 const isBlankRow = (row) => !row.address && !row.port && !row.version
     && !row.community && !row.secret && !row.securityEngine;
 
-// Pure input adapter for the "Addresses + shared config" mode - splits pasted text into
-// raw address candidates. Trimming/dedup/blank-and-comment handling lives in expandAddresses
-// so the same rules can later be reused for the addresses-only file adapter (Phase 3).
 export function parseAddressList(text){
     return (text || '').split(/[\n,]+/);
 }
 
 // Turns raw address candidates into complete six-key grid rows, applying the shared SNMP
-// config to every address. Drops blanks/#-comments and dedups so a messy paste (or file)
-// doesn't produce duplicate or garbage rows in the preview grid.
+// config to every address.
 export function expandAddresses(addresses, sharedConfig){
     const seen = new Set();
     const rows = [];
@@ -90,9 +82,6 @@ function BulkAddDeviceModal(){
     const [pasteText, setPasteText] = useState('');
     const [sharedConfig, setSharedConfig] = useState(emptySharedConfig());
 
-    // Start from a single blank row every time the modal is (re)opened for a group,
-    // but leave rows alone while it stays open so a partial-failure retry (see
-    // handleApply) doesn't lose the rows the user still needs to fix.
     useEffect(() => {
         if (GrCtx.bulkAddOpen){
             setRows([emptyRow()]);
@@ -130,9 +119,6 @@ function BulkAddDeviceModal(){
         setSharedConfig((prev) => ({ ...prev, [field]: value }));
     }, []);
 
-    // Manual mode's lone blank row is meaningless once you're pasting addresses instead -
-    // leaving it in place made the grid look like nothing happened after expanding. Drop it
-    // on the way into paste mode, and reseed it on the way back if the grid ended up empty.
     const handleModeChange = useCallback((e, { value }) => {
         setMode(value);
         setRows((prev) => {
@@ -143,9 +129,6 @@ function BulkAddDeviceModal(){
         });
     }, []);
 
-    // Drops still-blank rows (e.g. the single default row left over from manual mode)
-    // before appending the expanded addresses, so switching modes doesn't leave a stray
-    // empty row in the middle of the preview grid.
     const handleExpandAddresses = useCallback(() => {
         const expanded = expandAddresses(parseAddressList(pasteText), sharedConfig);
         if (expanded.length === 0){
@@ -178,7 +161,6 @@ function BulkAddDeviceModal(){
         });
 
         if (toSubmit.length === 0){
-            // Nothing valid to send - just surface the inline errors.
             setRows(validated);
             return;
         }
@@ -223,11 +205,7 @@ function BulkAddDeviceModal(){
             <Modal onRequestClose={handleRequestClose} open={GrCtx.bulkAddOpen} style={{ width: '900px' }}>
                 <StyledModalHeader title={`Add devices in bulk to ${GrCtx.groupName}`} onRequestClose={handleRequestClose} />
                 <StyledModalBody>
-                    {/* Plain P labels instead of StyledControlGroup: ControlGroup clones its single
-                        child and injects labelledBy/labelText/id props that only well-behaved single
-                        react-ui form controls consume correctly - RadioBar (a composite of multiple
-                        radio inputs) and a plain wrapper div both end up with a <label for> that
-                        doesn't match any real element id. */}
+                    {}
                     <P style={sectionTitle}>Mode</P>
                     <StyledModeSwitch data-test="sc4snmp:bulk:mode" value={mode} onChange={handleModeChange}>
                         <RadioBar.Option data-test="sc4snmp:bulk:mode-manual" value="manual" label="Manual grid" />

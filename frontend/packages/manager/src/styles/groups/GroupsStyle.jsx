@@ -1,9 +1,6 @@
 import styled from "styled-components";
 import RadioBar from '@splunk/react-ui/RadioBar';
 
-// The bulk-add mode toggle should read as a plain view switch, not a bordered button
-// group - strip RadioBar's own border/box-shadow and use a flat grey fill (matching the
-// row-stripe color) for the selected option instead.
 const StyledModeSwitch = styled(RadioBar)`
     border: none !important;
     box-shadow: none !important;

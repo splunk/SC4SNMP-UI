@@ -44,9 +44,6 @@ describe("BulkAddDeviceModal", () => {
 
         expect(screen.getAllByDataTest("sc4snmp:bulk:row")).toHaveLength(1);
 
-        // FormRows renders its own "Add" button inside the container we tag via
-        // data-test - the button itself carries the library's fixed data-test="add-row",
-        // mirroring the pattern used for VarBinds/FieldPatterns in AddProfileModal.test.jsx.
         const addRowButton = screen.getByDataTest("sc4snmp:bulk:add-row").querySelector('[data-test="add-row"]');
         fireEvent.click(addRowButton);
 
