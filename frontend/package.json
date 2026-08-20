@@ -28,14 +28,22 @@
     "uuid": "^14.0.0",
     "follow-redirects": "^1.16.0",
     "axios": "^1.16.0",
-    "undici": "^6.27.0",
+    "undici": "^6.28.0",
     "tmp": "^0.2.6",
     "form-data": "^4.0.6",
-    "brace-expansion": "^5.0.6",
+    "brace-expansion": "^5.0.9",
     "yaml": "^2.8.3",
-    "tar": "^7.5.16",
-    "js-yaml": "^4.2.0",
+    "tar": "^7.5.21",
+    "js-yaml": "^4.3.1",
     "postcss": "^8.5.23",
-    "nanoid": "^3.3.17"
+    "nanoid": "^3.3.17",
+    "ip-address": "^10.3.1",
+    "nx": "^22.7.7",
+    "sigstore": "^4.1.1",
+    "@sigstore/core": "^3.2.1",
+    "@sigstore/verify": "^3.1.1",
+    "@babel/plugin-transform-modules-systemjs": "^7.29.8",
+    "fast-uri": "^3.1.5",
+    "websocket-driver": "^0.7.5"
   }
 }
