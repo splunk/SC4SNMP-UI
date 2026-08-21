@@ -88,7 +88,7 @@ class AuthNotConfiguredException(Exception):
     pass
 
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
+limiter = Limiter(key_func=get_remote_address, default_limits=[], storage_uri=REDBEAT_URL)
 
 
 def create_app():
@@ -135,7 +135,6 @@ def create_app():
     CORS(app, origins=cors_origins, supports_credentials=True)
 
     limiter.init_app(app)
-    limiter.storage_uri = REDBEAT_URL
 
     if REDIS_MODE == "replication":
         broker_transport_options = {

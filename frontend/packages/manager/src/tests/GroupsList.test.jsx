@@ -85,7 +85,7 @@ describe("GroupsList pagination", () => {
         api.get.mockResolvedValueOnce({data: 100});
         api.get.mockResolvedValueOnce({data: [{_id: "2", groupName: "group2", groupInInventory: false}]});
 
-        const pageTwoButton = screen.getByLabelText("Go to page 2");
+        const pageTwoButton = screen.getByLabelText("Page 2");
         await act(async () => {
             fireEvent.click(pageTwoButton);
             await sleep(10);
