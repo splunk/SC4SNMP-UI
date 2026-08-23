@@ -76,7 +76,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
 
@@ -126,6 +126,6 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
