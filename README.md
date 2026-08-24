@@ -75,7 +75,7 @@ pip3 install -r requirements.txt
 Run mongoDB in docker:
 
 ```shell
-docker run --rm -d -p 27017:27017 --name example-mongo mongo:4.4.6
+docker run --rm -d -p 27017:27017 --name example-mongo mongo:8.3.4
 ```
 
 To start backend service run:

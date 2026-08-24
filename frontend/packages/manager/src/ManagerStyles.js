@@ -18,6 +18,4 @@ const StyledGreeting = styled.div`
     font-size: ${variables.fontSizeXXLarge};
 `;
 
-const
-
 export { StyledContainer, StyledGreeting };

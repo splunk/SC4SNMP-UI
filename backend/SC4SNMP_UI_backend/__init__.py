@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "1.2.2"
+__version__ = "1.2.3-beta.9"
 
 MONGO_URI = os.getenv("MONGO_URI")
 log = logging.getLogger('gunicorn.error')
@@ -88,7 +88,7 @@ class AuthNotConfiguredException(Exception):
     pass
 
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
+limiter = Limiter(key_func=get_remote_address, default_limits=[], storage_uri=REDBEAT_URL)
 
 
 def create_app():
@@ -135,7 +135,6 @@ def create_app():
     CORS(app, origins=cors_origins, supports_credentials=True)
 
     limiter.init_app(app)
-    limiter.storage_uri = REDBEAT_URL
 
     if REDIS_MODE == "replication":
         broker_transport_options = {

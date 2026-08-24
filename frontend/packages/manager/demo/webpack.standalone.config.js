@@ -14,11 +14,6 @@ module.exports = webpackMerge(baseConfig, {
             "querystring": require.resolve("querystring-es3")
         }
     },
-    module: {
-      rules: [
-          { test: /\.(png|woff|woff2|eot|ttf|svg|otf)$/, use: {loader: 'file-loader',}}
-      ]
-    },
     plugins: [
         new HtmlWebpackPlugin({
             hash: true,
@@ -30,5 +25,6 @@ module.exports = webpackMerge(baseConfig, {
             }
         })
     ],
-    devtool: 'eval-source-map'
+    devtool: 'eval-source-map',
+    performance: { hints: false }
 });

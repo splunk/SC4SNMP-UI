@@ -9,6 +9,7 @@ export function GroupContextProvider(props){
     // Controling Modals
     const [addGroupOpen, setAddGroupOpen] = useState(false);
     const [addDeviceOpen, setAddDeviceOpen] = useState(false);
+    const [bulkAddOpen, setBulkAddOpen] = useState(false);
     const [deleteUrl, setDeleteUrl] = useState('');
     const [deleteName, setDeleteName] = useState('');
 
@@ -64,6 +65,8 @@ export function GroupContextProvider(props){
         setAddGroupOpen,
         addDeviceOpen,
         setAddDeviceOpen,
+        bulkAddOpen,
+        setBulkAddOpen,
         deleteOpen: BtnCtx.deleteOpen,
         setDeleteOpen: BtnCtx.setDeleteOpen,
         deleteUrl,

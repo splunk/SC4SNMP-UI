@@ -32,25 +32,25 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
           persist-credentials: false
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4.2.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.2.0
+        uses: docker/setup-buildx-action@v4.3.0
       - name: Login to GitHub Packages Docker Registry
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta - frontend
         id: docker_meta
-        uses: docker/metadata-action@v5.5.1
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ghcr.io/splunk/sc4snmp-ui/frontend/container
           tags: |
@@ -64,7 +64,7 @@ jobs:
             type=ref,event=pr
       - name: Build and push action - frontend
         id: docker_action_build_frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7.3.0
         with:
           context: frontend
           push: true
@@ -72,7 +72,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
 
@@ -83,25 +83,25 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
           persist-credentials: false
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4.2.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.2.0
+        uses: docker/setup-buildx-action@v4.3.0
       - name: Login to GitHub Packages Docker Registry
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta - backend
         id: docker_meta
-        uses: docker/metadata-action@v5.5.1
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ghcr.io/splunk/sc4snmp-ui/backend/container
           tags: |
@@ -115,7 +115,7 @@ jobs:
             type=ref,event=pr
       - name: Build and push action - backend
         id: docker_action_build_backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7.3.0
         with:
           context: backend
           push: true
@@ -123,7 +123,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-to: type=inline
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
   release:
@@ -134,7 +134,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
           persist-credentials: false
@@ -145,12 +145,12 @@ jobs:
           client-id: ${{ secrets.GH_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
       - name: Semantic Release
         id: version
-        uses: splunk/semantic-release-action@v1.3.4
+        uses: splunk/semantic-release-action@v1.3.10
         with:
           git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
           git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}

@@ -88,8 +88,8 @@ def test_get_all_profiles_list(m_client, client):
 def test_get_groups_list(m_client, client):
     common_id = "635916b2c8cb7a15f28af40a"
 
-    m_client.side_effect = [
-        [{
+    page_groups = [
+        {
             "_id": common_id,
             "group_1": [
                 {"address": "1.2.3.4"}
@@ -100,10 +100,15 @@ def test_get_groups_list(m_client, client):
             "group_2": [
                 {"address": "1.2.3.4"}
             ]
-        }],
-        [],
-        [{"address": "group_2"}]
+        }
     ]
+
+    # mongo_groups.find() is chained with .sort().skip().limit(), so its mocked return
+    # value needs that chain pre-wired; the batched inventory "$in" lookup that follows
+    # is a plain, un-chained find() call and is the second side effect.
+    groups_cursor = mock.MagicMock()
+    groups_cursor.sort.return_value.skip.return_value.limit.return_value = page_groups
+    m_client.side_effect = [groups_cursor, [{"address": "group_2"}]]
 
     expected_groups = [
         {
@@ -118,9 +123,21 @@ def test_get_groups_list(m_client, client):
         }
     ]
 
-    response = client.get('/groups')
+    response = client.get('/groups/1/50')
 
     assert response.json == expected_groups
+    # Exactly one groups query and one *batched* inventory query, regardless of how many
+    # groups are on the page - this is the fix for the 1+N query pattern.
+    assert m_client.call_count == 2
+    inventory_call = m_client.call_args_list[1]
+    assert inventory_call.args == ({"address": {"$in": ["group_1", "group_2"]}, "delete": False}, {"address": 1, "_id": 0})
+
+
+@mock.patch("pymongo.collection.Collection.count_documents")
+def test_get_groups_count(m_client, client):
+    m_client.return_value = 42
+    response = client.get('/groups/count')
+    assert response.json == 42
 
 
 @mock.patch("pymongo.collection.Collection.find")
@@ -263,9 +280,9 @@ def test_get_devices_of_group(m_client, client):
     assert response.json == third_result
 
 
-@mock.patch("SC4SNMP_UI_backend.inventory.routes.get_inventory_type")
+@mock.patch("SC4SNMP_UI_backend.common.inventory_utils.mongo_groups")
 @mock.patch("pymongo.cursor.Cursor.limit")
-def test_get_inventory_list(m_cursor, m_get_inventory_type, client):
+def test_get_inventory_list(m_cursor, m_groups, client):
     common_id = "635916b2c8cb7a15f28af40a"
 
     m_cursor.side_effect = [
@@ -314,7 +331,12 @@ def test_get_inventory_list(m_cursor, m_get_inventory_type, client):
         ]
     ]
 
-    m_get_inventory_type.side_effect = ["Host", "Group", "Group"]
+    # get_inventory_types_bulk runs one groups_ui "$or" query per page instead of one
+    # get_inventory_type call per row - mock that query's result per page.
+    m_groups.find.side_effect = [
+        [{"_id": common_id, "group_1": [{"address": "1.2.3.4"}]}],
+        [{"_id": common_id, "group_2": [{"address": "1.2.3.4"}]}],
+    ]
 
     first_result = [
         {
@@ -363,9 +385,12 @@ def test_get_inventory_list(m_cursor, m_get_inventory_type, client):
 
     response = client.get('/inventory/1/2')
     assert response.json == first_result
+    # One groups_ui query for the whole 2-row page, not one per row.
+    assert m_groups.find.call_count == 1
 
     response = client.get('/inventory/2/2')
     assert response.json == second_result
+    assert m_groups.find.call_count == 2
 
 
 @mock.patch("pymongo.collection.Collection.count_documents")

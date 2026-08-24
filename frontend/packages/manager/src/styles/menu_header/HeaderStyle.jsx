@@ -49,8 +49,14 @@ const StyledHeaderRight = styled.div`
 
     & > div {
         display: flex;
+        flex-direction: column;
+        align-items: flex-end;
         margin-right: 20px;
         margin-top: 34px;
+    }
+
+    & > div > div {
+        display: flex;
     }
 `;
 

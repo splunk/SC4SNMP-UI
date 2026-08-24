@@ -184,7 +184,7 @@ function AddInventoryModal() {
                             {((ValCtx.addressErrors) ? ValCtx.addressErrors.map((el) => <P data-test="sc4snmp:ip-group-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
-                    <StyledControlGroup labelWidth={140} label="Port">
+                    <StyledControlGroup labelWidth={140} label={((InvCtx.inventoryType === "Group") ? "Port (optional)" : "Port")}>
                         <ValidationGroup>
                             <Text data-test="sc4snmp:form:port-input" value={InvCtx.port} onChange={handleChangePort} error={(!!(ValCtx.portErrors))}/>
                             {((ValCtx.portErrors) ? ValCtx.portErrors.map((el) => <P data-test="sc4snmp:port-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}

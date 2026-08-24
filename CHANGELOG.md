@@ -1,6 +1,14 @@
 # Changelog
 
 ### Changed
+- fix button misalignment on multilines in table
+- fix schedules not resuming for unchanged inventory records after Redis/RedBeat is reset while MongoDB data is preserved
+- fix font flash on page switch by inlining Proxima Nova as WOFF2 instead of loading OTF files on demand
+- add "Restore configuration" button to recover Profiles, Groups, and Inventory from section files on disk when MongoDB data is lost
+- hide Logout button when authentication is disabled
+- fix port being required when adding a Group inventory record
+- fix Groups tab freezing for large device counts by paginating the group list and batching inventory-membership lookups
+- add "Bulk add devices" to a group, supporting a manual grid or a pasted address list with shared SNMP config
 
 ## [1.2.1]
 

@@ -55,6 +55,7 @@ def test_status_authenticated(client):
     response = client.get("/auth/status")
     assert response.status_code == 200
     assert response.json["username"] == TEST_USERNAME
+    assert response.json["authEnabled"] is True
 
 
 def test_status_unauthenticated(client):

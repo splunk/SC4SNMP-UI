@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import Select from "@splunk/react-ui/Select";
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
@@ -10,6 +10,7 @@ import api from "../../api";
 import {useProfileContext} from "../../store/profile-contxt";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {Pagination} from "../../styles/groups/GroupsStyle";
+import {RowActions} from "../../styles/common/ListStyles";
 import DeleteModal from "../DeleteModal";
 import P from "@splunk/react-ui/Paragraph";
 
@@ -62,6 +63,7 @@ function ProfilesList() {
     const [expandedRowId, setExpandedRowId] = useState(null);
     const ProfCtx = useProfileContext();
     const ErrCtx = useErrorsModalContext();
+    const isMountedRef = useRef(true);
 
     const getProfileRows = (page) => {
         api.get("/profiles/count")
@@ -73,17 +75,19 @@ function ProfilesList() {
                 };
                 api.get(`/profiles/${page.toString()}/${profilesPerPage.toString()}`)
                     .then((response2) => {
-                        setPageNum(page);
-                        setTotalPages(maxPages);
-                        setProfilesRecords(response2.data);
+                        if (isMountedRef.current){
+                            setPageNum(page);
+                            setTotalPages(maxPages);
+                            setProfilesRecords(response2.data);
+                        }
                     })
             });
     };
 
     useEffect(() => {
-        let isMounted = true;
+        isMountedRef.current = true;
         getProfileRows(pageNum);
-        return () => { isMounted = false }
+        return () => { isMountedRef.current = false }
     }, [ProfCtx.profilesChange]);
 
     const profilesPerPageHandler = (e, { value }) => {
@@ -190,8 +194,10 @@ function ProfilesList() {
                                 <Table.Cell data-test="sc4snmp:profile-mib-object" >{/* MIB object is empty in this view */}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:profile-mib-index" >{/* MIB index is empty in this view */}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:profile-actions" >
-                                    <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
-                                    <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    <RowActions>
+                                        <Button data-test="sc4snmp:profile-row-edit" onClick={() => profileEditHandler(JSON.parse(JSON.stringify(row)))} icon={<Pencil />} />
+                                        <Button data-test="sc4snmp:profile-row-delete"  onClick={() => profileDeleteHandler(JSON.parse(JSON.stringify(row)))} icon={<Trash />} />
+                                    </RowActions>
                                 </Table.Cell>
                             </Table.Row>
                         ))}
