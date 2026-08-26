@@ -202,4 +202,38 @@ describe("AddInventoryModal", () => {
         await sleep(5)
         expect(screen.queryByText("When using SNMP version 3, secret must be specified")).toBeInTheDocument()
     })
+
+    it("Test max OID to process is optional but validated when provided", async () => {
+        api.get.mockResolvedValueOnce({data:[]});
+        api.post.mockResolvedValue({data: "success"});
+        await act( async () => renderModal());
+        const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
+        const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
+        const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
+        const communityInput = screen.getByDataTest('sc4snmp:form:community-input').querySelector("input");
+        const maxOidToProcessInput = screen.getByDataTest('sc4snmp:form:max-oid-to-process-input').querySelector("input");
+
+        // A successful submit resets the whole form, so address/community are
+        // re-filled before each submit below rather than only once up front.
+        fireEvent.click(hostButton);
+        fireEvent.change(addressInput, {target: {value: "1.2.3.4"}})
+        fireEvent.change(communityInput, {target: {value: "public"}})
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Max OID to process must be a positive integer, or left empty to use the default.")).not.toBeInTheDocument();
+        expect(api.post).toHaveBeenCalledWith("/inventory/add", expect.objectContaining({maxOidToProcess: ''}));
+
+        fireEvent.change(addressInput, {target: {value: "1.2.3.4"}})
+        fireEvent.change(communityInput, {target: {value: "public"}})
+        fireEvent.change(maxOidToProcessInput, {target: {value: 0}});
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Max OID to process must be a positive integer, or left empty to use the default.")).toBeInTheDocument();
+
+        fireEvent.change(maxOidToProcessInput, {target: {value: 50}});
+        fireEvent.click(submitButton);
+        await sleep(10);
+        expect(screen.queryByText("Max OID to process must be a positive integer, or left empty to use the default.")).not.toBeInTheDocument();
+        expect(api.post).toHaveBeenCalledWith("/inventory/add", expect.objectContaining({maxOidToProcess: 50}));
+    })
 })

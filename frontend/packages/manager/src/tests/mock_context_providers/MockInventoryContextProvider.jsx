@@ -25,6 +25,7 @@ export function MockInventoryContextProvider(props){
     const [secret, setSecret] = useState('');
     const [securityEngine, setSecurityEngine] = useState('');
     const [walkInterval, setWalkInterval] = useState(1800);
+    const [maxOidToProcess, setMaxOidToProcess] = useState('');
     const [profiles, setProfiles] = useState([]);
     const [smartProfiles, setSmartProfiles] = useState(false);
     const [inventoryType, setInventoryType] = useState("Host");
@@ -38,6 +39,7 @@ export function MockInventoryContextProvider(props){
         setSecret('');
         setSecurityEngine('');
         setWalkInterval(1800);
+        setMaxOidToProcess('');
         setProfiles([]);
         setSmartProfiles(false);
     }
@@ -71,6 +73,8 @@ export function MockInventoryContextProvider(props){
         setSecurityEngine,
         walkInterval,
         setWalkInterval,
+        maxOidToProcess,
+        setMaxOidToProcess,
         profiles,
         setProfiles,
         smartProfiles,

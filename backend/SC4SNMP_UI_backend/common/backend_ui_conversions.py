@@ -278,6 +278,8 @@ class InventoryConversion(Conversion):
                 'walk_interval': document['walkInterval'],
                 'profiles': profiles,
                 'smart_profiles': document['smartProfiles'],
+                'max_oid_to_process': int(document['maxOidToProcess'])
+                    if str(document.get('maxOidToProcess', "")).strip() else None,
                 'delete': kwargs['delete']
             }
             return result
@@ -303,6 +305,7 @@ class InventoryConversion(Conversion):
             'securityEngine': document['security_engine'],
             'walkInterval': document['walk_interval'],
             'profiles': profiles,
-            'smartProfiles': document['smart_profiles']
+            'smartProfiles': document['smart_profiles'],
+            'maxOidToProcess': '' if document.get('max_oid_to_process') is None else document['max_oid_to_process']
         }
         return result

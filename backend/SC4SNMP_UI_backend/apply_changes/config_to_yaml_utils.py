@@ -130,13 +130,15 @@ class InventoryToYamlDictConversion(MongoToYamlDictConversion):
         :param documents: inventory from mongo
         :return: dictionary that can be dumped to yaml
         """
-        inventory_string = "address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,delete"
+        inventory_string = "address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,max_oid_to_process,delete"
         for inv in documents:
             smart_profiles = bool_to_str(inv['smart_profiles'])
             inv_delete = bool_to_str(inv['delete'])
+            max_oid_to_process = inv.get('max_oid_to_process')
+            max_oid_to_process = '' if max_oid_to_process is None else max_oid_to_process
             inventory_string += f"\n{inv['address']},{inv['port']},{inv['version']},{inv['community']}," \
                                 f"{inv['secret']},{inv['security_engine']},{inv['walk_interval']},{inv['profiles']}," \
-                                f"{smart_profiles},{inv_delete}"
+                                f"{smart_profiles},{max_oid_to_process},{inv_delete}"
         return {
             "inventory": literal_string(inventory_string)
         }

@@ -100,6 +100,7 @@ inventory_collection_no_id = [
         "walk_interval": 1800,
         "profiles": "small_walk;in_profile",
         "smart_profiles": True,
+        "max_oid_to_process": None,
         "delete": False
     },
     {
@@ -112,6 +113,7 @@ inventory_collection_no_id = [
         "walk_interval": 1800,
         "profiles": "single_metric;multiple_conditions",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
 ]
@@ -150,6 +152,34 @@ class TestFileToConfigUtils(TestCase):
         documents = inventory_csv_to_documents(csv_string)
         self.assertEqual(len(documents), 1)
         self.assertEqual(documents[0]["address"], "1.1.1.1")
+
+    def test_inventory_csv_to_documents_max_oid_to_process_backward_compat(self):
+        # Older section files predate the max_oid_to_process column entirely; a
+        # blank cell in a current-format file means the same thing (unset).
+        # Both must parse to None rather than raising, so the connector falls
+        # back to its global default.
+        old_format_csv = (
+            "address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,delete\n"
+            "1.1.1.1,161,2c,public,,,1800,small_walk,t,f\n"
+        )
+        documents = inventory_csv_to_documents(old_format_csv)
+        self.assertEqual(documents[0]["max_oid_to_process"], None)
+
+        blank_cell_csv = (
+            "address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,"
+            "max_oid_to_process,delete\n"
+            "1.1.1.1,161,2c,public,,,1800,small_walk,t,,f\n"
+        )
+        documents = inventory_csv_to_documents(blank_cell_csv)
+        self.assertEqual(documents[0]["max_oid_to_process"], None)
+
+        set_value_csv = (
+            "address,port,version,community,secret,security_engine,walk_interval,profiles,smart_profiles,"
+            "max_oid_to_process,delete\n"
+            "1.1.1.1,161,2c,public,,,1800,small_walk,t,50,f\n"
+        )
+        documents = inventory_csv_to_documents(set_value_csv)
+        self.assertEqual(documents[0]["max_oid_to_process"], 50)
 
     def test_inventory_csv_to_documents_empty_string(self):
         self.assertEqual(inventory_csv_to_documents(""), [])

@@ -22,6 +22,7 @@ const columns = [
     {sortKey: 'secret', label: 'Secret'},
     {sortKey: 'securityEngine', label: 'Security Engine'},
     {sortKey: 'walkInterval', label: 'Walk Interval'},
+    {sortKey: 'maxOidToProcess', label: 'Max OID to process'},
     {sortKey: 'profiles', label: 'Profiles'},
     {sortKey: 'smartProfiles', label: 'Smart Profiles'},
     {sortKey: `actions`, label: 'Actions'},
@@ -68,6 +69,7 @@ function InventoryList() {
         InvCtx.setSecret(row.secret);
         InvCtx.setSecurityEngine(row.securityEngine);
         InvCtx.setWalkInterval(row.walkInterval);
+        InvCtx.setMaxOidToProcess(row.maxOidToProcess);
         InvCtx.setProfiles(row.profiles);
         InvCtx.setSmartProfiles(row.smartProfiles);
     };
@@ -150,6 +152,7 @@ function InventoryList() {
                                 <Table.Cell data-test="sc4snmp:inventory-secret" >{row.secret}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-security-engine" >{row.securityEngine}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-walk-interval" >{row.walkInterval}</Table.Cell>
+                                <Table.Cell data-test="sc4snmp:inventory-max-oid-to-process" >{row.maxOidToProcess}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-profiles" >{row.profiles.toString()}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-smart-profiles" >{row.smartProfiles.toString()}</Table.Cell>
                                 <Table.Cell data-test="sc4snmp:inventory-actions" >

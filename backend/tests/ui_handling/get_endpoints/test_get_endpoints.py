@@ -350,7 +350,8 @@ def test_get_inventory_list(m_cursor, m_groups, client):
             "walkInterval": 1800,
             "securityEngine": "1234aabbccd",
             "profiles": ["prof1", "prof2", "prof3"],
-            "smartProfiles": False
+            "smartProfiles": False,
+            "maxOidToProcess": ""
         },
         {
             "_id": common_id,
@@ -363,7 +364,8 @@ def test_get_inventory_list(m_cursor, m_groups, client):
             "walkInterval": 1900,
             "securityEngine": "",
             "profiles": ["prof3"],
-            "smartProfiles": True
+            "smartProfiles": True,
+            "maxOidToProcess": ""
         }
     ]
 
@@ -379,7 +381,8 @@ def test_get_inventory_list(m_cursor, m_groups, client):
             "walkInterval": 1800,
             "securityEngine": "1234aabbccd",
             "profiles": ["prof1", "prof2", "prof3"],
-            "smartProfiles": False
+            "smartProfiles": False,
+            "maxOidToProcess": ""
         },
     ]
 
