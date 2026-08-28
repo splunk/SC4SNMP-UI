@@ -58,12 +58,12 @@ inventory_collection_no_id = [
     {
         "address": "1.1.1.1", "port": 161, "version": "2c", "community": "public", "secret": "",
         "security_engine": "", "walk_interval": 1800, "profiles": "small_walk;in_profile",
-        "smart_profiles": True, "delete": False
+        "smart_profiles": True, "max_oid_to_process": None, "delete": False
     },
     {
         "address": "group1", "port": 1161, "version": "2c", "community": "public", "secret": "",
         "security_engine": "", "walk_interval": 1800, "profiles": "single_metric;multiple_conditions",
-        "smart_profiles": False, "delete": False
+        "smart_profiles": False, "max_oid_to_process": None, "delete": False
     }
 ]
 

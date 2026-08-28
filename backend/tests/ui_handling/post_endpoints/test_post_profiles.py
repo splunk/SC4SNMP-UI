@@ -101,6 +101,7 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
         "security_engine": "1234aabbccd",
         "profiles": "profile_2",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
 
@@ -220,6 +221,7 @@ def test_update_profile_record_with_name_change_success(m_find, m_update, client
         "security_engine": "1234aabbccd",
         "profiles": "profile_1_edit;profile_2",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
 

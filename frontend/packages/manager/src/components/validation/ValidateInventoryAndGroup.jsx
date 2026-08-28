@@ -15,6 +15,7 @@ const validateInventoryAndGroup = (validationObj) => {
         secret: [],
         securityEngine: [],
         walkInterval: [],
+        maxOidToProcess: [],
         profiles: []
     };
     let isValid = true;
@@ -104,6 +105,16 @@ const validateInventoryAndGroup = (validationObj) => {
         if (!(Number.isInteger(validationObj.walkInterval)) || (validationObj.walkInterval < 1800 || validationObj.walkInterval > 604800)){
             isValid = false;
             errors.walkInterval.push("Walk Interval number must be an integer in range 1800-604800.");
+        }
+    }
+
+    // Validate Max OID to process (optional - empty means "use the connector's global default")
+    if ("maxOidToProcess" in validationObj){
+        const maxOidToProcess = validationObj.maxOidToProcess;
+        const isEmpty = maxOidToProcess === '' || maxOidToProcess === null || maxOidToProcess === undefined;
+        if (!isEmpty && !(Number.isInteger(maxOidToProcess) && maxOidToProcess >= 1)){
+            isValid = false;
+            errors.maxOidToProcess.push("Max OID to process must be a positive integer, or left empty to use the default.");
         }
     }
 

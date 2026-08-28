@@ -44,8 +44,12 @@ def inventory_csv_to_documents(csv_string: str) -> list:
     Inverse of InventoryToYamlDictConversion.convert. Parses the
     poller.inventory literal-block CSV (header: address,port,version,
     community,secret,security_engine,walk_interval,profiles,smart_profiles,
-    delete) into the inventory_ui Mongo document shape - one dict per row,
-    matching InventoryConversion.ui2backend's output fields.
+    max_oid_to_process,delete) into the inventory_ui Mongo document shape -
+    one dict per row, matching InventoryConversion.ui2backend's output fields.
+
+    max_oid_to_process is optional - a missing column (older section files)
+    or a blank cell both mean "unset" (None), so the connector falls back to
+    its global default rather than raising on int("").
 
     Rows whose address is blank or starts with "#" are skipped, mirroring
     the connector's own convention of allowing commented-out inventory rows.
@@ -59,6 +63,7 @@ def inventory_csv_to_documents(csv_string: str) -> list:
         address = (row.get("address") or "").strip()
         if not address or address.startswith("#"):
             continue
+        max_oid_raw = (row.get("max_oid_to_process") or "").strip()
         documents.append({
             "address": address,
             "port": int(row["port"]),
@@ -69,6 +74,7 @@ def inventory_csv_to_documents(csv_string: str) -> list:
             "walk_interval": int(row["walk_interval"]),
             "profiles": row["profiles"],
             "smart_profiles": str_to_bool(row["smart_profiles"]),
+            "max_oid_to_process": int(max_oid_raw) if max_oid_raw else None,
             "delete": str_to_bool(row["delete"]),
         })
     return documents
