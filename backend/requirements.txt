@@ -17,4 +17,4 @@ redis~=8.0
 ruamel.yaml===0.17.32
 PyJWT~=2.13
 argon2-cffi~=25.1
-Flask-Limiter~=3.8
+Flask-Limiter~=4.1
