@@ -202,6 +202,7 @@ class TestConversions(TestCase):
             "security_engine": "1234aabbccd",
             "profiles": "prof1;prof2;prof3",
             "smart_profiles": False,
+            "max_oid_to_process": 50,
             "delete": False
         }
 
@@ -216,7 +217,8 @@ class TestConversions(TestCase):
             "walkInterval": 1800,
             "securityEngine": "1234aabbccd",
             "profiles": ["prof1", "prof2", "prof3"],
-            "smartProfiles": False
+            "smartProfiles": False,
+            "maxOidToProcess": 50
         }
 
         cls.backend_inventory_2 = {
@@ -230,6 +232,7 @@ class TestConversions(TestCase):
             "security_engine": "",
             "profiles": "prof3",
             "smart_profiles": True,
+            "max_oid_to_process": None,
             "delete": True
         }
 
@@ -244,7 +247,8 @@ class TestConversions(TestCase):
             "walkInterval": 1900,
             "securityEngine": "",
             "profiles": ["prof3"],
-            "smartProfiles": True
+            "smartProfiles": True,
+            "maxOidToProcess": ""
         }
 
     def test_profile_backend_to_ui(self):
@@ -350,6 +354,7 @@ class TestConversions(TestCase):
             "security_engine": "",
             "profiles": "prof3",
             "smart_profiles": True,
+            "max_oid_to_process": None,
             "delete": True
         }
 

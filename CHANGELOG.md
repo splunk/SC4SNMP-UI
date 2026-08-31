@@ -1,6 +1,15 @@
 # Changelog
 
 ### Changed
+
+## [1.3.0]
+
+### Changed
+- adds optional value max oid to process to the inventory page
+
+## [1.2.3]
+
+### Changed
 - fix button misalignment on multilines in table
 - fix schedules not resuming for unchanged inventory records after Redis/RedBeat is reset while MongoDB data is preserved
 - fix font flash on page switch by inlining Proxima Nova as WOFF2 instead of loading OTF files on demand

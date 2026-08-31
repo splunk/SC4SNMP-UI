@@ -10,6 +10,7 @@ export function InventoryDevicesValidationContxtProvider(props){
     const [secretErrors, setSecretErrors] = useState(null);
     const [securityEngineErrors, setSecurityEngineErrors] = useState(null);
     const [walkIntervalErrors, setWalkIntervalErrors] = useState(null);
+    const [maxOidToProcessErrors, setMaxOidToProcessErrors] = useState(null);
     const [profilesErrors, setProfilesErrors] = useState(null);
 
     const resetAllErrors = () =>{
@@ -20,6 +21,7 @@ export function InventoryDevicesValidationContxtProvider(props){
         setSecretErrors(null);
         setSecurityEngineErrors(null);
         setWalkIntervalErrors(null);
+        setMaxOidToProcessErrors(null);
         setProfilesErrors(null);
     };
 
@@ -46,6 +48,10 @@ export function InventoryDevicesValidationContxtProvider(props){
                 setWalkIntervalErrors(null);
             case "profiles":
                 setProfilesErrors(null);
+                break;
+            case "maxOidToProcess":
+                setMaxOidToProcessErrors(null);
+                break;
             default:
                 break;
         };
@@ -74,6 +80,10 @@ export function InventoryDevicesValidationContxtProvider(props){
                 setWalkIntervalErrors(errors);
             case "profiles":
                 setProfilesErrors(errors);
+                break;
+            case "maxOidToProcess":
+                setMaxOidToProcessErrors(errors);
+                break;
             default:
                 break;
         };
@@ -87,6 +97,7 @@ export function InventoryDevicesValidationContxtProvider(props){
         secretErrors: secretErrors,
         securityEngineErrors: securityEngineErrors,
         walkIntervalErrors: walkIntervalErrors,
+        maxOidToProcessErrors: maxOidToProcessErrors,
         profilesErrors: profilesErrors,
         resetAllErrors: resetAllErrors,
         resetErrors: resetErrors,

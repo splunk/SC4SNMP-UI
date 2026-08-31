@@ -52,6 +52,10 @@ function AddInventoryModal() {
         InvCtx.setWalkInterval(val);
     }, [InvCtx]);
 
+    const handleChangeMaxOidToProcess = useCallback((e, { value: val }) => {
+        InvCtx.setMaxOidToProcess(val);
+    }, [InvCtx]);
+
     const handleChangeSmartProfiles = useCallback((e, { value: val }) => {
         InvCtx.setSmartProfiles(val);
     }, [InvCtx]);
@@ -128,6 +132,7 @@ function AddInventoryModal() {
                 secret: InvCtx.secret,
                 securityEngine: InvCtx.securityEngine,
                 walkInterval: InvCtx.walkInterval,
+                maxOidToProcess: InvCtx.maxOidToProcess,
                 profiles: InvCtx.profiles,
                 smartProfiles: InvCtx.smartProfiles,
                 initProfiles
@@ -160,7 +165,7 @@ function AddInventoryModal() {
 
         },
         [InvCtx.inventoryType, InvCtx.address, InvCtx.port, InvCtx.version, InvCtx.community, InvCtx.secret, InvCtx.securityEngine, InvCtx.isEdit,
-            InvCtx.walkInterval, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
+            InvCtx.walkInterval, InvCtx.maxOidToProcess, InvCtx.profiles, InvCtx.smartProfiles, InvCtx.setAddOpen, InvCtx.addModalToggle, InvCtx.inventoryId, initProfiles]
     );
 
     return (
@@ -228,6 +233,13 @@ function AddInventoryModal() {
                         <ValidationGroup>
                             <Number data-test="sc4snmp:form:walk-interval-input" value={InvCtx.walkInterval} onChange={handleChangeWalkInterval} error={(!!(ValCtx.walkIntervalErrors))}/>
                             {((ValCtx.walkIntervalErrors) ? ValCtx.walkIntervalErrors.map((el) => <P data-test="sc4snmp:walk-interval-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
+                        </ValidationGroup>
+                    </StyledControlGroup>
+
+                    <StyledControlGroup label="Max OID to process" labelWidth={140}>
+                        <ValidationGroup>
+                            <Number data-test="sc4snmp:form:max-oid-to-process-input" value={InvCtx.maxOidToProcess} onChange={handleChangeMaxOidToProcess} error={(!!(ValCtx.maxOidToProcessErrors))}/>
+                            {((ValCtx.maxOidToProcessErrors) ? ValCtx.maxOidToProcessErrors.map((el) => <P data-test="sc4snmp:max-oid-to-process-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
 

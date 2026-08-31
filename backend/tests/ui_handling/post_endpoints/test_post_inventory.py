@@ -29,6 +29,7 @@ backend_inventory_new = lambda : {
     "security_engine": "1234aabbccd",
     "profiles": "prof1;prof2;prof3",
     "smart_profiles": False,
+    "max_oid_to_process": None,
     "delete": False
 }
 
@@ -55,6 +56,7 @@ backend_inventory_new_host_name  = lambda : {
     "security_engine": "1234aabbccd",
     "profiles": "prof1;prof2;prof3",
     "smart_profiles": False,
+    "max_oid_to_process": None,
     "delete": False
 }
 
@@ -302,6 +304,7 @@ def test_edit_single_host_address_and_port_success(m_find, m_insert, m_update, m
         "security_engine": "1234aabbccd",
         "profiles": "prof1;prof2;prof3",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
     deleted_host_backend = {
@@ -383,6 +386,7 @@ def test_edit_ip_to_hostname_success(m_find, m_insert, m_update, m_delete, m_get
         "security_engine": "1234aabbccd",
         "profiles": "prof1;prof2;prof3",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
     deleted_host_backend = {
@@ -565,6 +569,7 @@ new_group_backend_inventory = lambda :{
     "security_engine": "1234aabbccd",
     "profiles": "prof1;prof2;prof3",
     "smart_profiles": False,
+    "max_oid_to_process": None,
     "delete": False
 }
 
@@ -939,6 +944,7 @@ edited_inventory_group = lambda : {
     "security_engine": "1234aabbccd",
     "profiles": "prof1;prof2;prof3",
     "smart_profiles": False,
+    "max_oid_to_process": None,
     "delete": False
 }
 
@@ -1030,6 +1036,7 @@ def test_update_group_with_changing_name_success(m_find, m_insert, m_update, m_d
         "security_engine": "1234aabbccd",
         "profiles": "prof1;prof2;prof3",
         "smart_profiles": False,
+        "max_oid_to_process": None,
         "delete": False
     }
 
