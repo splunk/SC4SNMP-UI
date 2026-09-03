@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useContext } from 'react';
+import PropTypes from 'prop-types';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
@@ -26,9 +27,9 @@ function DeleteModal(props) {
                 <Modal.Header title={`Delete ${props.deleteName}`} onRequestClose={handleRequestClose} />
                 <Modal.Body>
                     <P>Are you sure you want to delete {props.deleteName} ?</P>
-                    {("customWarning" in props && props["customWarning"] != null) ?
+                    {("customWarning" in props && props.customWarning != null) ?
                         (<Message appearance="fill" type="warning">
-                            {props["customWarning"]}
+                            {props.customWarning}
                         </Message>) : null}
                 </Modal.Body>
                 <Modal.Footer>
@@ -39,5 +40,11 @@ function DeleteModal(props) {
         </div>
     );
 }
+
+DeleteModal.propTypes = {
+    deleteName: PropTypes.string.isRequired,
+    customWarning: PropTypes.node,
+    handleDelete: PropTypes.func.isRequired,
+};
 
 export default DeleteModal;

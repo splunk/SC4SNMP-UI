@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import PropTypes from 'prop-types';
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
 
 export function MockInventoryValidationContextProvider(props){
@@ -89,18 +90,18 @@ export function MockInventoryValidationContextProvider(props){
     };
 
     const context = {
-        groupNameErrors: groupNameErrors,
-        addressErrors: addressErrors,
-        portErrors: portErrors,
-        communityErrors: communityErrors,
-        secretErrors: secretErrors,
-        securityEngineErrors: securityEngineErrors,
-        walkIntervalErrors: walkIntervalErrors,
-        maxOidToProcessErrors: maxOidToProcessErrors,
-        profilesErrors: profilesErrors,
-        resetAllErrors: resetAllErrors,
-        resetErrors: resetErrors,
-        setErrors: setErrors
+        groupNameErrors,
+        addressErrors,
+        portErrors,
+        communityErrors,
+        secretErrors,
+        securityEngineErrors,
+        walkIntervalErrors,
+        maxOidToProcessErrors,
+        profilesErrors,
+        resetAllErrors,
+        resetErrors,
+        setErrors
     }
 
     return (
@@ -108,4 +109,8 @@ export function MockInventoryValidationContextProvider(props){
             {props.children}
         </InventoryDevicesValidationContxt.Provider>
     )
+};
+
+MockInventoryValidationContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import PropTypes from 'prop-types';
 import {jest} from "@jest/globals";
 import ProfileContext from "../../store/profile-contxt";
 
@@ -17,7 +18,7 @@ export function MockProfileContextProvider(props) {
     const [profileName, setProfileName] = useState('');
     const [frequency, setFrequency] = useState(1);
     const [varBinds, setVarBinds] = useState([]);
-    const [condition, setCondition] = useState(("profileType" in props["profileProps"] ? props["profileProps"]["profileType"] : "standard"));
+    const [condition, setCondition] = useState(("profileType" in props.profileProps ? props.profileProps.profileType : "standard"));
     const [conditionField, setConditionField] = useState("");
     const [conditionPatterns, setConditionPatterns] = useState([]);
     const [conditional, setConditional] = useState([]);
@@ -63,3 +64,10 @@ export function MockProfileContextProvider(props) {
         </ProfileContext.Provider>
     )
 }
+
+MockProfileContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+    profileProps: PropTypes.shape({
+        profileType: PropTypes.string,
+    }),
+};

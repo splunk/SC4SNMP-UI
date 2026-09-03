@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
@@ -94,9 +95,7 @@ function FieldPatterns(props){
     }
 
     useEffect(() => {
-        let isMounted = true;
         setRowItems(loadFormRows());
-        return () => { isMounted = false }
     }, [props.newSubmit, reload]);
 
     return (
@@ -110,5 +109,9 @@ function FieldPatterns(props){
         </FormRows>
     )
 }
+
+FieldPatterns.propTypes = {
+    newSubmit: PropTypes.bool,
+};
 
 export default FieldPatterns;

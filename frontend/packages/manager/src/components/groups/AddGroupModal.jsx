@@ -4,8 +4,8 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
 import Text from '@splunk/react-ui/Text';
-import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
+import api from "../../api";
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
@@ -24,7 +24,7 @@ function AddGroupModal() {
 
     const postGroup = (groupObj) => {
         api.post("/groups/add", groupObj)
-            .then((response) => {
+            .then(() => {
                 GrCtx.makeGroupsChange();
             })
             .catch((error) => {

@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
@@ -104,7 +105,7 @@ function VarBinds(props){
                                   error={((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors))}/>
                         </div>
                         {((ValCtx.varBindsErrors && newIndices[`${keyID}`] in ValCtx.varBindsErrors) ?
-                            ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el,i) => <P data-test="sc4snmp:varbind-error" key={createDOMID()}
+                            ValCtx.varBindsErrors[newIndices[`${keyID}`]].map((el) => <P data-test="sc4snmp:varbind-error" key={createDOMID()}
                                                                                          style={validationMessage}>{el}</P>) :
                             <P/>)}
                     </ValidationGroup>
@@ -116,9 +117,7 @@ function VarBinds(props){
     }
 
     useEffect(() => {
-        let isMounted = true;
         setRowItems(loadFormRows());
-        return () => { isMounted = false }
     }, [props.newSubmit, reload]);
 
     return (
@@ -133,5 +132,9 @@ function VarBinds(props){
     )
 
 }
+
+VarBinds.propTypes = {
+    newSubmit: PropTypes.bool,
+};
 
 export default VarBinds;

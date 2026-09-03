@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import AuthContext from '../../store/auth-contxt';
 
 const defaultAuthContext = {
@@ -21,3 +22,8 @@ export function MockAuthContextProvider({ children, overrides = {} }) {
         </AuthContext.Provider>
     );
 }
+
+MockAuthContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+    overrides: PropTypes.object,
+};

@@ -1,9 +1,7 @@
-import React from 'react';
-import { expect, describe, jest, it, beforeEach } from '@jest/globals';
+import React, { act } from 'react';
+import { expect, describe, jest, it } from '@jest/globals';
 import { fireEvent } from '@testing-library/dom';
-import { act } from 'react-dom/test-utils';
 import { render, screen } from './custom_testing_lib/custom-testing-lib';
-import "@testing-library/jest-dom";
 import "@testing-library/jest-dom";
 import LoginPage from "../components/auth/LoginPage";
 import { MockAuthContextProvider } from "./mock_context_providers/MockAuthContextProvider";
@@ -42,7 +40,7 @@ describe("LoginPage", () => {
         await act(async () => renderLoginPage());
 
         const signInButton = screen.getByText("Sign in");
-        expect(signInButton.closest("button")).toBeDisabled();
+        expect(signInButton.closest("button")).toHaveAttribute("aria-disabled", "true");
     });
 
     it("enables Sign in button when both fields are filled", async () => {
@@ -57,7 +55,7 @@ describe("LoginPage", () => {
         });
 
         const signInButton = screen.getByText("Sign in");
-        expect(signInButton.closest("button")).not.toBeDisabled();
+        expect(signInButton.closest("button")).not.toHaveAttribute("aria-disabled", "true");
     });
 
     it("calls login on submit", async () => {

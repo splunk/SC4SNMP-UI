@@ -1,6 +1,7 @@
 import React, {useState} from "react";
-import InventoryContext from "../../store/inventory-contxt";
+import PropTypes from 'prop-types';
 import {jest} from "@jest/globals";
+import InventoryContext from "../../store/inventory-contxt";
 
 const setStateMock = jest.fn()
 
@@ -82,7 +83,7 @@ export function MockInventoryContextProvider(props){
         inventoryType,
         setInventoryType,
 
-        resetFormData:resetFormData
+        resetFormData
     };
 
     return (
@@ -90,4 +91,8 @@ export function MockInventoryContextProvider(props){
             {props.children}
         </InventoryContext.Provider>
     )
+};
+
+MockInventoryContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

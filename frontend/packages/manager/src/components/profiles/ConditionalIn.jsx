@@ -1,4 +1,5 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
@@ -33,7 +34,7 @@ function ConditionalIn(props){
 
         // Update errors indexes after deleting an element
         const errors = ValCtx.conditionalValuesErrors;
-        if (errors && errors.hasOwnProperty(props.conditionIndex)){
+        if (errors && Object.prototype.hasOwnProperty.call(errors, props.conditionIndex)){
             const error = errors[props.conditionIndex]
             const errorKeys = Object.keys(error);
             errorKeys.forEach((errorID) => {
@@ -81,7 +82,7 @@ function ConditionalIn(props){
             return (
                 <FormRows.Row index={indexCopy} key={keyID} onRequestRemove={handleRequestRemove}>
                     <div style={validationGroup}>
-                        <Text data-test={`${props["data-test"]}`} defaultValue={value} placeholder={"Value"} onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
+                        <Text data-test={`${props["data-test"]}`} defaultValue={value} placeholder="Value" onChange={e => handleItemValue(newIndices[`${keyID}`], e)}
                               error={((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors)) &&
                         newIndices[`${keyID}`] in ValCtx.conditionalValuesErrors[props.conditionIndex]}/>
                         {((ValCtx.conditionalValuesErrors && props.conditionIndex in ValCtx.conditionalValuesErrors
@@ -97,9 +98,7 @@ function ConditionalIn(props){
     }
 
     useEffect(() => {
-        let isMounted = true;
         setRowItems(loadFormRows());
-        return () => { isMounted = false }
     }, [props.newSubmit, reload]);
 
     return (
@@ -112,5 +111,11 @@ function ConditionalIn(props){
         </FormRows>
     )
 }
+
+ConditionalIn.propTypes = {
+    conditionIndex: PropTypes.number,
+    newSubmit: PropTypes.bool,
+    'data-test': PropTypes.string,
+};
 
 export default ConditionalIn;

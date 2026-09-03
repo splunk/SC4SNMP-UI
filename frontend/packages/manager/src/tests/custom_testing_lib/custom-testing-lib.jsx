@@ -12,8 +12,10 @@ const customRender = (ui, options) => render(ui, {queries: allQueries, ...option
 
 
 // re-export everything
+// eslint-disable-next-line import/export -- render/screen/within are intentionally overridden below
 export * from '@testing-library/react';
 
 
 // override render method
+// eslint-disable-next-line import/export -- intentional override of the wildcard export above
 export {customScreen as screen, customWithin as within, customRender as render};

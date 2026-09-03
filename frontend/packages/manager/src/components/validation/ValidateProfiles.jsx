@@ -1,5 +1,3 @@
-import React from 'react';
-
 const sameConditions = (configuredConditions, fieldName, newConditionKeys) => {
     /*
         configuredConditions: {"fieldName1": [["fieldName1", "value1", "<operation_type>"], ["fieldName1", "value2", "value3", "<operation_type>"]]}
@@ -15,8 +13,6 @@ const sameConditions = (configuredConditions, fieldName, newConditionKeys) => {
                 });
             }
         }
-    } else{
-        console.log("fieldName not in configuredConditions")
     }
     return result;
 }
@@ -97,7 +93,7 @@ const validateProfiles = (validationObj) => {
             // Validate each pattern
             const configuredPatterns = {};
             let patternKey;
-            for (let i = 0; i < validationObj.conditions.patterns.length; i++){
+            for (let i = 0; i < validationObj.conditions.patterns.length; i += 1){
                 patternKey = validationObj.conditions.patterns[i].pattern;
                 if (patternKey in configuredPatterns && patternKey.length > 0){
                     message = "The same pattern has been already configured for this profile"
@@ -139,12 +135,12 @@ const validateProfiles = (validationObj) => {
             const configuredConditions = {};
             let fieldKey;
             let conditionKeys = [];
-             for (let i = 0; i < validationObj.conditions.conditions.length; i++){
+             for (let i = 0; i < validationObj.conditions.conditions.length; i += 1){
                 field = validationObj.conditions.conditions[i].field;
                 values = validationObj.conditions.conditions[i].value;
                 fieldKey = `${field}`;
                 conditionKeys = [fieldKey];
-                values.forEach(v => {conditionKeys.push(`${v}`)});
+                conditionKeys.push(...values.map(v => `${v}`));
                 conditionKeys.push(validationObj.conditions.conditions[i].operation);
                 conditionKeys.push(`negateOperation=${validationObj.conditions.conditions[i].negateOperation}`);
                 if (sameConditions(configuredConditions, fieldKey, conditionKeys)){
@@ -185,7 +181,7 @@ const validateProfiles = (validationObj) => {
                 }
                 let conditionsErrors = {}
                 const configuredConditionalValues = {};
-                for (let j = 0; j < values.length; j++){
+                for (let j = 0; j < values.length; j += 1){
                     message = ""
                     if (values[j].length === 0){
                         message = "Value is required"
@@ -222,7 +218,7 @@ const validateProfiles = (validationObj) => {
         }
         const configuredVarBinds = {};
         let varBindKey;
-        for (let i = 0; i < validationObj.varBinds.length; i++){
+        for (let i = 0; i < validationObj.varBinds.length; i += 1){
             varBindKey = `${validationObj.varBinds[i].component}${validationObj.varBinds[i].object}${validationObj.varBinds[i].index}`
             if (varBindKey in configuredVarBinds && varBindKey.length > 0){
                 message = "The same varBind has been already configured for this profile"
@@ -244,7 +240,7 @@ const validateProfiles = (validationObj) => {
                 }
                 isValid = false;
 
-            }else if (!validationObj.varBinds[i].component.match(/^[a-zA-Z0-9._-]+$/) || !isNaN(validationObj.varBinds[i].component)){
+            }else if (!validationObj.varBinds[i].component.match(/^[a-zA-Z0-9._-]+$/) || !Number.isNaN(Number(validationObj.varBinds[i].component))){
                 message = "MIB component can consist only of upper and lower english letters, " +
                 "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB component can't be a number."
                 if (i in errors.varBinds){
@@ -256,7 +252,7 @@ const validateProfiles = (validationObj) => {
             }
 
             if (validationObj.varBinds[i].object.length > 0){
-                if (!validationObj.varBinds[i].object.match(/^[a-zA-Z0-9._-]+$/) || !isNaN(validationObj.varBinds[i].object)){
+                if (!validationObj.varBinds[i].object.match(/^[a-zA-Z0-9._-]+$/) || !Number.isNaN(Number(validationObj.varBinds[i].object))){
                     message = "MIB object can consist only of upper and lower english letters, " +
                         "numbers and three special characters: '.', '-' and '_'. No spaces are allowed. MIB object can't be a number.";
                     if (i in errors.varBinds){

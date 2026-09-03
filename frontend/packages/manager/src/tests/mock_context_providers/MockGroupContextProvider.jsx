@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import PropTypes from 'prop-types';
 import {jest} from "@jest/globals";
 import GroupContext from "../../store/group-contxt";
 
@@ -110,4 +111,8 @@ export function MockGroupContextProvider(props){
             {props.children}
         </GroupContext.Provider>
     )
+};
+
+MockGroupContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

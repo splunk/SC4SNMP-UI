@@ -1,15 +1,16 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
 import {createDOMID} from '@splunk/ui-utils/id';
 import Text from "@splunk/react-ui/Text";
 import P from "@splunk/react-ui/Paragraph";
 import FormRows from "@splunk/react-ui/FormRows";
 import Select from "@splunk/react-ui/Select";
 import Card from '@splunk/react-ui/Card';
+import Switch from '@splunk/react-ui/Switch';
 import {useProfileContext} from "../../store/profile-contxt";
 import {validationGroup, validationMessage} from "../../styles/ValidationStyles";
 import {useProfilesValidationContxt} from "../../store/profiles-validation-contxt";
 import ConditionalIn from "./ConditionalIn";
-import Switch from '@splunk/react-ui/Switch';
 
 function Conditional(props){
     const ProfCtx = useProfileContext();
@@ -177,9 +178,7 @@ function Conditional(props){
     }
 
     useEffect(() => {
-        let isMounted = true;
         setRowItems(loadFormRows());
-        return () => { isMounted = false }
     }, [props.newSubmit, reload]);
 
     return (
@@ -193,5 +192,9 @@ function Conditional(props){
         </FormRows>
     )
 }
+
+Conditional.propTypes = {
+    newSubmit: PropTypes.bool,
+};
 
 export default Conditional;

@@ -1,4 +1,5 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import api from '../api';
 
 const AuthContext = createContext();
@@ -27,7 +28,7 @@ export function AuthContextProvider(props) {
     }, []);
 
     const login = useCallback((user, password) => {
-        return api.post("/auth/login", { username: user, password: password })
+        return api.post("/auth/login", { username: user, password })
             .then((response) => {
                 setIsAuthenticated(true);
                 setUsername(response.data.username || user);
@@ -91,6 +92,10 @@ export function AuthContextProvider(props) {
         </AuthContext.Provider>
     );
 }
+
+AuthContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
 export const useAuthContext = () => useContext(AuthContext);
 export default AuthContext;

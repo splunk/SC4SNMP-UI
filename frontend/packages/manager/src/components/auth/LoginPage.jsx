@@ -54,7 +54,7 @@ function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = (e) => {
-        if (e) e.preventDefault();
+        if (e) {e.preventDefault();}
         setError("");
         if (authCtx.clearSessionExpiredMessage) {
             authCtx.clearSessionExpiredMessage();

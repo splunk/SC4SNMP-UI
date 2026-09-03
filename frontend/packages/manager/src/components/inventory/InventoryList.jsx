@@ -1,12 +1,12 @@
 import React, {useContext, useEffect, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
-import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
+import api from "../../api";
 import DeleteModal from "../DeleteModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
@@ -88,7 +88,7 @@ function InventoryList() {
     const deleteModalRequest = () => {
         const url = `/inventory/delete/${InvCtx.inventoryId.toString()}`;
         api.post(url)
-          .then(function (response) {
+          .then((response) => {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
@@ -96,8 +96,8 @@ function InventoryList() {
             }
             InvCtx.makeInventoryChange();
           })
-          .catch(function (error) {
-            console.log(error);
+          .catch((error) => {
+            console.error(error);
             InvCtx.makeInventoryChange();
           });
         InvCtx.setDeleteOpen(false);

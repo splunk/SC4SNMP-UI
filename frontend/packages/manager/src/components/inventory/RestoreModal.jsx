@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import PropTypes from 'prop-types';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
@@ -53,5 +54,11 @@ function RestoreModal(props) {
         </div>
     );
 }
+
+RestoreModal.propTypes = {
+    open: PropTypes.bool.isRequired,
+    setOpen: PropTypes.func.isRequired,
+    handleRestore: PropTypes.func.isRequired,
+};
 
 export default RestoreModal;

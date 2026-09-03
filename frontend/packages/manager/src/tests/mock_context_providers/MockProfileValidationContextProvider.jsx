@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import PropTypes from 'prop-types';
 import ProfilesValidationContxt from "../../store/profiles-validation-contxt";
 
 export function MockProfileValidationContextProvider(props){
@@ -152,4 +153,8 @@ export function MockProfileValidationContextProvider(props){
             {props.children}
         </ProfilesValidationContxt.Provider>
     )
+};
+
+MockProfileValidationContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

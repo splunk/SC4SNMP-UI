@@ -19,7 +19,7 @@ function renderModal(){
     )
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 describe("AddGroupModal", () => {
     it("Test wrong group name", async () => {

@@ -1,10 +1,8 @@
-import React from 'react';
+import React, { act } from 'react';
 import {expect, describe, jest, it} from '@jest/globals';
 import {fireEvent} from '@testing-library/dom';
 import api from "../api";
-import {act} from "react-dom/test-utils";
 import {render, screen} from './custom_testing_lib/custom-testing-lib'
-import "@testing-library/jest-dom"
 import "@testing-library/jest-dom"
 import AddInventoryModal from "../components/inventory/AddInventoryModal";
 import {MockInventoryContextProvider} from "./mock_context_providers/MockInventoryContextProvider";
@@ -23,7 +21,7 @@ function renderModal(){
     )
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 jest.mock("../api", () => ({
     __esModule: true,
@@ -110,7 +108,6 @@ describe("AddInventoryModal", () => {
         await act( async () => renderModal());
         const submitButton = screen.getByDataTest("sc4snmp:form:submit-form-button");
         const hostButton = screen.getByDataTest("sc4snmp:form:inventory-type-host");
-        const groupButton = screen.getByDataTest("sc4snmp:form:inventory-type-group");
         const addressInput = screen.getByDataTest('sc4snmp:form:group-ip-input').querySelector("input");
         const walkIntervalInput = screen.getByDataTest('sc4snmp:form:walk-interval-input').querySelector("input");
 

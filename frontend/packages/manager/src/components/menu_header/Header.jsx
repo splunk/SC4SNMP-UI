@@ -1,4 +1,7 @@
-import React, {useCallback, useContext, useLayoutEffect, useRef, useState} from 'react';
+import React, {useContext, useLayoutEffect, useRef, useState} from 'react';
+import Button from '@splunk/react-ui/Button';
+import Plus from '@splunk/react-icons/Plus';
+import P from '@splunk/react-ui/Paragraph';
 import MenuHeaderContxt from '../../store/menu-header-contxt';
 import ProfileContext from "../../store/profile-contxt";
 import GroupContext from "../../store/group-contxt";
@@ -6,9 +9,6 @@ import InventoryContext from "../../store/inventory-contxt";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import AuthContext from "../../store/auth-contxt";
 import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/menu_header/HeaderStyle";
-import Button from '@splunk/react-ui/Button';
-import Plus from '@splunk/react-icons/Plus';
-import P from '@splunk/react-ui/Paragraph';
 import api from "../../api";
 import RestoreModal from "../inventory/RestoreModal";
 
@@ -65,10 +65,10 @@ function Header(){
                 }
             })
         .catch((error) => {
-            console.log(error)
+            console.error(error);
             ErrCtx.setOpen(true);
             ErrCtx.setErrorType("error");
-            ErrCtx.setMessage("Error: " + error.response.data.message);
+            ErrCtx.setMessage(`Error: ${  error.response.data.message}`);
             })
     };
 
@@ -78,13 +78,13 @@ function Header(){
 
     const handleRestore = () => {
         api.post("/load-config")
-            .then(function (response) {
+            .then((response) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
                 InvCtx.makeInventoryChange();
             })
-            .catch(function (error) {
+            .catch((error) => {
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response?.data?.message || "Failed to restore configuration from section files.");

@@ -1,4 +1,5 @@
 import React, {useState, createContext, useContext} from 'react';
+import PropTypes from 'prop-types';
 
 const ProfilesValidationContxt = createContext();
 
@@ -153,6 +154,10 @@ export function ProfilesValidationContxtProvider(props){
             {props.children}
         </ProfilesValidationContxt.Provider>
     )
+};
+
+ProfilesValidationContxtProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useProfilesValidationContxt = () => useContext(ProfilesValidationContxt);

@@ -1,14 +1,14 @@
-import React, {useRef, useState, Component, useCallback, useEffect, useContext} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Select from '@splunk/react-ui/Select';
 import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import RadioBar from '@splunk/react-ui/RadioBar';
-import api from "../../api";
 import Button from '@splunk/react-ui/Button';
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
+import api from "../../api";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import {useInventoryContext} from "../../store/inventory-contxt";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
@@ -99,7 +99,6 @@ function AddInventoryModal() {
     const updateInventory = (inventoryObj, inventoryId) => {
         api.post(`/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
-                console.log(response.data)
                 if (response.data !== "success" && 'message' in response.data){
                     ErrCtx.setOpen(true);
                     ErrCtx.setErrorType("info");

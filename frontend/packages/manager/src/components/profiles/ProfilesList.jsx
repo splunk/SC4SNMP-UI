@@ -6,13 +6,13 @@ import Paginator from "@splunk/react-ui/Paginator";
 import Table from "@splunk/react-ui/Table";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Button from "@splunk/react-ui/Button";
+import P from "@splunk/react-ui/Paragraph";
 import api from "../../api";
 import {useProfileContext} from "../../store/profile-contxt";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {Pagination} from "../../styles/groups/GroupsStyle";
 import {RowActions} from "../../styles/common/ListStyles";
 import DeleteModal from "../DeleteModal";
-import P from "@splunk/react-ui/Paragraph";
 
 
 function getExpansionRow(row) {
@@ -69,7 +69,7 @@ function ProfilesList() {
         api.get("/profiles/count")
             .then((response) => {
                 let maxPages = Math.ceil(response.data/Number(profilesPerPage));
-                if (maxPages === 0) maxPages = 1;
+                if (maxPages === 0) {maxPages = 1;}
                 if (page > maxPages){
                     page = maxPages;
                 };
@@ -126,7 +126,7 @@ function ProfilesList() {
 
     const deleteModalRequest = () => {
         api.post(`/profiles/delete/${ProfCtx.profileId}`)
-          .then(function (response) {
+          .then((response) => {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
@@ -134,8 +134,8 @@ function ProfilesList() {
             }
             ProfCtx.makeProfilesChange();
           })
-          .catch(function (error) {
-            console.log(error);
+          .catch((error) => {
+            console.error(error);
             ProfCtx.makeProfilesChange();
           });
         ProfCtx.setDeleteOpen(false);

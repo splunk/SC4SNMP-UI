@@ -1,4 +1,5 @@
-import React, {useState, useRef, useCallback, useContext, useEffect} from 'react';
+import React, {useCallback} from 'react';
+import PropTypes from 'prop-types';
 import { createDOMID } from '@splunk/ui-utils/id';
 import Select from "@splunk/react-ui/Select";
 import Text from "@splunk/react-ui/Text";
@@ -71,5 +72,9 @@ function Condition(props){
         </div>
     )
 }
+
+Condition.propTypes = {
+    newSubmit: PropTypes.bool,
+};
 
 export default Condition;
