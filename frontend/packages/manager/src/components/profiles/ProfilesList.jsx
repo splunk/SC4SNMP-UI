@@ -153,7 +153,7 @@ function ProfilesList() {
     return (
         <div style={{width: '100%' }}>
             <Pagination>
-                <Select data-test="sc4snmp:profiles-pagination" appearance="pill" suffixLabel="profiles per page"
+                <Select data-test="sc4snmp:profiles-pagination" appearance="subtle" suffixLabel="profiles per page"
                         value={profilesPerPage} onChange={profilesPerPageHandler}
                         defaultValue="20">
                     <Select.Option data-test="sc4snmp:profiles-pagination-option" label="10" value="10" />

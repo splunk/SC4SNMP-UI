@@ -260,10 +260,10 @@ function GroupsList() {
                 {group.groupName}
             </P>
             <div>
-                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button data-test="sc4snmp:group:bulk-add-button" style={{ margin: "0" }} onClick={() => (bulkAddHandler(group._id, group.groupName))} appearance="pill" icon={<SquaresLayeredPlus />} />
-                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
+                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="subtle" icon={<Plus />} />
+                <Button data-test="sc4snmp:group:bulk-add-button" style={{ margin: "0" }} onClick={() => (bulkAddHandler(group._id, group.groupName))} appearance="subtle" icon={<SquaresLayeredPlus />} />
+                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="subtle" icon={<Pencil />} />
+                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="subtle" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -275,7 +275,7 @@ function GroupsList() {
                 <GroupsNamesHeader>
                     <P>Group</P>
                     <div>
-                        <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
+                        <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="subtle" icon={<Plus />} />
                     </div>
                 </GroupsNamesHeader>
                 <GroupsPagination>
@@ -292,7 +292,7 @@ function GroupsList() {
             <GroupDevices>
                 <div style={{width: '100%' }}>
                     <Pagination>
-                        <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="items per page"
+                        <Select data-test="sc4snmp:group-pagination" appearance="subtle" suffixLabel="items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
                                 defaultValue="20">
                             <Select.Option data-test="sc4snmp:group-pagination-option" label="10" value="10" />
