@@ -4,6 +4,9 @@ Flask-Cors==6.0.5
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
+# pymongo, celery, and redis are pinned to match the versions used by the
+# splunk-connect-for-snmp connector (shared Redis/Celery infrastructure) —
+# bump these only in lockstep with that repo, not to latest independently.
 pymongo==4.17.0
 six==1.17.0
 Werkzeug==3.1.8
@@ -13,8 +16,8 @@ kubernetes~=36.0.3
 python-dotenv~=1.2, >=1.2.2
 PyYAML~=6.0
 celery==5.6.3
-redis~=8.0
-ruamel.yaml===0.17.32
+redis==8.0.1
+ruamel.yaml===0.19.1
 PyJWT~=2.13
 argon2-cffi~=25.1
 Flask-Limiter~=4.1
