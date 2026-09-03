@@ -120,9 +120,8 @@ function AddProfileModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
-                <StyledModalHeader title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")}
-                              onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} returnFocus={ProfCtx.addModalToggle} style={{ width: '600px' }}>
+                <StyledModalHeader title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")} />
                 <StyledModalBody>
                     <StyledControlGroup label="Profile name">
                         <ValidationGroup>

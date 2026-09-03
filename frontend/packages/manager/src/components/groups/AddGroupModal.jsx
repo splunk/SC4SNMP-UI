@@ -88,8 +88,8 @@ function AddGroupModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((GrCtx.isGroupEdit) ? `Edit group` : `Add a new group`)} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} returnFocus={GrCtx.addGroupModalToggle} style={{ width: '600px' }}>
+                <Modal.Header title={((GrCtx.isGroupEdit) ? `Edit group` : `Add a new group`)} />
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <ValidationGroup>

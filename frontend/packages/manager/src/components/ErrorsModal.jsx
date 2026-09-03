@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
@@ -7,6 +7,15 @@ import ErrorsModalContext from "../store/errors-modal-contxt";
 
 function ErrorsModal() {
     const ErrCtx = useContext(ErrorsModalContext);
+    const returnFocusRef = useRef(null);
+
+    // ErrorsModal is opened from many unrelated call sites across the app, so there is no
+    // single fixed trigger element - capture whatever had focus right before it opened.
+    useEffect(() => {
+        if (ErrCtx.open) {
+            returnFocusRef.current = document.activeElement;
+        }
+    }, [ErrCtx.open]);
 
     const handleRequestClose = () => {
         ErrCtx.setOpen(false);
@@ -16,7 +25,7 @@ function ErrorsModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={ErrCtx.open} style={{ width: '600px' }}>
+            <Modal onRequestClose={handleRequestClose} open={ErrCtx.open} returnFocus={returnFocusRef} style={{ width: '600px' }}>
                 <Modal.Body>
                     {
                         ErrCtx.errorType === "info" ? <P>{ErrCtx.message}</P> : null

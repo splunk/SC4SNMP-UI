@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
@@ -8,6 +8,13 @@ import Message from "@splunk/react-ui/Message";
 function RestoreModal(props) {
     const [cancelButton, setCancelButon] = useState();
     const cancelButtonRef = useCallback((el) => setCancelButon(el), []);
+    const returnFocusRef = useRef(null);
+
+    useEffect(() => {
+        if (props.open) {
+            returnFocusRef.current = document.activeElement;
+        }
+    }, [props.open]);
 
     const handleRequestClose = () => {
         props.setOpen(false);
@@ -19,9 +26,10 @@ function RestoreModal(props) {
                 initialFocus={cancelButton}
                 onRequestClose={handleRequestClose}
                 open={props.open}
+                returnFocus={returnFocusRef}
                 style={{ width: '600px' }}
             >
-                <Modal.Header title="Restore configuration" onRequestClose={handleRequestClose} />
+                <Modal.Header title="Restore configuration" />
                 <Modal.Body>
                     <P>
                         Are you sure you want to restore the configuration from the section files on

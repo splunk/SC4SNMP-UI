@@ -1,4 +1,4 @@
-import React, {useCallback, useContext} from 'react';
+import React, {useCallback, useContext, useEffect, useRef} from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
@@ -19,6 +19,15 @@ function AddDeviceModal(){
     const GrCtx = useContext(GroupContext);
     const ValCtx = useContext(InventoryDevicesValidationContxt);
     const ErrCtx = useContext(ErrorsModalContext);
+    const returnFocusRef = useRef(null);
+
+    // Opened from a different "new device" button per group row, so there is no single
+    // fixed trigger element to reference.
+    useEffect(() => {
+        if (GrCtx.addDeviceOpen) {
+            returnFocusRef.current = document.activeElement;
+        }
+    }, [GrCtx.addDeviceOpen]);
 
     const handleChangeAddress = useCallback((e, { value: val }) => {
         GrCtx.setAddress(val);
@@ -117,8 +126,8 @@ function AddDeviceModal(){
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={GrCtx.addDeviceOpen} style={{ width: '600px' }}>
-                <StyledModalHeader title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add a new device to ${GrCtx.groupName}`)} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={GrCtx.addDeviceOpen} returnFocus={returnFocusRef} style={{ width: '600px' }}>
+                <StyledModalHeader title={((GrCtx.isDeviceEdit) ? `Edit device` : `Add a new device to ${GrCtx.groupName}`)} />
                 <StyledModalBody>
                     <StyledControlGroup labelWidth={140} label="IP address">
                         <ValidationGroup>
