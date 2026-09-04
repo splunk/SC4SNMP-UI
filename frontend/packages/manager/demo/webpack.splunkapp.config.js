@@ -1,8 +1,8 @@
 const path = require('path');
-const webpackMerge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const baseConfig = require('@splunk/webpack-configs/base.config').default;
 
-module.exports = webpackMerge(baseConfig, {
+module.exports = merge(baseConfig, {
     entry: path.join(__dirname, 'demo'),
     output: {
         path: path.join(__dirname, 'splunk-app/appserver/static/pages/'),
