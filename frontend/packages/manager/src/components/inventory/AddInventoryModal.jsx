@@ -238,7 +238,7 @@ function AddInventoryModal() {
 
                     <StyledControlGroup label="Max OID to process" labelWidth={140}>
                         <ValidationGroup>
-                            <Number data-test="sc4snmp:form:max-oid-to-process-input" value={InvCtx.maxOidToProcess} onChange={handleChangeMaxOidToProcess} error={(!!(ValCtx.maxOidToProcessErrors))}/>
+                            <Number data-test="sc4snmp:form:max-oid-to-process-input" value={typeof InvCtx.maxOidToProcess === 'number' ? InvCtx.maxOidToProcess : undefined} onChange={handleChangeMaxOidToProcess} error={(!!(ValCtx.maxOidToProcessErrors))}/>
                             {((ValCtx.maxOidToProcessErrors) ? ValCtx.maxOidToProcessErrors.map((el) => <P data-test="sc4snmp:max-oid-to-process-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
