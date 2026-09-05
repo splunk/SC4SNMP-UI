@@ -20,7 +20,7 @@
   },
   "main": "Manager.js",
   "dependencies": {
-    "@splunk/react-ui": "^4.47.1",
+    "@splunk/react-ui": "^5.0.0",
     "@splunk/themes": "^0.11.0",
     "axios": "^1.16.0",
     "css-loader": "^7.1.4",
