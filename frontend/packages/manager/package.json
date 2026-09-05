@@ -34,7 +34,7 @@
     "@jest/globals": "^30.4.1",
     "@splunk/babel-preset": "^4.0.0",
     "@splunk/eslint-config": "^4.0.0",
-    "@splunk/splunk-utils": "^2.3.4",
+    "@splunk/splunk-utils": "^4.0.0",
     "@splunk/stylelint-config": "^5.1.0",
     "@splunk/webpack-configs": "^5.0.0",
     "@testing-library/dom": "10.4.1",
