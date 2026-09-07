@@ -1,10 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const webpackMerge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const baseConfig = require('@splunk/webpack-configs/base.config').default;
 
-module.exports = webpackMerge(baseConfig, {
+module.exports = merge(baseConfig, {
     entry: path.join(__dirname, 'demo'),
     output:{
         filename: "[name].js?[chunkhash]"
