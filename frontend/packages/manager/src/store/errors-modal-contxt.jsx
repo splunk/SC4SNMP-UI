@@ -1,4 +1,5 @@
 import React, {useState, createContext, useContext} from 'react';
+import PropTypes from 'prop-types';
 
 const ErrorsModalContext = createContext();
 
@@ -20,6 +21,10 @@ export function ErrorsModalContextProvider(props){
             {props.children}
         </ErrorsModalContext.Provider>
     )
+};
+
+ErrorsModalContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useErrorsModalContext = () => useContext(ErrorsModalContext);

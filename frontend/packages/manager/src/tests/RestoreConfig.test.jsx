@@ -35,7 +35,7 @@ function renderHeader(){
     )
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 jest.mock("../api", () => ({
     __esModule: true,

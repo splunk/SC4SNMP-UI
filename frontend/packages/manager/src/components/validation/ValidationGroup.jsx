@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import {validationGroup} from "../../styles/ValidationStyles";
 
 function ValidationGroup(props){
@@ -8,5 +9,9 @@ function ValidationGroup(props){
         </div>
     )
 }
+
+ValidationGroup.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
 export default ValidationGroup;
