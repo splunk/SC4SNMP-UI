@@ -22,7 +22,7 @@
   "dependencies": {
     "@splunk/react-icons": "^4.14.0",
     "@splunk/react-ui": "^4.47.1",
-    "@splunk/themes": "^0.11.0",
+    "@splunk/themes": "^0.25.0",
     "@splunk/ui-utils": "^1.14.1",
     "axios": "^1.16.0",
     "css-loader": "^7.1.4",
