@@ -11,7 +11,7 @@ import DeleteModal from "../DeleteModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
 import { Pagination } from '../../styles/inventory/InventoryStyle';
-import { RowActions } from '../../styles/common/ListStyles';
+import { RowActions, StyledFramedTable } from '../../styles/common/ListStyles';
 
 
 const columns = [
@@ -132,7 +132,7 @@ function InventoryList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
+            <StyledFramedTable data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -163,7 +163,7 @@ function InventoryList() {
                             </Table.Row>
                         ))}
                 </Table.Body>
-            </Table>
+            </StyledFramedTable>
             <DeleteModal deleteName={`${InvCtx.address}:${InvCtx.port}`}
                          handleDelete={deleteModalRequest}/>
         </div>

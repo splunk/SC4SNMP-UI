@@ -17,7 +17,7 @@ import BulkAddDeviceModal from "./BulkAddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination, GroupsPagination } from "../../styles/groups/GroupsStyle";
-import { RowActions } from "../../styles/common/ListStyles";
+import { RowActions, StyledFramedTable } from "../../styles/common/ListStyles";
 
 
 
@@ -308,7 +308,7 @@ function GroupsList() {
                             totalPages={totalPages}
                         />
                     </Pagination>
-                    <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
+                    <StyledFramedTable data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
                                 <Table.HeadCell key={headData.sortKey} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -335,7 +335,7 @@ function GroupsList() {
                                     </Table.Row>
                                 ))}
                         </Table.Body>
-                    </Table>
+                    </StyledFramedTable>
                 </div>
             </GroupDevices>
             <AddDeviceModal />
