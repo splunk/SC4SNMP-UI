@@ -65,10 +65,10 @@ function GroupsList() {
                         const existingGroups = [];
                         const selected = {};
                         for (const group of response2.data){
-                            // eslint-disable-next-line no-underscore-dangle
+                             
                             selected[group._id] = false;
                             GrCtx.setDevices([]);
-                            // eslint-disable-next-line no-underscore-dangle
+                             
                             existingGroups.push(group._id);
                         }
                         // If page was reloaded after updating one of devices, open tab of that group
@@ -231,7 +231,7 @@ function GroupsList() {
 
     const deleteModalRequest = () => {
         api.post(GrCtx.deleteUrl)
-          .then(function (response) {
+          .then((response) => {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
@@ -239,8 +239,7 @@ function GroupsList() {
             }
             GrCtx.makeGroupsChange();
           })
-          .catch(function (error) {
-            console.log(error);
+          .catch(() => {
             GrCtx.makeGroupsChange();
           });
         GrCtx.setDeleteOpen(false);

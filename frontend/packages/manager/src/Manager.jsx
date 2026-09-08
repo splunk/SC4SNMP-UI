@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
 
 import ErrorsModal from "./components/ErrorsModal";
 import Menu from "./components/menu_header/Menu";
@@ -13,8 +14,7 @@ import { MenuHeaderContxtProvider } from "./store/menu-header-contxt";
 import { ProfileContxtProvider } from "./store/profile-contxt";
 import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
-import { AuthContextProvider } from "./store/auth-contxt";
-import AuthContext from "./store/auth-contxt";
+import AuthContext, { AuthContextProvider } from "./store/auth-contxt";
 import { FontStyles } from "./styles/FontsStyles";
 
 function AuthGate({ children }) {
@@ -34,6 +34,10 @@ function AuthGate({ children }) {
 
     return children;
 }
+
+AuthGate.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
 function Uncontrolled() {
 

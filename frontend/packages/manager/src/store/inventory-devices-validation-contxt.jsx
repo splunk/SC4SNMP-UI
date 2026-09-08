@@ -1,4 +1,5 @@
 import React, {useState, createContext, useContext} from 'react';
+import PropTypes from 'prop-types';
 
 const InventoryDevicesValidationContxt = createContext();
 
@@ -90,18 +91,18 @@ export function InventoryDevicesValidationContxtProvider(props){
     };
 
     const context = {
-        groupNameErrors: groupNameErrors,
-        addressErrors: addressErrors,
-        portErrors: portErrors,
-        communityErrors: communityErrors,
-        secretErrors: secretErrors,
-        securityEngineErrors: securityEngineErrors,
-        walkIntervalErrors: walkIntervalErrors,
-        maxOidToProcessErrors: maxOidToProcessErrors,
-        profilesErrors: profilesErrors,
-        resetAllErrors: resetAllErrors,
-        resetErrors: resetErrors,
-        setErrors: setErrors
+        groupNameErrors,
+        addressErrors,
+        portErrors,
+        communityErrors,
+        secretErrors,
+        securityEngineErrors,
+        walkIntervalErrors,
+        maxOidToProcessErrors,
+        profilesErrors,
+        resetAllErrors,
+        resetErrors,
+        setErrors
     }
 
     return (
@@ -109,6 +110,10 @@ export function InventoryDevicesValidationContxtProvider(props){
             {props.children}
         </InventoryDevicesValidationContxt.Provider>
     )
+};
+
+InventoryDevicesValidationContxtProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useInventoryDevicesValidationContxt = () => useContext(InventoryDevicesValidationContxt);

@@ -1,4 +1,5 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
+import PropTypes from 'prop-types';
 import { useButtonsContext } from "./buttons-contx";
 
 const InventoryContext = createContext();
@@ -95,6 +96,10 @@ export function InventoryContextProvider(props){
             {props.children}
         </InventoryContext.Provider>
     )
+};
+
+InventoryContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useInventoryContext = () => useContext(InventoryContext);

@@ -20,7 +20,7 @@ function renderModal(profileProps= {}){
     )
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 describe("AddProfileModal", () => {
     it("Test no VarBinds and no profile name", () => {

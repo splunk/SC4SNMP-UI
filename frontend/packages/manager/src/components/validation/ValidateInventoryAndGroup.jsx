@@ -1,5 +1,3 @@
-import React from 'react';
-
 const validateInventoryAndGroup = (validationObj) => {
 
     /*
@@ -43,7 +41,7 @@ const validateInventoryAndGroup = (validationObj) => {
                 validationObj.inventoryType === "Host")) ? "Address or host name is required" : "Group is required")
             errors.address.push(err);
             isValid = false;
-        }else if (!validationObj.address.match(/^[.a-zA-Z0-9_\-]+$/)){
+        }else if (!validationObj.address.match(/^[.a-zA-Z0-9_-]+$/)){
             isValid = false;
             errors.address.push(`${("inGroupConfig" in validationObj || ("inventoryType" in validationObj &&
                 validationObj.inventoryType === "Host")) ? "Address or host name" : "Group"} can consist only of upper and lower english letters, " +
@@ -110,7 +108,7 @@ const validateInventoryAndGroup = (validationObj) => {
 
     // Validate Max OID to process (optional - empty means "use the connector's global default")
     if ("maxOidToProcess" in validationObj){
-        const maxOidToProcess = validationObj.maxOidToProcess;
+        const {maxOidToProcess} = validationObj;
         const isEmpty = maxOidToProcess === '' || maxOidToProcess === null || maxOidToProcess === undefined;
         if (!isEmpty && !(Number.isInteger(maxOidToProcess) && maxOidToProcess >= 1)){
             isValid = false;

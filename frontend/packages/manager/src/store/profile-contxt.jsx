@@ -1,4 +1,5 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
+import PropTypes from 'prop-types';
 import ButtonsContext from "./buttons-contx";
 
 const ProfileContext = createContext();
@@ -70,6 +71,10 @@ export function ProfileContxtProvider(props) {
         </ProfileContext.Provider>
     )
 }
+
+ProfileContxtProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
 export const useProfileContext = () => useContext(ProfileContext);
 export default ProfileContext;
