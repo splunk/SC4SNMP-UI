@@ -132,7 +132,7 @@ function InventoryList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout horizontalOverflow="scroll">
+            <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
