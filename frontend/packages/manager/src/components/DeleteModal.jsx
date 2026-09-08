@@ -6,7 +6,7 @@ import P from '@splunk/react-ui/Paragraph';
 import Message from "@splunk/react-ui/Message";
 import ButtonsContext from "../store/buttons-contx";
 
-function DeleteModal(props) {
+function DeleteModal({ deleteName, customWarning = null, handleDelete }) {
     const BtnCtx = useContext(ButtonsContext);
 
     const [cancelButton, setCancelButon] = useState();
@@ -34,17 +34,17 @@ function DeleteModal(props) {
                 returnFocus={returnFocusRef}
                 style={{ width: '600px' }}
             >
-                <Modal.Header title={`Delete ${props.deleteName}`} />
+                <Modal.Header title={`Delete ${deleteName}`} />
                 <Modal.Body>
-                    <P>Are you sure you want to delete {props.deleteName} ?</P>
-                    {("customWarning" in props && props.customWarning != null) ?
+                    <P>Are you sure you want to delete {deleteName} ?</P>
+                    {(customWarning != null) ?
                         (<Message appearance="fill" type="warning">
-                            {props.customWarning}
+                            {customWarning}
                         </Message>) : null}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button data-test="sc4snmp:delete-modal:cancel-button" appearance="secondary" elementRef={cancelButtonRef} onClick={handleRequestClose} label="Cancel" />
-                    <Button data-test="sc4snmp:delete-modal:delete-button" appearance="primary" onClick={props.handleDelete} label="Delete" />
+                    <Button data-test="sc4snmp:delete-modal:delete-button" appearance="primary" onClick={handleDelete} label="Delete" />
                 </Modal.Footer>
             </Modal>
         </div>
@@ -55,10 +55,6 @@ DeleteModal.propTypes = {
     deleteName: PropTypes.string.isRequired,
     customWarning: PropTypes.node,
     handleDelete: PropTypes.func.isRequired,
-};
-
-DeleteModal.defaultProps = {
-    customWarning: null,
 };
 
 export default DeleteModal;

@@ -26,25 +26,25 @@ const StyledTab = styled(TabBar)`
         margin-left: 20px;
       }
 
-      & > button:nth-child(1) > div[class*='TabStyles__StyledLabel']{
+      & > button:nth-child(1) div[class*='TabStyles__StyledLabel']{
         width: 51px;
       }
 
       & > button:nth-child(2){
         margin-left: 27px;
       }
-      & > button:nth-child(2) > div[class*='TabStyles__StyledLabel']{
+      & > button:nth-child(2) div[class*='TabStyles__StyledLabel']{
         width: 49px;
       }
 
       & > button:nth-child(3){
         margin-left: 27px;
       }
-      & > button:nth-child(3) > div[class*='TabStyles__StyledLabel']{
+      & > button:nth-child(3) div[class*='TabStyles__StyledLabel']{
         width: 63px;
       }
 
-      & > button > div[class*='TabStyles__StyledLabel']{
+      & > button div[class*='TabStyles__StyledLabel']{
         font-size: 14px;
         font-weight: 400;
         line-height: 39px;
@@ -63,7 +63,7 @@ const StyledTab = styled(TabBar)`
         background-color: #5CC05C;
       }
 
-      [aria-selected='true'] > div[class*='TabStyles__StyledLabel']{
+      [aria-selected='true'] div[class*='TabStyles__StyledLabel']{
         color: #FFFFFF;
         font-family: 'Proxima Nova Sbold';
         font-weight: 600;
