@@ -280,13 +280,19 @@ function GroupsList() {
                     </div>
                 </GroupsNamesHeader>
                 <GroupsPagination>
-                    <Paginator
-                        data-test="sc4snmp:groups-pagination"
-                        onChange={groupsPaginationHandler}
-                        current={groupsPageNum}
-                        alwaysShowLastPageLink
-                        totalPages={groupsTotalPages}
-                    />
+                    {groupsTotalPages > 1 ? (
+                        <Paginator
+                            data-test="sc4snmp:groups-pagination"
+                            onChange={groupsPaginationHandler}
+                            current={groupsPageNum}
+                            alwaysShowLastPageLink
+                            totalPages={groupsTotalPages}
+                        />
+                    ) : (
+                        // Paginator itself renders nothing for a single page, leaving an empty-looking
+                        // row - show the page number directly instead.
+                        <P data-test="sc4snmp:groups-pagination" style={{ margin: 0 }}>1</P>
+                    )}
                 </GroupsPagination>
                 {groupsList}
             </GroupsNames>
