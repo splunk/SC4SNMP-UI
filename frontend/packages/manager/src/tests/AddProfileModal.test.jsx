@@ -482,7 +482,7 @@ describe("AddProfileModal", () => {
 
         expect(screen.queryByText("The same condition has been already configured for this profile")).toBeInTheDocument();
 
-        const negation0 = screen.getAllByDataTest("sc4snmp:conditional-negation")[0].querySelector('[data-test="button"]')
+        const negation0 = screen.getAllByDataTest("sc4snmp:conditional-negation")[0].querySelector('[data-test="toggle"]')
         fireEvent.click(negation0)
         await sleep(5);
         fireEvent.click(submitButton)

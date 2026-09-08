@@ -38,7 +38,7 @@ export function MockProfileContextProvider(props) {
         makeProfilesChange: profilesChangeHandler,
         addOpen: true,
         setAddOpen: setStateMock,
-        addModalToggle: null,
+        addModalToggle: { current: null },
 
         profileName,
         setProfileName,
