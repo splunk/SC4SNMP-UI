@@ -7,7 +7,7 @@ MarkupSafe==3.0.3
 # pymongo, celery, and redis are pinned to match the versions used by the
 # splunk-connect-for-snmp connector (shared Redis/Celery infrastructure) —
 # bump these only in lockstep with that repo, not to latest independently.
-pymongo==4.17.0
+pymongo==4.18.0
 six==1.17.0
 Werkzeug==3.1.8
 pytest~=9.0, >=9.0.3
