@@ -2962,6 +2962,15 @@
     lodash "^4.17.14"
     prop-types "^15.6.2"
 
+"@splunk/react-icons@^5.0.0":
+  version "5.15.0"
+  resolved "https://registry.yarnpkg.com/@splunk/react-icons/-/react-icons-5.15.0.tgz#79a5867237a3567c01949f2cce33f08de672e880"
+  integrity sha512-xuskaIsho1e9+q90WkbopQxIQikF4iygPKXsDwfiTp5X2vmh9t3Hq2S8wsfcoOCrrsOkofjtsvufAsQ7Og1r9w==
+  dependencies:
+    "@splunk/ui-utils" "^1.14.1"
+    lodash "^4.18.1"
+    prop-types "^15.6.2"
+
 "@splunk/react-ui@^4.47.1":
   version "4.47.1"
   resolved "https://registry.npmjs.org/@splunk/react-ui/-/react-ui-4.47.1.tgz#80e14ae943aa9a2cce3b80709ce578d5a69bb19a"
