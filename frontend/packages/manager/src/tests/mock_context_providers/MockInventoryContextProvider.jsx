@@ -53,7 +53,7 @@ export function MockInventoryContextProvider(props){
 
         addOpen: true,
         setAddOpen: setStateMock,
-        addModalToggle: null,
+        addModalToggle: { current: null },
 
         inventoryChange,
         makeInventoryChange: inventoryChangeHandler,

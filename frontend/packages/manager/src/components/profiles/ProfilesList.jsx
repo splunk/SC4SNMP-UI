@@ -11,7 +11,7 @@ import api from "../../api";
 import {useProfileContext} from "../../store/profile-contxt";
 import {useErrorsModalContext} from "../../store/errors-modal-contxt";
 import {Pagination} from "../../styles/groups/GroupsStyle";
-import {RowActions} from "../../styles/common/ListStyles";
+import {RowActions, StyledFramedTable} from "../../styles/common/ListStyles";
 import DeleteModal from "../DeleteModal";
 
 
@@ -152,7 +152,7 @@ function ProfilesList() {
     return (
         <div style={{width: '100%' }}>
             <Pagination>
-                <Select data-test="sc4snmp:profiles-pagination" appearance="pill" suffixLabel="profiles per page"
+                <Select data-test="sc4snmp:profiles-pagination" appearance="subtle" suffixLabel="profiles per page"
                         value={profilesPerPage} onChange={profilesPerPageHandler}
                         defaultValue="20">
                     <Select.Option data-test="sc4snmp:profiles-pagination-option" label="10" value="10" />
@@ -167,7 +167,7 @@ function ProfilesList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table data-test="sc4snmp:profiles-table" stripeRows resizableFillLayout rowExpansion="single">
+            <StyledFramedTable data-test="sc4snmp:profiles-table" stripeRows resizableFillLayout rowExpansion="single">
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -201,7 +201,7 @@ function ProfilesList() {
                             </Table.Row>
                         ))}
                 </Table.Body>
-            </Table>
+            </StyledFramedTable>
             <DeleteModal deleteName={`${ProfCtx.profileName}`} customWarning={ProfCtx.profileWarning}
                              handleDelete={deleteModalRequest}/>
         </div>

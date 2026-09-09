@@ -169,8 +169,8 @@ function AddInventoryModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit ${((InvCtx.inventoryType === "Host") ? "device" : "group")}` : "Add a new device/group")} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} returnFocus={InvCtx.addModalToggle} style={{ width: '700px' }}>
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit ${((InvCtx.inventoryType === "Host") ? "device" : "group")}` : "Add a new device/group")} />
                 <StyledModalBody>
                     {
                         InvCtx.isEdit ? null :

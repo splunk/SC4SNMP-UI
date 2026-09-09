@@ -64,7 +64,7 @@ export function MockGroupContextProvider(props){
         deleteName: "",
         setDeleteName: setStateMock,
 
-        addGroupModalToggle: null,
+        addGroupModalToggle: { current: null },
 
         // Is edit
         isGroupEdit,
