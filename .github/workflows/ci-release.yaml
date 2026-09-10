@@ -74,7 +74,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
 
   build-backend:
     name: build-backend
@@ -125,7 +125,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
   release:
     name: Release
     needs: [build-frontend, build-backend]
@@ -147,7 +147,7 @@ jobs:
           owner: ${{ github.repository_owner }}
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
       - name: Semantic Release
         id: version
         uses: splunk/semantic-release-action@v1.3.10
