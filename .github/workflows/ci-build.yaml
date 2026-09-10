@@ -44,7 +44,9 @@ jobs:
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4.2.0
+        uses: docker/setup-qemu-action@v4.3.0
+        with:
+          image: tonistiigi/binfmt:qemu-v8.1.5
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.3.0
       - name: Login to GitHub Packages Docker Registry
@@ -78,7 +80,7 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
 
   build-backend:
     name: build-backend
@@ -94,7 +96,9 @@ jobs:
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4.2.0
+        uses: docker/setup-qemu-action@v4.3.0
+        with:
+          image: tonistiigi/binfmt:qemu-v8.1.5
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.3.0
       - name: Login to GitHub Packages Docker Registry
@@ -128,4 +132,4 @@ jobs:
           cache-to: type=inline
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
