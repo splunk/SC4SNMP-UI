@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import PropTypes from 'prop-types';
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 
 export function MockErrorsContextProvider(props){
@@ -7,16 +8,20 @@ export function MockErrorsContextProvider(props){
     const [errorType, setErrorType] = useState("info");
 
     const context = {
-        open: open,
-        setOpen: setOpen,
-        message: message,
-        setMessage: setMessage,
-        errorType: errorType,
-        setErrorType: setErrorType
+        open,
+        setOpen,
+        message,
+        setMessage,
+        errorType,
+        setErrorType
     };
     return (
         <ErrorsModalContext.Provider value={context}>
             {props.children}
         </ErrorsModalContext.Provider>
     )
+};
+
+MockErrorsContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

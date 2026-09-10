@@ -4,8 +4,8 @@ import ControlGroup from '@splunk/react-ui/ControlGroup';
 import Modal from '@splunk/react-ui/Modal';
 import P from '@splunk/react-ui/Paragraph';
 import Text from '@splunk/react-ui/Text';
-import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
+import api from "../../api";
 import GroupContext from "../../store/group-contxt";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import InventoryDevicesValidationContxt from "../../store/inventory-devices-validation-contxt";
@@ -24,7 +24,7 @@ function AddGroupModal() {
 
     const postGroup = (groupObj) => {
         api.post("/groups/add", groupObj)
-            .then((response) => {
+            .then(() => {
                 GrCtx.makeGroupsChange();
             })
             .catch((error) => {
@@ -88,8 +88,8 @@ function AddGroupModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} style={{ width: '600px' }}>
-                <Modal.Header title={((GrCtx.isGroupEdit) ? `Edit group` : `Add a new group`)} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={GrCtx.addGroupOpen} returnFocus={GrCtx.addGroupModalToggle} style={{ width: '600px' }}>
+                <Modal.Header title={((GrCtx.isGroupEdit) ? `Edit group` : `Add a new group`)} />
                 <Modal.Body>
                     <ControlGroup label="Group Name">
                         <ValidationGroup>

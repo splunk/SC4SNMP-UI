@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useContext} from 'react';
+import React, {useState, useCallback} from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
@@ -17,7 +17,7 @@ import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../st
 import ValidationGroup from "../validation/ValidationGroup";
 
 
-function AddProfileModal(props) {
+function AddProfileModal() {
     const ProfCtx = useProfileContext();
     const ValCtx = useProfilesValidationContxt();
     const ErrCtx = useErrorsModalContext();
@@ -34,12 +34,10 @@ function AddProfileModal(props) {
 
     const postProfile = (profileObj) => {
         api.post("/profiles/add", profileObj)
-            .then((response) => {
-                console.log(response);
+            .then(() => {
                 ProfCtx.makeProfilesChange();
             })
             .catch((error) => {
-                console.log(error);
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("error");
                 ErrCtx.setMessage(error.response.data.message);
@@ -51,7 +49,6 @@ function AddProfileModal(props) {
             .then((response) => {
                 ProfCtx.makeProfilesChange();
                 if (typeof response.data !== 'string' && 'message' in response.data){
-                    console.log(response.data);
                     ErrCtx.setErrorType("info");
                     ErrCtx.setOpen(true);
                     ErrCtx.setMessage(response.data.message);
@@ -65,7 +62,7 @@ function AddProfileModal(props) {
     };
 
    const handleRequestClose = useCallback(
-    (e) => {
+    () => {
         ValCtx.resetAllErrors();
         ProfCtx.setAddOpen(false);
         ProfCtx.addModalToggle?.current?.focus();
@@ -75,7 +72,7 @@ function AddProfileModal(props) {
 
 
     const handleApply = useCallback(
-    (e) => {
+    () => {
 
         const profileObj = {
             profileName: ProfCtx.profileName,
@@ -122,9 +119,8 @@ function AddProfileModal(props) {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} style={{ width: '600px' }}>
-                <StyledModalHeader title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")}
-                              onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={ProfCtx.addOpen} returnFocus={ProfCtx.addModalToggle} style={{ width: '600px' }}>
+                <StyledModalHeader title={((ProfCtx.isEdit) ? `Edit profile` : "Add a new profile")} />
                 <StyledModalBody>
                     <StyledControlGroup label="Profile name">
                         <ValidationGroup>

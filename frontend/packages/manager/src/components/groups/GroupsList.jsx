@@ -17,7 +17,7 @@ import BulkAddDeviceModal from "./BulkAddDeviceModal";
 import DeleteModal from "../DeleteModal";
 import { GroupsContent, GroupsNames, GroupsNamesHeader,
     SingleGroup, GroupDevices, Pagination, GroupsPagination } from "../../styles/groups/GroupsStyle";
-import { RowActions } from "../../styles/common/ListStyles";
+import { RowActions, StyledFramedTable } from "../../styles/common/ListStyles";
 
 
 
@@ -65,10 +65,10 @@ function GroupsList() {
                         const existingGroups = [];
                         const selected = {};
                         for (const group of response2.data){
-                            // eslint-disable-next-line no-underscore-dangle
+                             
                             selected[group._id] = false;
                             GrCtx.setDevices([]);
-                            // eslint-disable-next-line no-underscore-dangle
+                             
                             existingGroups.push(group._id);
                         }
                         // If page was reloaded after updating one of devices, open tab of that group
@@ -231,7 +231,7 @@ function GroupsList() {
 
     const deleteModalRequest = () => {
         api.post(GrCtx.deleteUrl)
-          .then(function (response) {
+          .then((response) => {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
@@ -239,8 +239,7 @@ function GroupsList() {
             }
             GrCtx.makeGroupsChange();
           })
-          .catch(function (error) {
-            console.log(error);
+          .catch(() => {
             GrCtx.makeGroupsChange();
           });
         GrCtx.setDeleteOpen(false);
@@ -262,10 +261,10 @@ function GroupsList() {
                 {group.groupName}
             </P>
             <div>
-                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="pill" icon={<Plus />} />
-                <Button data-test="sc4snmp:group:bulk-add-button" style={{ margin: "0" }} onClick={() => (bulkAddHandler(group._id, group.groupName))} appearance="pill" icon={<SquaresLayeredPlus />} />
-                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="pill" icon={<Pencil />} />
-                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="pill" icon={<Trash />} />
+                <Button data-test="sc4snmp:group:new-device-button" style={{ margin: "0" }} onClick={() => (newDevicenHandler(group._id, group.groupName))} appearance="subtle" icon={<Plus />} />
+                <Button data-test="sc4snmp:group:bulk-add-button" style={{ margin: "0" }} onClick={() => (bulkAddHandler(group._id, group.groupName))} appearance="subtle" icon={<SquaresLayeredPlus />} />
+                <Button data-test="sc4snmp:group:edit-group-button" style={{ margin: "0" }} onClick={() => (editGroupHandler(group._id, group.groupName))} appearance="subtle" icon={<Pencil />} />
+                <Button data-test="sc4snmp:group:delete-group-button" style={{ margin: "0" }} onClick={() => (groupDeleteHandler(group._id, group.groupName, group.groupInInventory))} appearance="subtle" icon={<Trash />} />
             </div>
         </SingleGroup>
     ));
@@ -277,7 +276,7 @@ function GroupsList() {
                 <GroupsNamesHeader>
                     <P>Group</P>
                     <div>
-                        <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="pill" icon={<Plus />} />
+                        <Button data-test="sc4snmp:add-new-group-button" onClick={handleRequestOpenGroups} appearance="subtle" icon={<Plus />} />
                     </div>
                 </GroupsNamesHeader>
                 <GroupsPagination>
@@ -294,7 +293,7 @@ function GroupsList() {
             <GroupDevices>
                 <div style={{width: '100%' }}>
                     <Pagination>
-                        <Select data-test="sc4snmp:group-pagination" appearance="pill" suffixLabel="items per page"
+                        <Select data-test="sc4snmp:group-pagination" appearance="subtle" suffixLabel="items per page"
                                 value={devicesPerPage} onChange={devicesPerPageHandler}
                                 defaultValue="20">
                             <Select.Option data-test="sc4snmp:group-pagination-option" label="10" value="10" />
@@ -309,7 +308,7 @@ function GroupsList() {
                             totalPages={totalPages}
                         />
                     </Pagination>
-                    <Table data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
+                    <StyledFramedTable data-test="sc4snmp:group-table" stripeRows resizableFillLayout>
                         <Table.Head>
                             {columns.map((headData) => (
                                 <Table.HeadCell key={headData.sortKey} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -336,7 +335,7 @@ function GroupsList() {
                                     </Table.Row>
                                 ))}
                         </Table.Body>
-                    </Table>
+                    </StyledFramedTable>
                 </div>
             </GroupDevices>
             <AddDeviceModal />

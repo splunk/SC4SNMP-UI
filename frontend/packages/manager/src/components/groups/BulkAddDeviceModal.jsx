@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import Button from '@splunk/react-ui/Button';
 import Modal from '@splunk/react-ui/Modal';
 import Select from '@splunk/react-ui/Select';
@@ -81,6 +81,7 @@ function BulkAddDeviceModal(){
     const [mode, setMode] = useState('manual');
     const [pasteText, setPasteText] = useState('');
     const [sharedConfig, setSharedConfig] = useState(emptySharedConfig());
+    const returnFocusRef = useRef(null);
 
     useEffect(() => {
         if (GrCtx.bulkAddOpen){
@@ -88,6 +89,9 @@ function BulkAddDeviceModal(){
             setMode('manual');
             setPasteText('');
             setSharedConfig(emptySharedConfig());
+            // Opened from a different "bulk add" button per group row, so there is no
+            // single fixed trigger element to reference.
+            returnFocusRef.current = document.activeElement;
         }
     }, [GrCtx.bulkAddOpen]);
 
@@ -202,8 +206,8 @@ function BulkAddDeviceModal(){
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={GrCtx.bulkAddOpen} style={{ width: '900px' }}>
-                <StyledModalHeader title={`Add devices in bulk to ${GrCtx.groupName}`} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={GrCtx.bulkAddOpen} returnFocus={returnFocusRef} style={{ width: '900px' }}>
+                <StyledModalHeader title={`Add devices in bulk to ${GrCtx.groupName}`} />
                 <StyledModalBody>
                     {}
                     <P style={sectionTitle}>Mode</P>

@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {jest} from "@jest/globals";
+import PropTypes from 'prop-types';
 import GroupContext from "../../store/group-contxt";
 
 const setStateMock = jest.fn()
@@ -63,7 +64,7 @@ export function MockGroupContextProvider(props){
         deleteName: "",
         setDeleteName: setStateMock,
 
-        addGroupModalToggle: null,
+        addGroupModalToggle: { current: null },
 
         // Is edit
         isGroupEdit,
@@ -110,4 +111,8 @@ export function MockGroupContextProvider(props){
             {props.children}
         </GroupContext.Provider>
     )
+};
+
+MockGroupContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };

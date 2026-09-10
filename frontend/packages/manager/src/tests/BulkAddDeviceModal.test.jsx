@@ -1,7 +1,6 @@
-import React from "react";
+import React, { act } from "react";
 import {expect, describe, jest, it, beforeEach} from "@jest/globals";
 import {fireEvent} from "@testing-library/dom";
-import {act} from "react-dom/test-utils";
 import api from "../api";
 import {render, screen} from "./custom_testing_lib/custom-testing-lib";
 import {MockGroupContextProvider} from "./mock_context_providers/MockGroupContextProvider";
@@ -20,7 +19,7 @@ function renderModal(){
     )
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 jest.mock("../api", () => ({
     __esModule: true,
@@ -195,17 +194,17 @@ describe("BulkAddDeviceModal", () => {
         renderModal();
 
         const submitButton = screen.getByDataTest("sc4snmp:bulk:submit-button");
-        expect(submitButton.disabled).toBe(false);
+        expect(submitButton).not.toHaveAttribute("aria-disabled", "true");
 
         fireEvent.click(screen.getByDataTest("sc4snmp:bulk:mode-paste"));
-        expect(screen.getByDataTest("sc4snmp:bulk:submit-button").disabled).toBe(true);
+        expect(screen.getByDataTest("sc4snmp:bulk:submit-button")).toHaveAttribute("aria-disabled", "true");
         expect(screen.getByDataTest("sc4snmp:bulk:empty-grid-hint")).toBeInTheDocument();
 
         const pasteInput = screen.getByDataTest("sc4snmp:bulk:paste-input").querySelector('textarea[data-test="textbox"]');
         fireEvent.change(pasteInput, {target: {value: "1.1.1.1"}})
         fireEvent.click(screen.getByDataTest("sc4snmp:bulk:expand-button"));
 
-        expect(screen.getByDataTest("sc4snmp:bulk:submit-button").disabled).toBe(false);
+        expect(screen.getByDataTest("sc4snmp:bulk:submit-button")).not.toHaveAttribute("aria-disabled", "true");
     })
 
     it("drops the leftover blank manual row when expanding pasted addresses", () => {

@@ -1,17 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
 import Table from '@splunk/react-ui/Table';
-import api from "../../api";
 import { createDOMID } from '@splunk/ui-utils/id';
 import Paginator from '@splunk/react-ui/Paginator';
 import Select from '@splunk/react-ui/Select';
 import Trash from '@splunk/react-icons/enterprise/Trash';
 import Pencil from '@splunk/react-icons/Pencil';
 import Button from '@splunk/react-ui/Button';
+import api from "../../api";
 import DeleteModal from "../DeleteModal";
 import ErrorsModalContext from "../../store/errors-modal-contxt";
 import InventoryContext from "../../store/inventory-contxt";
 import { Pagination } from '../../styles/inventory/InventoryStyle';
-import { RowActions } from '../../styles/common/ListStyles';
+import { RowActions, StyledFramedTable } from '../../styles/common/ListStyles';
 
 
 const columns = [
@@ -88,7 +88,7 @@ function InventoryList() {
     const deleteModalRequest = () => {
         const url = `/inventory/delete/${InvCtx.inventoryId.toString()}`;
         api.post(url)
-          .then(function (response) {
+          .then((response) => {
             if ('message' in response.data){
                 ErrCtx.setOpen(true);
                 ErrCtx.setErrorType("info");
@@ -96,8 +96,7 @@ function InventoryList() {
             }
             InvCtx.makeInventoryChange();
           })
-          .catch(function (error) {
-            console.log(error);
+          .catch(() => {
             InvCtx.makeInventoryChange();
           });
         InvCtx.setDeleteOpen(false);
@@ -118,7 +117,7 @@ function InventoryList() {
     return (
         <div style={{width: '100%' }}>
             <Pagination>
-                <Select data-test="sc4snmp:inventory-pagination" appearance="pill" suffixLabel="inventory items per page"
+                <Select data-test="sc4snmp:inventory-pagination" appearance="subtle" suffixLabel="inventory items per page"
                         value={devicesPerPage} onChange={handleDevicesPerPage}
                         defaultValue="20">
                     <Select.Option data-test="sc4snmp:inventory-pagination-option" label="10" value="10" />
@@ -133,7 +132,7 @@ function InventoryList() {
                     totalPages={totalPages}
                 />
             </Pagination>
-            <Table data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
+            <StyledFramedTable data-test="sc4snmp:inventory-table" stripeRows resizableFillLayout>
                 <Table.Head>
                     {columns.map((headData) => (
                         <Table.HeadCell key={createDOMID()} width={headData.label === "Actions" ? 100 : "auto"}>
@@ -164,7 +163,7 @@ function InventoryList() {
                             </Table.Row>
                         ))}
                 </Table.Body>
-            </Table>
+            </StyledFramedTable>
             <DeleteModal deleteName={`${InvCtx.address}:${InvCtx.port}`}
                          handleDelete={deleteModalRequest}/>
         </div>

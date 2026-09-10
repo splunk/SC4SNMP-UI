@@ -1,4 +1,5 @@
 import React, {useState, createContext, useRef, useContext} from 'react';
+import PropTypes from 'prop-types';
 import { useButtonsContext } from "./buttons-contx";
 
 const GroupContext = createContext();
@@ -123,6 +124,10 @@ export function GroupContextProvider(props){
             {props.children}
         </GroupContext.Provider>
     )
+};
+
+GroupContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useGroupContext = () => useContext(GroupContext);

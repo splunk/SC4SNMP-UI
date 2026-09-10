@@ -1,14 +1,14 @@
-import React, {useRef, useState, Component, useCallback, useEffect, useContext} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import Modal from '@splunk/react-ui/Modal';
 import Number from '@splunk/react-ui/Number';
 import Select from '@splunk/react-ui/Select';
 import Multiselect from '@splunk/react-ui/Multiselect';
 import Text from '@splunk/react-ui/Text';
 import RadioBar from '@splunk/react-ui/RadioBar';
-import api from "../../api";
 import Button from '@splunk/react-ui/Button';
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
+import api from "../../api";
 import validateInventoryAndGroup from "../validation/ValidateInventoryAndGroup";
 import {useInventoryContext} from "../../store/inventory-contxt";
 import { StyledControlGroup, StyledModalBody, StyledModalHeader } from "../../styles/inventory/InventoryStyle";
@@ -99,7 +99,6 @@ function AddInventoryModal() {
     const updateInventory = (inventoryObj, inventoryId) => {
         api.post(`/inventory/update/${inventoryId}`, inventoryObj)
             .then((response) => {
-                console.log(response.data)
                 if (response.data !== "success" && 'message' in response.data){
                     ErrCtx.setOpen(true);
                     ErrCtx.setErrorType("info");
@@ -170,8 +169,8 @@ function AddInventoryModal() {
 
     return (
         <div>
-            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} style={{ width: '700px' }}>
-                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit ${((InvCtx.inventoryType === "Host") ? "device" : "group")}` : "Add a new device/group")} onRequestClose={handleRequestClose} />
+            <Modal onRequestClose={handleRequestClose} open={InvCtx.addOpen} returnFocus={InvCtx.addModalToggle} style={{ width: '700px' }}>
+                <StyledModalHeader title={((InvCtx.isEdit) ? `Edit ${((InvCtx.inventoryType === "Host") ? "device" : "group")}` : "Add a new device/group")} />
                 <StyledModalBody>
                     {
                         InvCtx.isEdit ? null :
@@ -238,7 +237,7 @@ function AddInventoryModal() {
 
                     <StyledControlGroup label="Max OID to process" labelWidth={140}>
                         <ValidationGroup>
-                            <Number data-test="sc4snmp:form:max-oid-to-process-input" value={InvCtx.maxOidToProcess} onChange={handleChangeMaxOidToProcess} error={(!!(ValCtx.maxOidToProcessErrors))}/>
+                            <Number data-test="sc4snmp:form:max-oid-to-process-input" value={typeof InvCtx.maxOidToProcess === 'number' ? InvCtx.maxOidToProcess : undefined} onChange={handleChangeMaxOidToProcess} error={(!!(ValCtx.maxOidToProcessErrors))}/>
                             {((ValCtx.maxOidToProcessErrors) ? ValCtx.maxOidToProcessErrors.map((el) => <P data-test="sc4snmp:max-oid-to-process-error" key={createDOMID()} style={validationMessage}>{el}</P>) : <P/>)}
                         </ValidationGroup>
                     </StyledControlGroup>
