@@ -16,32 +16,34 @@ import DeleteModal from "../DeleteModal";
 
 
 function getExpansionRow(row) {
-    return (
-        <Table.Row data-test="sc4snmp:profile-row-expanded" key={`${row._id}-expansion`}>
-            <Table.Cell data-test="sc4snmp:profile-name-expanded" >{/* Empty cell */}</Table.Cell>
-            <Table.Cell data-test="sc4snmp:profile-frequency-expanded" >{/* Empty cell */}</Table.Cell>
-            <Table.Cell data-test="sc4snmp:profile-type-expanded" >{/* Empty cell */}</Table.Cell>
-            <Table.Cell data-test="sc4snmp:profile-mib-component-expanded" >
-                {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.component}</P>
-                ))}
-            </Table.Cell>
-
-            <Table.Cell data-test="sc4snmp:profile-mib-object_expanded" >
-                {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.object}</P>
-                ))}
-            </Table.Cell>
-
-            <Table.Cell data-test="sc4snmp:profile-mib-index-expanded" >
-                {row.varBinds.map((value) => (
-                    <P style={{height: "20px", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} key={createDOMID()}>{value.index}</P>
-                ))}
-            </Table.Cell>
-
-            <Table.Cell data-test="sc4snmp:profile-actions-expanded" />
-        </Table.Row>
+    // Sorted by component then object so varBinds sharing a MIB component
+    // (and, within that, the same object) are grouped together, with the
+    // component/object label only shown once per group - each varBind still
+    // gets its own real table row so component/object/index can never drift
+    // out of alignment with each other.
+    const sortedVarBinds = [...row.varBinds].sort((a, b) =>
+        a.component.localeCompare(b.component) || a.object.localeCompare(b.object)
     );
+
+    return sortedVarBinds.map((value, index) => {
+        const isFirstInGroup = index === 0 || sortedVarBinds[index - 1].component !== value.component;
+        const isFirstObjectInGroup = isFirstInGroup || sortedVarBinds[index - 1].object !== value.object;
+        return (
+            <Table.Row data-test="sc4snmp:profile-row-expanded" key={`${row._id}-${value.component}-${value.object}-${value.index}`}>
+                <Table.Cell data-test="sc4snmp:profile-name-expanded" >{/* Empty cell */}</Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-frequency-expanded" >{/* Empty cell */}</Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-type-expanded" >{/* Empty cell */}</Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-mib-component-expanded" >
+                    {isFirstInGroup ? value.component : ""}
+                </Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-mib-object_expanded" >
+                    {isFirstObjectInGroup ? value.object : ""}
+                </Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-mib-index-expanded" >{value.index}</Table.Cell>
+                <Table.Cell data-test="sc4snmp:profile-actions-expanded" />
+            </Table.Row>
+        );
+    });
 }
 
 function ProfilesList() {
