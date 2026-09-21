@@ -16,11 +16,6 @@ import DeleteModal from "../DeleteModal";
 
 
 function getExpansionRow(row) {
-    // Sorted by component then object so varBinds sharing a MIB component
-    // (and, within that, the same object) are grouped together, with the
-    // component/object label only shown once per group - each varBind still
-    // gets its own real table row so component/object/index can never drift
-    // out of alignment with each other.
     const sortedVarBinds = [...row.varBinds].sort((a, b) =>
         a.component.localeCompare(b.component) || a.object.localeCompare(b.object)
     );
