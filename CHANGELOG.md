@@ -1,6 +1,7 @@
 # Changelog
 
 ### Changed
+- fix MIB component/object/index misalignment and truncated names in the expanded profiles table row
 
 ## [1.3.0]
 
