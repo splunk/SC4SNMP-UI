@@ -39,7 +39,7 @@ jobs:
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4.3.0
+        uses: docker/setup-qemu-action@v4.4.0
         with:
           image: tonistiigi/binfmt:qemu-v8.1.5
       - name: Set up Docker Buildx
@@ -92,7 +92,7 @@ jobs:
 
       #Build docker images
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4.3.0
+        uses: docker/setup-qemu-action@v4.4.0
         with:
           image: tonistiigi/binfmt:qemu-v8.1.5
       - name: Set up Docker Buildx
