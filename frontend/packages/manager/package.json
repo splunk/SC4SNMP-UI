@@ -32,8 +32,8 @@
     "style-loader": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
-    "@babel/eslint-parser": "^7.28.0",
+    "@babel/core": "^8.0.0",
+    "@babel/eslint-parser": "^8.0.0",
     "@eslint/js": "^9.39.4",
     "@jest/globals": "^30.4.1",
     "@splunk/babel-preset": "^4.0.0",
