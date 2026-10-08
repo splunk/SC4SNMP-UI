@@ -3143,11 +3143,11 @@
     use-typed-event-listener "^3.0.0"
 
 "@splunk/splunk-utils@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.npmjs.org/@splunk/splunk-utils/-/splunk-utils-4.0.1.tgz#c11a73f93bba2b4422541daab47725a0e51f985f"
-  integrity sha512-BsFKoetTEE7tQGXAbRiikQcrfuOfoPFCpsvc3rfVe1HdB2go5XtcH/A5VMGsZ/HiP6Av0ZARfVsFPYmZKj4D5Q==
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@splunk/splunk-utils/-/splunk-utils-4.1.0.tgz#27a0191c22ab1ec93c68e926fb45937ed777b27c"
+  integrity sha512-BnLyAJGrBvOySwmGbb0xT5O0ivh/e4Lbi3cPV52u+kexcCD/a6FbZywqIi/gvpB258SwATrrWISH7kIWL4kOgA==
   dependencies:
-    "@splunk/ui-utils" "^1.14.0"
+    "@splunk/ui-utils" "^1.14.1"
     lodash "^4.18.1"
     scriptjs "^2.5.8"
 
@@ -3169,7 +3169,7 @@
     colorjs.io "^0.6.1"
     lodash "^4.18.1"
 
-"@splunk/ui-utils@^1.14.0", "@splunk/ui-utils@^1.14.1":
+"@splunk/ui-utils@^1.14.1":
   version "1.14.1"
   resolved "https://registry.npmjs.org/@splunk/ui-utils/-/ui-utils-1.14.1.tgz#0862110b04155e1e2495ecab646d62e6cd2de3f9"
   integrity sha512-sr67renHKlIPkTtNAJ1Eg3dP2+/4kQU4oK+Csuwm0aakMWtEqccODij1gLtdYXJihkNdtxfTCMqNcMwe/NN2cA==
