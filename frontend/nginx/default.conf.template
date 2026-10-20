@@ -1,0 +1,36 @@
+server {
+    listen ${DEMO_PORT};
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Bulk device import and config restore can exceed nginx's 1 MB default.
+    client_max_body_size 10m;
+
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types text/css application/javascript image/svg+xml;
+
+    # The browser only talks to this origin; API calls are forwarded to the backend.
+    location /api/ {
+        include /etc/nginx/sc4snmp/security-headers.conf;
+        gzip off;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        # Overwritten (not appended) so clients cannot inject an address; $remote_addr
+        # is the real client IP when the request came from a trusted proxy (see realip).
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_pass ${BACKEND_URL}/;
+    }
+
+    location = /index.html {
+        include /etc/nginx/sc4snmp/security-headers.conf;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location / {
+        include /etc/nginx/sc4snmp/security-headers.conf;
+        try_files $uri /index.html;
+    }
+}

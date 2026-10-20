@@ -1,10 +1,9 @@
 import axios from 'axios';
-import { backendHost } from './host';
 
 // axios.create is a documented static method on the default export, not a named export.
 // eslint-disable-next-line import/no-named-as-default-member
 const api = axios.create({
-    baseURL: `http://${backendHost}`,
+    baseURL: '/api',
     withCredentials: true,
     headers: {
         'X-Requested-With': 'XMLHttpRequest',
