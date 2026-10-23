@@ -111,7 +111,7 @@ def create_app():
         # Per-client rate limiting needs the real client IP from X-Forwarded-For.
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=trusted_proxy_count)
 
-    auth_enabled =os.getenv("AUTH_ENABLED", "true").lower() == "true"
+    auth_enabled = os.getenv("AUTH_ENABLED", "true").lower() == "true"
     if auth_enabled:
         missing = []
         for var in ("AUTH_USERNAME", "AUTH_PASSWORD_HASH", "JWT_SECRET"):
