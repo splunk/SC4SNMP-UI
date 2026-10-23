@@ -1,6 +1,11 @@
 # Changelog
 
 ### Changed
+- serve the frontend from an unprivileged nginx with the production build instead of the webpack development server; the container starts immediately and runs with a read-only root filesystem
+- the browser now calls the API on its own origin under `/api`, which the frontend nginx forwards to the backend (`BACKEND_URL`, default `http://ui-backend-entrypoint:5000`); the backend no longer needs to be reachable from the browser, and `REACT_APP_FLASK_PORT` is no longer used by the image
+- add security headers (Content-Security-Policy without `unsafe-eval`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`); the production bundle no longer contains `eval` source maps and is much smaller
+- add `TRUSTED_PROXY_COUNT` (backend) and `TRUSTED_PROXY_CIDRS` (frontend) so the login rate limit is applied per client when the UI is behind a reverse proxy
+- the UI can be served behind a TLS reverse proxy without patching the running pods
 
 ## [1.3.2]
 

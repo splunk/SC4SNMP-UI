@@ -8,6 +8,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import logging
 from celery import Celery
@@ -96,6 +97,19 @@ def create_app():
         raise NoValuesDirectoryException
 
     app = Flask(__name__)
+
+    trusted_proxy_count_env = os.getenv("TRUSTED_PROXY_COUNT", "0").strip() or "0"
+    try:
+        trusted_proxy_count = int(trusted_proxy_count_env)
+    except ValueError:
+        trusted_proxy_count = -1
+    if trusted_proxy_count < 0:
+        raise ValueError(
+            f"TRUSTED_PROXY_COUNT must be a non-negative integer, got {trusted_proxy_count_env!r}."
+        )
+    if trusted_proxy_count > 0:
+        # Per-client rate limiting needs the real client IP from X-Forwarded-For.
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=trusted_proxy_count)
 
     auth_enabled = os.getenv("AUTH_ENABLED", "true").lower() == "true"
     if auth_enabled:
