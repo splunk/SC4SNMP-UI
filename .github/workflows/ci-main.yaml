@@ -58,7 +58,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 22
+          - "24.22.2"
     steps:
       - uses: actions/checkout@v7
       - name: Set Node.js ${{ matrix.node-version }}
