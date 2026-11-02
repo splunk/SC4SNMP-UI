@@ -35,3 +35,22 @@ def test_invalid_trusted_proxy_count_raises(monkeypatch, value):
     with mock.patch("SC4SNMP_UI_backend.wait_for_mongodb_replicaset"):
         with pytest.raises(ValueError, match="TRUSTED_PROXY_COUNT"):
             SC4SNMP_UI_backend.create_app()
+
+
+def test_forwarded_proto_is_not_trusted(monkeypatch):
+    import SC4SNMP_UI_backend
+    from unittest import mock
+    from flask import request
+
+    monkeypatch.setenv("TRUSTED_PROXY_COUNT", "1")
+    with mock.patch("SC4SNMP_UI_backend.wait_for_mongodb_replicaset"):
+        app = SC4SNMP_UI_backend.create_app()
+
+    @app.route("/_probe_scheme")
+    def probe_scheme():
+        return request.scheme
+
+    response = app.test_client().get(
+        "/_probe_scheme", headers={"X-Forwarded-For": "203.0.113.7", "X-Forwarded-Proto": "abc"}
+    )
+    assert response.get_data(as_text=True) == "http"

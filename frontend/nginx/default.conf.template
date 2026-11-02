@@ -1,6 +1,11 @@
 server {
     listen ${DEMO_PORT};
+    # Adds `listen [::]:PORT;` when the pod has IPv6 (written by entrypoint.sh).
+    include /tmp/nginx/listen-ipv6.inc;
     server_name _;
+
+    # Redirects (e.g. /api -> /api/) must not embed the internal scheme, host and port.
+    absolute_redirect off;
 
     root /usr/share/nginx/html;
     index index.html;

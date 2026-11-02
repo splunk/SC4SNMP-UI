@@ -6,6 +6,8 @@
 - add security headers (Content-Security-Policy without `unsafe-eval`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`); the production bundle no longer contains `eval` source maps and is much smaller
 - add `TRUSTED_PROXY_COUNT` (backend) and `TRUSTED_PROXY_CIDRS` (frontend) so the login rate limit is applied per client when the UI is behind a reverse proxy
 - the UI can be served behind a TLS reverse proxy without patching the running pods
+- the frontend nginx and the backend (gunicorn) now also listen on IPv6 when the pod has an IPv6 address; `BACKEND_URL` accepts bracketed IPv6 literals such as `http://[::1]:5000` and must use `http://` (the backend does not serve TLS)
+- the backend trusts only `X-Forwarded-For` from the proxy, not `X-Forwarded-Proto`; the frontend nginx redirects (e.g. `/api` to `/api/`) are now relative
 
 ## [1.3.2]
 
