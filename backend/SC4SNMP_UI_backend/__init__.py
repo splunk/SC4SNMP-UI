@@ -8,6 +8,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from werkzeug.middleware.proxy_fix import ProxyFix
+import ipaddress
 import os
 import logging
 from celery import Celery
@@ -88,6 +90,47 @@ class AuthNotConfiguredException(Exception):
     pass
 
 
+class PeerCheckedProxyFix:
+    """ProxyFix that is applied only when the connecting peer is inside trusted_networks.
+
+    Other callers keep their real address, so they cannot choose their rate-limit identity with
+    X-Forwarded-For. Only X-Forwarded-For is trusted (x_proto stays 0).
+    """
+
+    def __init__(self, app, trusted_count, trusted_networks):
+        self._app = app
+        self._proxy_fixed = ProxyFix(app, x_for=trusted_count, x_proto=0)
+        self._networks = trusted_networks
+
+    def _is_trusted(self, peer):
+        try:
+            address = ipaddress.ip_address(peer)
+        except ValueError:
+            return False
+        # A dual-stack socket reports IPv4 peers as ::ffff:a.b.c.d
+        if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+            address = address.ipv4_mapped
+        return any(address in network for network in self._networks)
+
+    def __call__(self, environ, start_response):
+        if self._is_trusted(environ.get("REMOTE_ADDR", "")):
+            return self._proxy_fixed(environ, start_response)
+        return self._app(environ, start_response)
+
+
+def _parse_trusted_networks(value):
+    networks = []
+    for item in value.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(item, strict=False))
+        except ValueError:
+            raise ValueError(f"TRUSTED_PROXY_CIDRS entry is not an IP address or CIDR: {item!r}.") from None
+    return networks
+
+
 limiter = Limiter(key_func=get_remote_address, default_limits=[], storage_uri=REDBEAT_URL)
 
 
@@ -96,6 +139,26 @@ def create_app():
         raise NoValuesDirectoryException
 
     app = Flask(__name__)
+
+    trusted_proxy_count_env = os.getenv("TRUSTED_PROXY_COUNT", "0").strip() or "0"
+    try:
+        trusted_proxy_count = int(trusted_proxy_count_env)
+    except ValueError:
+        trusted_proxy_count = -1
+    if trusted_proxy_count < 0:
+        raise ValueError(
+            f"TRUSTED_PROXY_COUNT must be a non-negative integer, got {trusted_proxy_count_env!r}."
+        )
+    trusted_networks = _parse_trusted_networks(os.getenv("TRUSTED_PROXY_CIDRS", ""))
+    if trusted_proxy_count > 0:
+        # Per-client rate limiting needs the real client IP from X-Forwarded-For. Only X-Forwarded-For is
+        # trusted: ProxyFix defaults x_proto to 1, which would let any client set the request scheme.
+        # With TRUSTED_PROXY_CIDRS the header is trusted only from peers in those ranges (the frontend nginx).
+        app.wsgi_app = (
+            PeerCheckedProxyFix(app.wsgi_app, trusted_proxy_count, trusted_networks)
+            if trusted_networks
+            else ProxyFix(app.wsgi_app, x_for=trusted_proxy_count, x_proto=0)
+        )
 
     auth_enabled = os.getenv("AUTH_ENABLED", "true").lower() == "true"
     if auth_enabled:
