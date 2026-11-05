@@ -153,11 +153,12 @@ def create_app():
     if trusted_proxy_count > 0:
         # Per-client rate limiting needs the real client IP from X-Forwarded-For. Only X-Forwarded-For is
         # trusted: ProxyFix defaults x_proto to 1, which would let any client set the request scheme.
-        if trusted_networks:
-            # Trust the header only when the connecting peer (the frontend nginx) is in TRUSTED_PROXY_CIDRS.
-            app.wsgi_app = PeerCheckedProxyFix(app.wsgi_app, trusted_proxy_count, trusted_networks)
-        else:
-            app.wsgi_app = ProxyFix(app.wsgi_app, x_for=trusted_proxy_count, x_proto=0)
+        # With TRUSTED_PROXY_CIDRS the header is trusted only from peers in those ranges (the frontend nginx).
+        app.wsgi_app = (
+            PeerCheckedProxyFix(app.wsgi_app, trusted_proxy_count, trusted_networks)
+            if trusted_networks
+            else ProxyFix(app.wsgi_app, x_for=trusted_proxy_count, x_proto=0)
+        )
 
     auth_enabled = os.getenv("AUTH_ENABLED", "true").lower() == "true"
     if auth_enabled:
