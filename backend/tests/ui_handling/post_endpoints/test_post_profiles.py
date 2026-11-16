@@ -114,7 +114,7 @@ def test_delete_profile_record(m_update, m_delete, m_find, client):
 
     response = client.post(f'/profiles/delete/{common_id}')
 
-    calls = [call({'_id': ObjectId(common_id)}, {"_id": 0}), call({"profiles": {"$regex": '.*profile_1.*'}, "delete": False})]
+    calls = [call({'_id': ObjectId(common_id)}, {"_id": 0}), call({"profiles": {"$regex": '(^|;)profile_1(;|$)'}, "delete": False})]
     m_find.assert_has_calls(calls)
     assert m_delete.call_args == call({"_id": ObjectId(common_id)})
     assert m_update.call_args == call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update})
@@ -234,7 +234,7 @@ def test_update_profile_record_with_name_change_success(m_find, m_update, client
 
     calls_find = [call({f"profile_1_edit": {"$exists": True}, "_id": {"$ne": ObjectId(common_id)}}),
                   call({'_id': ObjectId(common_id)}, {"_id": 0}),
-                  call({"profiles": {"$regex": '.*profile_1.*'}, "delete": False})]
+                  call({"profiles": {"$regex": '(^|;)profile_1(;|$)'}, "delete": False})]
 
     calls_update = [call({'_id': ObjectId(common_id)}, {"$rename": {"profile_1": "profile_1_edit"}}),
                     call({"_id": ObjectId(common_id)}, {"$set": backend_inventory_update}),
@@ -274,3 +274,15 @@ def test_update_profile_record_failure(m_find, m_update, client):
     response = client.post(f"/profiles/update/{common_id}", json=ui_prof_1_new)
     assert not m_update.called
     assert response.json == {"message": "Profile with name profile_1 already exists. Profile was not edited."}
+
+def test_profile_name_regex_matches_whole_entries_only():
+    import re
+    from SC4SNMP_UI_backend.common.inventory_utils import profile_name_regex
+    pattern = re.compile(profile_name_regex("test"))
+    assert pattern.search("test")
+    assert pattern.search("a;test;b")
+    assert pattern.search("a;test")
+    assert not pattern.search("test2")
+    assert not pattern.search("latest;my_test_profile")
+    assert re.compile(profile_name_regex("a.b(c")).search("x;a.b(c")
+    assert not re.compile(profile_name_regex("a.b")).search("axb")

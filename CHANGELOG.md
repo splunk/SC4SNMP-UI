@@ -10,6 +10,9 @@
 - the frontend nginx and the backend (gunicorn) now also listen on IPv6 when the pod has an IPv6 address; `BACKEND_URL` accepts bracketed IPv6 literals such as `http://[::1]:5000` and must use `http://` (the backend does not serve TLS)
 - the backend trusts only `X-Forwarded-For` from the proxy, not `X-Forwarded-Proto`; the frontend nginx redirects (e.g. `/api` to `/api/`) are now relative
 
+### Fixed
+- fix profile search in the inventory matching profile names as substrings (e.g. `test` matched `snmpstring-test`): the warning no longer shows for unrelated profiles, and deleting or renaming such a profile no longer fails with a 500 error
+
 ## [1.3.2]
 
 ### Changed

@@ -3,7 +3,7 @@ from flask import request, Blueprint, jsonify
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import ProfileConversion, get_group_or_profile_name_from_backend
-from SC4SNMP_UI_backend.common.inventory_utils import update_profiles_in_inventory
+from SC4SNMP_UI_backend.common.inventory_utils import update_profiles_in_inventory, profile_name_regex
 
 profiles_blueprint = Blueprint('profiles_blueprint', __name__)
 
@@ -39,7 +39,7 @@ def get_profiles_list(page_num, prof_per_page):
     profiles_list = []
     for pr in profiles:
         profile_name = get_group_or_profile_name_from_backend(pr)
-        profile_in_inventory = True if list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_name}.*'},
+        profile_in_inventory = True if list(mongo_inventory.find({"profiles": {"$regex": profile_name_regex(profile_name)},
                                                                   "delete": False})) else False
         converted = profile_conversion.backend2ui(pr, profile_in_inventory=profile_in_inventory)
         if converted['conditions']['condition'] not in ['mandatory']:
