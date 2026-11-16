@@ -3160,11 +3160,11 @@
     stylelint-config-standard "^34.0.0"
 
 "@splunk/themes@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.npmjs.org/@splunk/themes/-/themes-1.12.0.tgz#93b2f8bcad25e74a89cc9b6bfed18ebfa5520514"
-  integrity sha512-zBVOBNjBMCQSa6KKW3SFoeaMVtb3jr6yMLw46OhJ744lQS8fryAIf8kuzPg1v7p0on8u64jFe9Z5pQideYbNiQ==
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/@splunk/themes/-/themes-1.13.1.tgz#af9726f690fbc1161eba832691d6c5a4d9e042b3"
+  integrity sha512-Xx60xFM8G505eJejFuq9BRHILoGFK9NVTWcEwNgRAjl0sdVTd5PEsaWKjJu8H3YME6JxhycEOv3gA/TEupIUvQ==
   dependencies:
-    "@splunk/ui-utils" "^1.14.1"
+    "@splunk/ui-utils" "^1.15.0"
     color-blend "^2.0.9"
     colorjs.io "^0.6.1"
     lodash "^4.18.1"
@@ -3173,6 +3173,14 @@
   version "1.14.1"
   resolved "https://registry.npmjs.org/@splunk/ui-utils/-/ui-utils-1.14.1.tgz#0862110b04155e1e2495ecab646d62e6cd2de3f9"
   integrity sha512-sr67renHKlIPkTtNAJ1Eg3dP2+/4kQU4oK+Csuwm0aakMWtEqccODij1gLtdYXJihkNdtxfTCMqNcMwe/NN2cA==
+  dependencies:
+    keycode "^2.1.9"
+    lodash "^4.18.1"
+
+"@splunk/ui-utils@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@splunk/ui-utils/-/ui-utils-1.15.0.tgz#98db8932ed3bbb0d3a952f2fc741963a183c2fcd"
+  integrity sha512-/YD3Tp5+yLRT2f2kH17ewss5aX9kOJPzVMBVTn+esuPAPQQT0Xt+ts7NuzqyOnz7J2A56MmAFioegUzXF09T9w==
   dependencies:
     keycode "^2.1.9"
     lodash "^4.18.1"
@@ -10924,10 +10932,10 @@ smart-buffer@^4.2.0:
   resolved "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz"
   integrity sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==
 
-smol-toml@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.npmjs.org/smol-toml/-/smol-toml-1.7.1.tgz#ba3e28d2e4348874a824fd8e1d73fec618cb763b"
-  integrity sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==
+smol-toml@1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/smol-toml/-/smol-toml-1.6.1.tgz#4fceb5f7c4b86c2544024ef686e12ff0983465be"
+  integrity sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==
 
 socks-proxy-agent@^10.0.0:
   version "10.1.0"
