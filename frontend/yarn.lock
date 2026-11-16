@@ -1825,16 +1825,6 @@
     jest-mock "30.5.2"
     jest-util "30.5.1"
 
-"@jest/environment@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/environment/-/environment-30.5.1.tgz#a28a93864515da3ad90d3a841dc32a95be462c52"
-  integrity sha512-eYJAkOsrpwDXPcoLNEG6lN9Zo3Cy35pxnVQD74vyIfsi/Q8wB/lZFsEjU4wrecOgT4ZviQDZaX/cFIJyMdMxTw==
-  dependencies:
-    "@jest/fake-timers" "30.5.1"
-    "@jest/types" "30.5.1"
-    "@types/node" "*"
-    jest-mock "30.5.1"
-
 "@jest/environment@30.5.2":
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/@jest/environment/-/environment-30.5.2.tgz#9f28a93aaa5569dab513c358843bec855c154b6d"
@@ -1845,27 +1835,12 @@
     "@types/node" "*"
     jest-mock "30.5.2"
 
-"@jest/expect-utils@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/expect-utils/-/expect-utils-30.5.1.tgz#ae10e1698eff0800de971168aa783ead6a9403df"
-  integrity sha512-WcRWhHQdTMRDpyWKZ/6MINBmovI7zeD+bL8wFjCncRV3NQOwKy1X45IfyblfHR4k/XciIlNEdFL9QjFO+HNKOg==
-  dependencies:
-    "@jest/get-type" "30.5.0"
-
 "@jest/expect-utils@30.5.2":
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/@jest/expect-utils/-/expect-utils-30.5.2.tgz#448c3f7bdc3d8f8afa794c839550cdd72962c0db"
   integrity sha512-d/HOLSrJUlBIl6n3LzOa7cjW3xdePm5H5gQw2lixZ/0h157l9sw3mLblzFqnPcTbhDzhRQdBOX3A3KcG73nm5Q==
   dependencies:
     "@jest/get-type" "30.5.0"
-
-"@jest/expect@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/expect/-/expect-30.5.1.tgz#b42ce55ba35cc0cb2ee8aa823baec6b6fbb95d1f"
-  integrity sha512-uOGd40P/COyUp9xHf5jeGiGJC2/ANg+2+Tk9/xN5/LxmlY/r/gxsPrx3DTEtaRZsLAX4wgNSLEDELZ5bmVs2bA==
-  dependencies:
-    expect "30.5.1"
-    jest-snapshot "30.5.1"
 
 "@jest/expect@30.5.2":
   version "30.5.2"
@@ -1874,18 +1849,6 @@
   dependencies:
     expect "30.5.2"
     jest-snapshot "30.5.2"
-
-"@jest/fake-timers@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/fake-timers/-/fake-timers-30.5.1.tgz#6e25f439f113216590a56e6423e716a2259a1255"
-  integrity sha512-rEkV6YzpBXo/L9cnj2ibyuYZuyGiNWaPUsyCu3HYJbqCV4jnEiKmf7hId20z8eKjZ0JQ9jtIYKxRSmYB/OYSsA==
-  dependencies:
-    "@jest/types" "30.5.1"
-    "@sinonjs/fake-timers" "^15.4.0"
-    "@types/node" "*"
-    jest-message-util "30.5.1"
-    jest-mock "30.5.1"
-    jest-util "30.5.1"
 
 "@jest/fake-timers@30.5.2":
   version "30.5.2"
@@ -1904,7 +1867,7 @@
   resolved "https://registry.npmjs.org/@jest/get-type/-/get-type-30.5.0.tgz#0fc76dd792523bf05d7715a18041c185f9128cc4"
   integrity sha512-9/2VUPitAjmBzbvDvqrxmvB7BzWsBW0WmkkojX1ODuxX1NLGxx9gfaZpHB0z8DtJ9uhGNmZG/VXBhf8uO0OV8Q==
 
-"@jest/globals@30.5.2":
+"@jest/globals@30.5.2", "@jest/globals@^30.5.2":
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/@jest/globals/-/globals-30.5.2.tgz#6e89c0b6334fc4b9cd9b18fa4495edc7783e856f"
   integrity sha512-62zfS+dL+M5aTNHXCNLyqD+j4oqxTIzDYrZbpqMP8Yn+gvlAGyzC6BSPNb1ZmFOakV1RtFYX/O3FCQXSWmQdgg==
@@ -1913,16 +1876,6 @@
     "@jest/expect" "30.5.2"
     "@jest/types" "30.5.1"
     jest-mock "30.5.2"
-
-"@jest/globals@^30.4.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/globals/-/globals-30.5.1.tgz#2794ea50e7ef7dea2675d04467b9eb7c42f17713"
-  integrity sha512-VhqvQ251XIC7pk46YymI3HCeBLOdvriDw9zibekodAHEwoVvbVVgpU5H13GvmyOAzxtZCfsm1uvzqkaqJf2I+g==
-  dependencies:
-    "@jest/environment" "30.5.1"
-    "@jest/expect" "30.5.1"
-    "@jest/types" "30.5.1"
-    jest-mock "30.5.1"
 
 "@jest/pattern@30.5.0":
   version "30.5.0"
@@ -2017,26 +1970,6 @@
     graceful-fs "^4.2.11"
     jest-haste-map "30.5.1"
     slash "^3.0.0"
-
-"@jest/transform@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/@jest/transform/-/transform-30.5.1.tgz#563895f9cb60bc490c3addde758e78f3dd9dc321"
-  integrity sha512-EDnDhn0jleU9ZhpVoA4gvqw+Ev0iw/r5upNT2b79RiwiaTiYAMMhvNJP3lmocjIe5J2ZkoNr0B3K/J6O5GIm4Q==
-  dependencies:
-    "@babel/core" "^7.27.4"
-    "@jest/types" "30.5.1"
-    "@jridgewell/trace-mapping" "^0.3.31"
-    babel-plugin-istanbul "^8.0.0"
-    chalk "^4.1.2"
-    convert-source-map "^2.0.0"
-    fast-json-stable-stringify "^2.1.0"
-    graceful-fs "^4.2.11"
-    jest-haste-map "30.5.1"
-    jest-regex-util "30.5.0"
-    jest-util "30.5.1"
-    pirates "^4.0.7"
-    slash "^3.0.0"
-    write-file-atomic "^5.0.1"
 
 "@jest/transform@30.5.2":
   version "30.5.2"
@@ -3118,6 +3051,15 @@
     lodash "^4.18.1"
     prop-types "^15.6.2"
 
+"@splunk/react-icons@^5.17.0":
+  version "5.17.0"
+  resolved "https://registry.npmjs.org/@splunk/react-icons/-/react-icons-5.17.0.tgz#47c310b8d4cc4460d6ca0418860084150ad56e8b"
+  integrity sha512-6+1l6GUR39qvqQ0JZzFCwSBRPnN11yU/Mtt2kc8ZHYS5udOiCIeacArFYk5Su5g/IzB9VlyrJxKsIoa6Yo1uNQ==
+  dependencies:
+    "@splunk/ui-utils" "^1.15.0"
+    lodash "^4.18.1"
+    prop-types "^15.6.2"
+
 "@splunk/react-ui@^5.16.0":
   version "5.16.0"
   resolved "https://registry.npmjs.org/@splunk/react-ui/-/react-ui-5.16.0.tgz#936ce9f46d76c784f4fe86130fa166c987e5bf71"
@@ -3142,12 +3084,12 @@
     use-sync-external-store "^1.6.0"
     use-typed-event-listener "^3.0.0"
 
-"@splunk/splunk-utils@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.npmjs.org/@splunk/splunk-utils/-/splunk-utils-4.0.1.tgz#c11a73f93bba2b4422541daab47725a0e51f985f"
-  integrity sha512-BsFKoetTEE7tQGXAbRiikQcrfuOfoPFCpsvc3rfVe1HdB2go5XtcH/A5VMGsZ/HiP6Av0ZARfVsFPYmZKj4D5Q==
+"@splunk/splunk-utils@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/@splunk/splunk-utils/-/splunk-utils-4.2.0.tgz#2f4f23523c1b0a81fb3f8c73f922d87c4416c230"
+  integrity sha512-ahQlLJfVZlyHHH0ptpUYgd8LblqIMpvftMnoh6ekNOpk7EM3uYna513jIyYEqDAs0OyaJOlG58CLbND0JIzBqg==
   dependencies:
-    "@splunk/ui-utils" "^1.14.0"
+    "@splunk/ui-utils" "^1.15.0"
     lodash "^4.18.1"
     scriptjs "^2.5.8"
 
@@ -3169,10 +3111,28 @@
     colorjs.io "^0.6.1"
     lodash "^4.18.1"
 
-"@splunk/ui-utils@^1.14.0", "@splunk/ui-utils@^1.14.1":
+"@splunk/themes@^1.13.1":
+  version "1.13.1"
+  resolved "https://registry.npmjs.org/@splunk/themes/-/themes-1.13.1.tgz#af9726f690fbc1161eba832691d6c5a4d9e042b3"
+  integrity sha512-Xx60xFM8G505eJejFuq9BRHILoGFK9NVTWcEwNgRAjl0sdVTd5PEsaWKjJu8H3YME6JxhycEOv3gA/TEupIUvQ==
+  dependencies:
+    "@splunk/ui-utils" "^1.15.0"
+    color-blend "^2.0.9"
+    colorjs.io "^0.6.1"
+    lodash "^4.18.1"
+
+"@splunk/ui-utils@^1.14.1":
   version "1.14.1"
   resolved "https://registry.npmjs.org/@splunk/ui-utils/-/ui-utils-1.14.1.tgz#0862110b04155e1e2495ecab646d62e6cd2de3f9"
   integrity sha512-sr67renHKlIPkTtNAJ1Eg3dP2+/4kQU4oK+Csuwm0aakMWtEqccODij1gLtdYXJihkNdtxfTCMqNcMwe/NN2cA==
+  dependencies:
+    keycode "^2.1.9"
+    lodash "^4.18.1"
+
+"@splunk/ui-utils@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.npmjs.org/@splunk/ui-utils/-/ui-utils-1.15.0.tgz#98db8932ed3bbb0d3a952f2fc741963a183c2fcd"
+  integrity sha512-/YD3Tp5+yLRT2f2kH17ewss5aX9kOJPzVMBVTn+esuPAPQQT0Xt+ts7NuzqyOnz7J2A56MmAFioegUzXF09T9w==
   dependencies:
     keycode "^2.1.9"
     lodash "^4.18.1"
@@ -3958,6 +3918,11 @@ argparse@2.0.1, argparse@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
+
+argparse@^3.0.3:
+  version "3.0.4"
+  resolved "https://registry.npmjs.org/argparse/-/argparse-3.0.4.tgz#ba802dd75fdc3d5bdcb4339b713d62c6c5d4565d"
+  integrity sha512-fwWK3Zq22l4XJJjx5mcBHGikIk+hJqO+32dPm0Jur7+rtG5x1scOjSfdT9ZKeWHPpsya/l0HHK4tDImBkTrtvA==
 
 argue-cli@^3.1.0:
   version "3.2.0"
@@ -5962,18 +5927,6 @@ exit-x@^0.2.2:
   resolved "https://registry.npmjs.org/exit-x/-/exit-x-0.2.2.tgz"
   integrity sha512-+I6B/IkJc1o/2tiURyz/ivu/O0nKNEArIUB5O7zBrlDVJr22SCLH3xTeEry428LvFhRzIA1g8izguxJ/gbNcVQ==
 
-expect@30.5.1:
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/expect/-/expect-30.5.1.tgz#0fdbaf8a9be4c660f394d745fc17174d08b4fba6"
-  integrity sha512-m8YrYgvKe9+9gEnWEuKz+qCGfHqkrff7PPfyDnOFkjsfYRKqiYyOxDFMFieCGAuhtk/VNm63tvNgKZVzVy+Hvg==
-  dependencies:
-    "@jest/expect-utils" "30.5.1"
-    "@jest/get-type" "30.5.0"
-    jest-matcher-utils "30.5.1"
-    jest-message-util "30.5.1"
-    jest-mock "30.5.1"
-    jest-util "30.5.1"
-
 expect@30.5.2:
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/expect/-/expect-30.5.2.tgz#f3fe2eeeb9df5c55e237c6428d37f37204b55f4f"
@@ -7657,16 +7610,6 @@ jest-config@30.5.2:
     slash "^3.0.0"
     strip-json-comments "^3.1.1"
 
-jest-diff@30.5.1:
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/jest-diff/-/jest-diff-30.5.1.tgz#e03474eca7e5dc42924b15c72069b3203253768d"
-  integrity sha512-e3cNNMpv8Kh20MjjphTXs+3Vz7DQyLM1nft7KJhnh46atFhjVJRa+0Hq0beywuwsACtMQUBihQkFl8zxb7gt1Q==
-  dependencies:
-    "@jest/diff-sequences" "30.5.0"
-    "@jest/get-type" "30.5.0"
-    chalk "^4.1.2"
-    pretty-format "30.5.1"
-
 jest-diff@30.5.2:
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/jest-diff/-/jest-diff-30.5.2.tgz#0d96ecb53aac3949132a6ce2106790d9212edced"
@@ -7754,16 +7697,6 @@ jest-leak-detector@30.5.1:
     "@jest/get-type" "30.5.0"
     pretty-format "30.5.1"
 
-jest-matcher-utils@30.5.1:
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/jest-matcher-utils/-/jest-matcher-utils-30.5.1.tgz#93e64fa4362c44d68cdc7a5590a2ccf6972083f4"
-  integrity sha512-aroZVqwOz/wC2y6pC+obgFWKV9viaQWQTTSB6W5H55+egtUczIfXR/rxExTv92xD/ADYwpqaYfVWx1aqwKg7FA==
-  dependencies:
-    "@jest/get-type" "30.5.0"
-    chalk "^4.1.2"
-    jest-diff "30.5.1"
-    pretty-format "30.5.1"
-
 jest-matcher-utils@30.5.2:
   version "30.5.2"
   resolved "https://registry.yarnpkg.com/jest-matcher-utils/-/jest-matcher-utils-30.5.2.tgz#360433048fea76513dd2ceed6dfaf5f488164ed5"
@@ -7789,16 +7722,6 @@ jest-message-util@30.5.1:
     pretty-format "30.5.1"
     slash "^3.0.0"
     stack-utils "^2.0.6"
-
-jest-mock@30.5.1:
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/jest-mock/-/jest-mock-30.5.1.tgz#a52a7286d4bbf049bf9dabaa94616a9cc28c4b84"
-  integrity sha512-9fVjc3leUpGID2/by/LU4Dvdcp7PFh9LlxS3QRWK3ABm+KtvEVsG/AEGeLY3gKOZsjkBxyfwGltoAVlW7dygHg==
-  dependencies:
-    "@jest/expect-utils" "30.5.1"
-    "@jest/types" "30.5.1"
-    "@types/node" "*"
-    jest-util "30.5.1"
 
 jest-mock@30.5.2:
   version "30.5.2"
@@ -7892,33 +7815,6 @@ jest-runtime@30.5.2:
     jest-util "30.5.1"
     slash "^3.0.0"
     strip-bom "^4.0.0"
-
-jest-snapshot@30.5.1:
-  version "30.5.1"
-  resolved "https://registry.npmjs.org/jest-snapshot/-/jest-snapshot-30.5.1.tgz#37fe8f798710bc1b9f598d5f51313c0c38438eae"
-  integrity sha512-cNWFdSb5xuDGl8hKkAZJ3YtI/PzHpAPFV+HUXWIOG8rMhpDTLVbvAc2d2wRicoYw2wGsJGLaurJT6BLC97bLXQ==
-  dependencies:
-    "@babel/core" "^7.27.4"
-    "@babel/generator" "^7.27.5"
-    "@babel/plugin-syntax-jsx" "^7.27.1"
-    "@babel/plugin-syntax-typescript" "^7.27.1"
-    "@babel/types" "^7.27.3"
-    "@jest/expect-utils" "30.5.1"
-    "@jest/get-type" "30.5.0"
-    "@jest/snapshot-utils" "30.5.1"
-    "@jest/transform" "30.5.1"
-    "@jest/types" "30.5.1"
-    babel-preset-current-node-syntax "^1.2.0"
-    chalk "^4.1.2"
-    expect "30.5.1"
-    graceful-fs "^4.2.11"
-    jest-diff "30.5.1"
-    jest-matcher-utils "30.5.1"
-    jest-message-util "30.5.1"
-    jest-util "30.5.1"
-    pretty-format "30.5.1"
-    semver "^7.7.2"
-    synckit "^0.11.8"
 
 jest-snapshot@30.5.2:
   version "30.5.2"
@@ -8020,12 +7916,12 @@ jest@^30.4.2:
   resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@4.3.0, js-yaml@^3.13.1, js-yaml@^4.1.0, js-yaml@^4.3.2, js-yaml@^5.3.0:
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-5.4.2.tgz#eebc7a57e0bbe1d6b6d9416a72e7463082c7da85"
-  integrity sha512-m+aqu+LwO1O6sIopafj8HUVl5aawITwZQe/yHpMCKjaWBaA/d07B/QdMb3529REftiU+RMMHL3Vlsw3hON7vWg==
+js-yaml@4.3.0, js-yaml@^3.13.1, js-yaml@^4.1.0, js-yaml@^4.3.2, js-yaml@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-5.5.0.tgz#ec843f09ffb2a54b6758a41eee109a1815d16442"
+  integrity sha512-paNr4LFIFPjeeSmwNYdrb8FafLLG/Cr2Af3GjbsHJ5CxIjH4r0c2emlmRdAtpPAieP1gRVzk6buBbVP5gBMGAg==
   dependencies:
-    argparse "^2.0.1"
+    argparse "^3.0.3"
 
 jsdom@^26.1.0:
   version "26.1.0"
@@ -9094,10 +8990,10 @@ mute-stream@^2.0.0:
   resolved "https://registry.npmjs.org/mute-stream/-/mute-stream-2.0.0.tgz"
   integrity sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==
 
-nanoid@^3.3.18, nanoid@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.npmjs.org/nanoid/-/nanoid-6.0.1.tgz#a04a2304f05b620c600ae8464d94c325ceeebd35"
-  integrity sha512-3wVS3i51pE2pi1k5FFL/95BGfVS0kSsvDVuGXHOtxox/TywUmtgq+3qiTOTbs9J7KfHaXPiN171k/A6dBnaXFw==
+nanoid@^3.3.18, nanoid@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-6.0.2.tgz#21f04be37e204d616b694de1564a9d89d123d788"
+  integrity sha512-hIvVOb9Qr1p/9CNNLOe0OlWvgx/ziTsVwKN/GDSsuArN2K0wDiafP3s0SWmsm7o2BdnyS8Z9Z64NFBUbn6ziBg==
 
 napi-postinstall@^0.3.4:
   version "0.3.4"
@@ -10149,7 +10045,7 @@ qified@^0.10.1:
   dependencies:
     hookified "^2.1.1"
 
-qs@^6.14.0, qs@^6.16.0, qs@^6.4.0:
+qs@^6.14.0, qs@^6.4.0:
   version "6.16.0"
   resolved "https://registry.npmjs.org/qs/-/qs-6.16.0.tgz#c22c723a28a920f3aacdce8289fabd43eccb79fd"
   integrity sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==
@@ -10157,7 +10053,7 @@ qs@^6.14.0, qs@^6.16.0, qs@^6.4.0:
     es-define-property "^1.0.1"
     side-channel "^1.1.1"
 
-qs@^6.16.1:
+qs@^6.16.1, qs@^6.17.1:
   version "6.17.1"
   resolved "https://registry.npmjs.org/qs/-/qs-6.17.1.tgz#43ac71d29ca0e9d0eed16a218e35b6cde5628e81"
   integrity sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==
@@ -10924,10 +10820,10 @@ smart-buffer@^4.2.0:
   resolved "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz"
   integrity sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==
 
-smol-toml@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.npmjs.org/smol-toml/-/smol-toml-1.7.1.tgz#ba3e28d2e4348874a824fd8e1d73fec618cb763b"
-  integrity sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==
+smol-toml@1.6.1:
+  version "1.6.1"
+  resolved "https://registry.npmjs.org/smol-toml/-/smol-toml-1.6.1.tgz#4fceb5f7c4b86c2544024ef686e12ff0983465be"
+  integrity sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==
 
 socks-proxy-agent@^10.0.0:
   version "10.1.0"
@@ -11309,10 +11205,10 @@ stylelint-config-standard@^34.0.0:
   dependencies:
     stylelint-config-recommended "^13.0.0"
 
-stylelint@^17.14.1:
-  version "17.15.0"
-  resolved "https://registry.yarnpkg.com/stylelint/-/stylelint-17.15.0.tgz#724532b29f07f14e0a67f24c287661d86bdc4877"
-  integrity sha512-mWIkesYQvQjf4Kvdeu9ns0IL8/K/wtjaGxPqsPd6DlLZvaQxGysJsocxUDrBcyHQ5VleAk4uSMat4yMrVED7PA==
+stylelint@^17.16.0:
+  version "17.16.0"
+  resolved "https://registry.npmjs.org/stylelint/-/stylelint-17.16.0.tgz#1d35ff4963122bcd55fa20573856689c3d43b366"
+  integrity sha512-ejlWnbJ13x1GU32+zZXa6sYQJsKKkwSdv2B4rAdO3OWdEmvhSJKcXi5pOphQYSzyaj1kXpuGJr7pcMBNfDIuPw==
   dependencies:
     "@csstools/css-calc" "^3.3.0"
     "@csstools/css-parser-algorithms" "^4.0.0"
@@ -11980,6 +11876,11 @@ uuid@^14.0.0:
   version "14.0.2"
   resolved "https://registry.npmjs.org/uuid/-/uuid-14.0.2.tgz#d5ae03e4db0881c87271f8b0b9bd7312d02c799a"
   integrity sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==
+
+uuid@^14.0.3:
+  version "14.0.3"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-14.0.3.tgz#48c9b0dcf5a42d983c23162399eeb9af8b2cc617"
+  integrity sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==
 
 uvu@^0.5.0:
   version "0.5.6"
