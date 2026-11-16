@@ -3143,11 +3143,11 @@
     use-typed-event-listener "^3.0.0"
 
 "@splunk/splunk-utils@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.npmjs.org/@splunk/splunk-utils/-/splunk-utils-4.0.1.tgz#c11a73f93bba2b4422541daab47725a0e51f985f"
-  integrity sha512-BsFKoetTEE7tQGXAbRiikQcrfuOfoPFCpsvc3rfVe1HdB2go5XtcH/A5VMGsZ/HiP6Av0ZARfVsFPYmZKj4D5Q==
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@splunk/splunk-utils/-/splunk-utils-4.2.0.tgz#2f4f23523c1b0a81fb3f8c73f922d87c4416c230"
+  integrity sha512-ahQlLJfVZlyHHH0ptpUYgd8LblqIMpvftMnoh6ekNOpk7EM3uYna513jIyYEqDAs0OyaJOlG58CLbND0JIzBqg==
   dependencies:
-    "@splunk/ui-utils" "^1.14.0"
+    "@splunk/ui-utils" "^1.15.0"
     lodash "^4.18.1"
     scriptjs "^2.5.8"
 
@@ -3169,10 +3169,18 @@
     colorjs.io "^0.6.1"
     lodash "^4.18.1"
 
-"@splunk/ui-utils@^1.14.0", "@splunk/ui-utils@^1.14.1":
+"@splunk/ui-utils@^1.14.1":
   version "1.14.1"
   resolved "https://registry.npmjs.org/@splunk/ui-utils/-/ui-utils-1.14.1.tgz#0862110b04155e1e2495ecab646d62e6cd2de3f9"
   integrity sha512-sr67renHKlIPkTtNAJ1Eg3dP2+/4kQU4oK+Csuwm0aakMWtEqccODij1gLtdYXJihkNdtxfTCMqNcMwe/NN2cA==
+  dependencies:
+    keycode "^2.1.9"
+    lodash "^4.18.1"
+
+"@splunk/ui-utils@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@splunk/ui-utils/-/ui-utils-1.15.0.tgz#98db8932ed3bbb0d3a952f2fc741963a183c2fcd"
+  integrity sha512-/YD3Tp5+yLRT2f2kH17ewss5aX9kOJPzVMBVTn+esuPAPQQT0Xt+ts7NuzqyOnz7J2A56MmAFioegUzXF09T9w==
   dependencies:
     keycode "^2.1.9"
     lodash "^4.18.1"
@@ -10924,10 +10932,10 @@ smart-buffer@^4.2.0:
   resolved "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz"
   integrity sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==
 
-smol-toml@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.npmjs.org/smol-toml/-/smol-toml-1.7.1.tgz#ba3e28d2e4348874a824fd8e1d73fec618cb763b"
-  integrity sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==
+smol-toml@1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/smol-toml/-/smol-toml-1.6.1.tgz#4fceb5f7c4b86c2544024ef686e12ff0983465be"
+  integrity sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==
 
 socks-proxy-agent@^10.0.0:
   version "10.1.0"
