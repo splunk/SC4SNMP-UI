@@ -31,7 +31,7 @@ function Header(){
 
     const handleRequestOpenProfile = () => {
         ProfCtx.setProfileName("");
-        ProfCtx.setFrequency(1);
+        ProfCtx.setFrequency(5);
         ProfCtx.setVarBinds([]);
         ProfCtx.setCondition("standard");
         ProfCtx.setConditionField("");

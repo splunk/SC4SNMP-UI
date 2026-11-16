@@ -20,7 +20,7 @@ export function ProfileContxtProvider(props) {
 
     // data for editing in AddProfileModal
     const [profileName, setProfileName] = useState('');
-    const [frequency, setFrequency] = useState(1);
+    const [frequency, setFrequency] = useState(5);
     const [varBinds, setVarBinds] = useState([]);
     const [condition, setCondition] = useState("standard");
     const [conditionField, setConditionField] = useState("");
