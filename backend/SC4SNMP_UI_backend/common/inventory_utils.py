@@ -1,3 +1,4 @@
+import re
 from SC4SNMP_UI_backend import mongo_client
 from enum import Enum
 from typing import Callable
@@ -33,6 +34,14 @@ def get_inventory_types_bulk(records):
     matched_names = {get_group_or_profile_name_from_backend(group) for group in matched_groups}
     return {address: ("Group" if address in matched_names else "Host") for address in addresses}
 
+def profile_name_regex(profile_name: str) -> str:
+    """
+    Inventory stores profiles as one ';'-separated string, so match the name only as a whole entry
+    (not as a substring of another profile name) and escape regex metacharacters in it.
+    """
+    return f"(^|;){re.escape(profile_name)}(;|$)"
+
+
 def update_profiles_in_inventory(profile_to_search: str, process_record: Callable, **kwargs):
     """
     When profile is edited, then in some cases inventory records using this profile should be updated.
@@ -43,7 +52,7 @@ def update_profiles_in_inventory(profile_to_search: str, process_record: Callabl
     :param kwargs: additional variables which user can pass to process_record function
     :return:
     """
-    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": f'.*{profile_to_search}.*'}, "delete": False}))
+    inventory_records = list(mongo_inventory.find({"profiles": {"$regex": profile_name_regex(profile_to_search)}, "delete": False}))
     for record in inventory_records:
         record_id = record["_id"]
         record_updated = inventory_conversion.backend2ui(record, inventory_type=None) # inventory_type isn't used
