@@ -24,19 +24,28 @@
   "dependencies": {
     "axios": "^1.16.0",
     "cors": "^2.8.5",
-    "qs": "^6.16.0",
-    "uuid": "^14.0.0"
+    "qs": "^6.17.1",
+    "uuid": "^14.0.3"
   },
   "resolutions": {
     "axios": "^1.16.0",
-    "undici": "^8.10.2",
+    "undici": "^8.12.4",
     "brace-expansion": "^5.0.9",
     "tar": "^7.5.21",
-    "js-yaml": "^5.3.0",
-    "nanoid": "^6.0.1",
+    "js-yaml": "^5.5.0",
+    "nanoid": "^6.0.2",
     "sigstore": "^5.0.0",
     "@sigstore/core": "^4.0.1",
     "@sigstore/verify": "^4.1.2",
-    "fast-uri": "^4.1.4"
+    "fast-uri": "^4.2.3",
+    "handlebars": "^4.7.10",
+    "shell-quote": "^1.12.0",
+    "follow-redirects": "^1.16.3",
+    "launch-editor": "^2.14.2",
+    "compression": "^1.8.2",
+    "body-parser": "^2.4.0",
+    "webpack-dev-middleware": "^8.6.0",
+    "ip-address": "^10.7.6",
+    "moment": "^2.31.0"
   }
 }
