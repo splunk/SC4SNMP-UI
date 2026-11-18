@@ -1,5 +1,5 @@
 # The bundle is architecture-independent, so build it once on the build platform.
-FROM --platform=$BUILDPLATFORM node:24.22.2-alpine AS build-step
+FROM --platform=$BUILDPLATFORM node:24.22.3-alpine AS build-step
 WORKDIR /frontend
 ENV PATH=/frontend/node_modules/.bin:$PATH
 COPY package.json yarn.lock lerna.json ./
