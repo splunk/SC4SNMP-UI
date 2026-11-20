@@ -11,12 +11,14 @@ import AuthContext from "../../store/auth-contxt";
 import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/menu_header/HeaderStyle";
 import api from "../../api";
 import RestoreModal from "../inventory/RestoreModal";
+import { useDiscoveryContext } from "../../store/discovery-contxt";
 
 function Header(){
     const MenuCtx = useContext(MenuHeaderContxt);
     const ProfCtx = useContext(ProfileContext);
     const GrCtx = useContext(GroupContext);
     const InvCtx = useContext(InventoryContext);
+    const DiscoveryCtx = useDiscoveryContext();
     const ErrCtx = useContext(ErrorsModalContext);
     const authCtx = useContext(AuthContext);
     const [restoreOpen, setRestoreOpen] = useState(false);
@@ -55,6 +57,12 @@ function Header(){
         InvCtx.resetFormData();
     };
 
+    const handleRequestOpenDiscovery = () => {
+        DiscoveryCtx.resetForm();
+        DiscoveryCtx.setIsEdit(false);
+        DiscoveryCtx.setAddOpen(true);
+    };
+
     const handleApplyChanges = () => {
         api.post("/apply-changes")
         .then((response) => {
@@ -67,7 +75,7 @@ function Header(){
         .catch((error) => {
             ErrCtx.setOpen(true);
             ErrCtx.setErrorType("error");
-            ErrCtx.setMessage(`Error: ${  error.response.data.message}`);
+            ErrCtx.setMessage(`Error: ${error.response?.data?.message || "Unable to apply changes."}`);
             })
     };
 
@@ -82,6 +90,7 @@ function Header(){
                 ErrCtx.setErrorType("info");
                 ErrCtx.setMessage(response.data.message);
                 InvCtx.makeInventoryChange();
+                DiscoveryCtx.makeChange();
             })
             .catch((error) => {
                 ErrCtx.setOpen(true);
@@ -94,13 +103,15 @@ function Header(){
     const addButtonLabel = {
         Profiles: "Add profile",
         Groups: "Add group",
-        Inventory: "Add device/group"
+        Inventory: "Add device/group",
+        Discovery: "Add discovery"
     };
 
     const addButtonHandler = {
         Profiles: handleRequestOpenProfile,
         Groups: handleRequestOpenGroups,
-        Inventory: handleRequestOpenInventory
+        Inventory: handleRequestOpenInventory,
+        Discovery: handleRequestOpenDiscovery
     };
 
     return(
@@ -115,7 +126,7 @@ function Header(){
                         <span id="project-description">
                             <P>
                                 Collect SNMP data for Splunk Enterprise, Splunk Enterprise Cloud, and Splunk Infrastructure Monitoring.
-                                Make any changes to Profiles, Groups, and Inventory, then select Apply changes.
+                                Make any changes to Profiles, Groups, Inventory, and Discovery, then select Apply changes.
                                 You can only apply changes every 5 minutes.
                             </P>
                         </span>

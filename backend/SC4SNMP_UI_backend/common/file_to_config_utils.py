@@ -78,3 +78,37 @@ def inventory_csv_to_documents(csv_string: str) -> list:
             "delete": str_to_bool(row["delete"]),
         })
     return documents
+
+
+def _normalize_device_rules(rules):
+    if not isinstance(rules, list):
+        return None
+    normalized = [
+        {"name": str(rule.get("name") or ""), "patterns": str(rule.get("patterns") or ""),
+         "group": str(rule.get("group") or "")}
+        for rule in rules if isinstance(rule, dict)
+    ]
+    return normalized or None
+
+
+def discovery_yaml_to_documents(discovery_dict: dict) -> list:
+    """Convert a discovery.autodiscovery mapping to flat discovery_ui documents."""
+    if not discovery_dict or not isinstance(discovery_dict, dict):
+        return []
+    documents = []
+    for name, entry in discovery_dict.items():
+        if not isinstance(entry, dict):
+            continue
+        documents.append({
+            "name": str(name),
+            "network_address": str(entry.get("network_address") or ""),
+            "version": str(entry.get("version") or "2c"),
+            "port": int(entry.get("port") or 161),
+            "community": entry.get("community") or "",
+            "secret": entry.get("secret") or "",
+            "security_engine": entry.get("security_engine") or "",
+            "frequency": int(entry.get("frequency") or 86400),
+            "delete_already_discovered": str_to_bool(entry.get("delete_already_discovered", False)),
+            "device_rules": _normalize_device_rules(entry.get("device_rules")),
+        })
+    return documents

@@ -4,6 +4,7 @@ from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import ProfileConversion, get_group_or_profile_name_from_backend
 from SC4SNMP_UI_backend.common.inventory_utils import update_profiles_in_inventory, profile_name_regex
+from SC4SNMP_UI_backend.common.change_tracking import mark_section_dirty
 
 profiles_blueprint = Blueprint('profiles_blueprint', __name__)
 
@@ -70,6 +71,7 @@ def add_profile_record():
     else:
         profile_obj = profile_conversion.ui2backend(profile_obj)
         mongo_profiles.insert_one(profile_obj)
+        mark_section_dirty("inventory")
         result = jsonify("success")
     return result
 
@@ -90,6 +92,7 @@ def delete_profile_record(profile_id):
         message = f"Profile {profile_name} was deleted."
 
     mongo_profiles.delete_one({'_id': ObjectId(profile_id)})
+    mark_section_dirty("inventory")
     return jsonify({"message": message}), 200
 
 
@@ -126,4 +129,5 @@ def update_profile_record(profile_id):
 
     mongo_profiles.update_one({'_id': ObjectId(profile_id)},
                               {"$set": {new_profile_name: profile_obj[new_profile_name]}})
+    mark_section_dirty("inventory")
     return result

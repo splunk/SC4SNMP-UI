@@ -3,10 +3,12 @@ import ruamel.yaml
 from flask import current_app
 from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.apply_changes.tasks import run_job, get_job_config
+from SC4SNMP_UI_backend.common.change_tracking import get_job_state, set_job_state, mark_applied
 from SC4SNMP_UI_backend.apply_changes.kubernetes_job import create_job
 from kubernetes.client import ApiException
 import datetime
 import os
+from collections.abc import MutableMapping
 
 
 CHANGES_INTERVAL_SECONDS = 300
@@ -20,6 +22,7 @@ mongo_config_collection = mongo_client.sc4snmp.config_collection
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
 mongo_profiles = mongo_client.sc4snmp.profiles_ui
+mongo_discovery = mongo_client.sc4snmp.discovery_ui
 
 
 class EmptyValuesFileException(Exception):
@@ -116,11 +119,14 @@ class SaveConfigToFileHandler(AbstractHandler):
             # update appropriate section values dictionary
             values_keys = key.split(".")
             sub_dict = values
-            for value_index, value_key in enumerate(values_keys):
-                if value_index == len(values_keys)-1:
-                    sub_dict[value_key] = parsed_values
-                else:
-                    sub_dict = sub_dict.get(value_key, {})
+            for value_key in values_keys[:-1]:
+                next_dict = sub_dict.get(value_key)
+                if not isinstance(next_dict, MutableMapping):
+                    # the section is missing or empty (e.g. "discovery:" with no value)
+                    next_dict = {}
+                    sub_dict[value_key] = next_dict
+                sub_dict = next_dict
+            sub_dict[values_keys[-1]] = parsed_values
 
         if values_file_resolved:
             with open(values_file_path, "w") as file:
@@ -135,30 +141,37 @@ class SaveConfigToFileHandler(AbstractHandler):
 class CheckJobHandler(AbstractHandler):
     def handle(self, request: dict = None):
         """
-        CheckJobHandler checks whether a new kubernetes job with updated sc4snmp configuration can be run immediately
-         or should it be scheduled for the future.
+        CheckJobHandler checks whether a new kubernetes job of the given type (inventory or discovery) with updated
+        sc4snmp configuration can be run immediately or should it be scheduled for the future. The state of every job
+        type is tracked separately, so applying one type never delays or blocks the other.
 
+        :param request: dictionary with "job_type" and "revision" - the revision of the section that was saved to
+                        values.yaml by this apply
         :return: pass dictionary with job_delay in seconds to the next handler
         """
-        record = list(mongo_config_collection.find())[0]
+        job_type = request["job_type"]
+        revision = request.get("revision", 0)
+        state = get_job_state(job_type, mongo_config_collection)
         schedule_new_job = True
+        # a scheduled (or retried) job reads mongo when it is created and marks this revision as applied
+        set_job_state(job_type, mongo_config_collection, pending_revision=revision)
         # get_job_config return job configuration in "job" variable and BatchV1Api from kubernetes client
-        job, batch_v1 = get_job_config()
+        job, batch_v1 = get_job_config(job_type)
         if job is None or batch_v1 is None:
             raise ValueError("CheckJobHandler: Job configuration is empty")
         try:
-            # Try creating a new kubernetes job immediately. If the previous job is still present in the namespace,
-            # ApiException will be thrown.
+            # Try creating a new kubernetes job immediately. If the previous job of this type is still present in
+            # the namespace, ApiException will be thrown.
             create_job(batch_v1, job, JOB_NAMESPACE)
-            task_id = record["task_id"]
+            task_id = state["task_id"]
             if task_id is not None:
                 # revoke existing Celery task with the previously scheduled job
                 current_app.extensions["celery"].control.revoke(task_id,
                    terminate=True, signal='SIGKILL')
-            mongo_config_collection.update_one({"_id": record["_id"]},
-                                               {"$set": {"previous_job_start_time": datetime.datetime.utcnow(),
-                                                         "currently_scheduled": False,
-                                                         "task_id": None}})
+            set_job_state(job_type, mongo_config_collection,
+                          previous_job_start_time=datetime.datetime.utcnow(),
+                          currently_scheduled=False, task_id=None)
+            mark_applied(job_type, revision, mongo_config_collection)
             job_delay = 1
             time_difference = 0
             schedule_new_job = False
@@ -166,15 +179,13 @@ class CheckJobHandler(AbstractHandler):
             # Check how many seconds have elapsed since the last time that the job was run. If the time difference
             # is greater than CHANGES_INTERVAL_SECONDS then job can be scheduled within 1 second. Otherwise, calculate how
             # many seconds are left until minimum time difference between updates (CHANGES_INTERVAL_SECONDS).
-            last_update = record["previous_job_start_time"]
+            last_update = state["previous_job_start_time"]
             if last_update is None:
-                # If it's the first time that the job is run (record in mongo_config_collection has been created
-                # in ApplyChanges class and last_update attribute is None) but the previous job is still in the namespace
+                # If it's the first time that the job is run but the previous job is still in the namespace
                 # then job delay should be equal to CHANGES_INTERVAL_SECONDS.
-                # Update the mongo record with job state accordingly.
                 job_delay = CHANGES_INTERVAL_SECONDS
-                mongo_config_collection.update_one({"_id": record["_id"]},
-                                                   {"$set": {"previous_job_start_time": datetime.datetime.utcnow()}})
+                set_job_state(job_type, mongo_config_collection,
+                              previous_job_start_time=datetime.datetime.utcnow())
                 # time from the last update
                 time_difference = 0
             else:
@@ -187,6 +198,7 @@ class CheckJobHandler(AbstractHandler):
                     job_delay = int(CHANGES_INTERVAL_SECONDS - time_difference)
 
         result = {
+            "job_type": job_type,
             "job_delay": job_delay,
             "time_from_last_update": time_difference,
             "schedule_new_job": schedule_new_job
@@ -199,29 +211,28 @@ class CheckJobHandler(AbstractHandler):
 class ScheduleHandler(AbstractHandler):
     def handle(self, request: dict):
         """
-        ScheduleHandler schedules the kubernetes job with updated sc4snmp configuration
+        ScheduleHandler schedules the kubernetes job of the given type with updated sc4snmp configuration
         """
-        record = list(mongo_config_collection.find())[0]
-        currently_scheduled = record["currently_scheduled"]
-        if currently_scheduled and not self._is_task_still_scheduled(record.get("task_id")):
+        job_type = request["job_type"]
+        state = get_job_state(job_type, mongo_config_collection)
+        currently_scheduled = state["currently_scheduled"]
+        if currently_scheduled and not self._is_task_still_scheduled(state.get("task_id")):
             current_app.logger.info(
-                f"ScheduleHandler: currently_scheduled was True but task_id "
-                f"{record.get('task_id')} is no longer known to any worker; resetting stale state."
+                f"ScheduleHandler: {job_type} currently_scheduled was True but task_id "
+                f"{state.get('task_id')} is no longer known to any worker; resetting stale state."
             )
-            mongo_config_collection.update_one({"_id": record["_id"]},
-                                               {"$set": {"currently_scheduled": False, "task_id": None}})
+            set_job_state(job_type, mongo_config_collection, currently_scheduled=False, task_id=None)
             currently_scheduled = False
 
         if not currently_scheduled and request["schedule_new_job"]:
             # If the task isn't currently scheduled, schedule it and update its state in mongo.
-            async_result = run_job.apply_async(countdown=request["job_delay"], queue='apply_changes')
-            mongo_config_collection.update_one({"_id": record["_id"]},
-                                               {"$set": {"currently_scheduled": True, "task_id": async_result.id}})
+            async_result = run_job.apply_async(args=[job_type], countdown=request["job_delay"], queue='apply_changes')
+            set_job_state(job_type, mongo_config_collection, currently_scheduled=True, task_id=async_result.id)
             current_app.logger.info(
-                f"ScheduleHandler: scheduling new task with the delay of {request['job_delay']} seconds.")
+                f"ScheduleHandler: scheduling new {job_type} task with the delay of {request['job_delay']} seconds.")
             currently_scheduled = True
         else:
-            current_app.logger.info("ScheduleHandler: new job wasn't scheduled.")
+            current_app.logger.info(f"ScheduleHandler: new {job_type} job wasn't scheduled.")
         return request["job_delay"], currently_scheduled
 
     @staticmethod

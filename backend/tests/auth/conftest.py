@@ -24,8 +24,16 @@ def auth_env_vars(monkeypatch, tmp_path):
     monkeypatch.setenv("MONGODB_MODE", "standalone")
 
 
+@pytest.fixture(autouse=True)
+def mark_dirty():
+    # edits register a revision in mongo through change_tracking; not needed to test authentication
+    from unittest import mock
+    with mock.patch("SC4SNMP_UI_backend.common.change_tracking.mark_section_dirty") as marker:
+        yield marker
+
+
 @pytest.fixture()
-def app(auth_env_vars):
+def app(auth_env_vars, mark_dirty):
     # Ensure auth.utils and all blueprint modules re-read AUTH_ENABLED and
     # re-decorate routes via @login_required against the freshly-reloaded
     # utils module. This matters because Python caches modules in sys.modules;
@@ -41,6 +49,7 @@ def app(auth_env_vars):
         "SC4SNMP_UI_backend.groups.routes",
         "SC4SNMP_UI_backend.inventory.routes",
         "SC4SNMP_UI_backend.apply_changes.routes",
+        "SC4SNMP_UI_backend.discovery.routes",
     ):
         if mod_name in sys.modules:
             importlib.reload(sys.modules[mod_name])
@@ -63,6 +72,7 @@ def app(auth_env_vars):
             "SC4SNMP_UI_backend.groups.routes",
             "SC4SNMP_UI_backend.inventory.routes",
             "SC4SNMP_UI_backend.apply_changes.routes",
+            "SC4SNMP_UI_backend.discovery.routes",
         ):
             if mod_name in sys.modules:
                 importlib.reload(sys.modules[mod_name])

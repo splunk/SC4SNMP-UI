@@ -16,6 +16,7 @@ import { InventoryContextProvider } from "./store/inventory-contxt";
 import { GroupContextProvider } from "./store/group-contxt";
 import AuthContext, { AuthContextProvider } from "./store/auth-contxt";
 import { FontStyles } from "./styles/FontsStyles";
+import { DiscoveryContextProvider } from "./store/discovery-contxt";
 
 function AuthGate({ children }) {
     const authCtx = useContext(AuthContext);
@@ -51,9 +52,11 @@ function Uncontrolled() {
                             <ProfileContxtProvider>
                                 <GroupContextProvider>
                                     <InventoryContextProvider>
-                                        <Menu/>
-                                        <Header/>
-                                        <TabPanels/>
+                                        <DiscoveryContextProvider>
+                                            <Menu/>
+                                            <Header/>
+                                            <TabPanels/>
+                                        </DiscoveryContextProvider>
                                     </InventoryContextProvider>
                                 </GroupContextProvider>
                             </ProfileContxtProvider>

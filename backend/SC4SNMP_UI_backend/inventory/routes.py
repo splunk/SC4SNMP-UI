@@ -4,6 +4,7 @@ from SC4SNMP_UI_backend import mongo_client
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.common.backend_ui_conversions import InventoryConversion
 from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type, get_inventory_types_bulk
+from SC4SNMP_UI_backend.common.change_tracking import mark_section_dirty
 
 inventory_blueprint = Blueprint('inventory_blueprint', __name__)
 
@@ -49,8 +50,10 @@ def add_inventory_record():
         record_added, message = handler.add_group_to_inventory(inventory_obj["address"], str(inventory_obj["port"]),
                                                         inventory_obj, True)
     if record_added and message is not None:
+        mark_section_dirty("inventory")
         result = jsonify({"message": message}), 200
     elif record_added:
+        mark_section_dirty("inventory")
         result = jsonify("success"), 200
     else:
         result = jsonify({"message": message}), 400
@@ -61,6 +64,7 @@ def add_inventory_record():
 @login_required
 def delete_inventory_record(inventory_id):
     mongo_inventory.update_one({"_id": ObjectId(inventory_id)}, {"$set": {"delete": True}})
+    mark_section_dirty("inventory")
     inventory_item = list(mongo_inventory.find({"_id": ObjectId(inventory_id)}))[0]
     address = inventory_item['address']
     port = f":{inventory_item['port']}" if address[0].isnumeric() else ""
@@ -86,6 +90,7 @@ def update_inventory_record(inventory_id):
         else:
             record_edited, message = handler.edit_group_in_inventory(inventory_obj["address"], str(inventory_id), inventory_obj, True)
         if record_edited:
+            mark_section_dirty("inventory")
             if message == "success" or message is None:
                 result = jsonify("success"), 200
             else:
