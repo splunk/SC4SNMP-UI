@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-slim
 WORKDIR /app
 
 COPY --chown=10000:10000 requirements.txt app.py ./
