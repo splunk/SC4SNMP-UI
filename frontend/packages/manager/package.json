@@ -42,7 +42,7 @@
     "@splunk/stylelint-config": "^5.1.0",
     "@splunk/webpack-configs": "^7.0.0",
     "@testing-library/dom": "10.4.2",
-    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/jest-dom": "^8.0.0",
     "@testing-library/react": "16.3.3",
     "@webpack-cli/serve": "^3.0.1",
     "babel-loader": "^10.1.1",
