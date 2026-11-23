@@ -81,6 +81,7 @@ describe("DiscoveryList", () => {
         const expandButtons = screen.getAllByRole("button", {name: /expand/i});
         await act(async () => { fireEvent.click(expandButtons[0]); });
         const rulesTable = screen.getByRole("table", {name: "Device rules for office-lan"});
+        expect(screen.queryByText("Device rules for office-lan")).not.toBeInTheDocument();
         expect(within(rulesTable).getAllByRole("columnheader").map((cell) => cell.textContent))
             .toEqual(["Rule name", "Pattern", "Group name"]);
         const items = screen.getAllByDataTest("sc4snmp:discovery-rule-row");

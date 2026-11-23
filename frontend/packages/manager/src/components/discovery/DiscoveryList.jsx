@@ -13,6 +13,7 @@ import ErrorsModalContext from '../../store/errors-modal-contxt';
 import { useDiscoveryContext } from '../../store/discovery-contxt';
 import { Pagination } from '../../styles/inventory/InventoryStyle';
 import { RowActions, StyledFramedTable } from '../../styles/common/ListStyles';
+import DeviceRulesTable from '../../styles/discovery/DiscoveryStyle';
 
 function DiscoveryList() {
     const ctx = useDiscoveryContext();
@@ -79,19 +80,20 @@ function DiscoveryList() {
             <Table.Head><Table.HeadCell>Name</Table.HeadCell><Table.HeadCell>Network</Table.HeadCell><Table.HeadCell>Version</Table.HeadCell><Table.HeadCell>Port</Table.HeadCell><Table.HeadCell>Community</Table.HeadCell><Table.HeadCell>Secret</Table.HeadCell><Table.HeadCell>Security engine</Table.HeadCell><Table.HeadCell>Frequency</Table.HeadCell><Table.HeadCell>Delete already discovered</Table.HeadCell><Table.HeadCell width={100}>Actions</Table.HeadCell></Table.Head>
             <Table.Body>{rows.map((row) => <Table.Row key={row._id} data-test="sc4snmp:discovery-row"
                 expansionRow={<Table.Row><Table.Cell colSpan={10}>
-                    {(row.deviceRules || []).length ? <StyledFramedTable data-test="sc4snmp:discovery-rules-table" stripeRows>
-                        <Table.Caption>Device rules for {row.name}</Table.Caption>
-                        <Table.Head>
-                            <Table.HeadCell>Rule name</Table.HeadCell>
-                            <Table.HeadCell>Pattern</Table.HeadCell>
-                            <Table.HeadCell>Group name</Table.HeadCell>
-                        </Table.Head>
-                        <Table.Body>{row.deviceRules.map((rule, index) => <Table.Row key={`${row._id}-${rule.id || index}`} data-test="sc4snmp:discovery-rule-row">
-                            <Table.Cell>{rule.name}</Table.Cell>
-                            <Table.Cell>{rule.patterns}</Table.Cell>
-                            <Table.Cell>{rule.group}</Table.Cell>
-                        </Table.Row>)}</Table.Body>
-                    </StyledFramedTable> : <span>No device rules</span>}
+                    {(row.deviceRules || []).length ? <DeviceRulesTable data-test="sc4snmp:discovery-rules-table" aria-label={`Device rules for ${row.name}`}>
+                        <thead>
+                            <tr>
+                                <th scope="col">Rule name</th>
+                                <th scope="col">Pattern</th>
+                                <th scope="col">Group name</th>
+                            </tr>
+                        </thead>
+                        <tbody>{row.deviceRules.map((rule, index) => <tr key={`${row._id}-${rule.id || index}`} data-test="sc4snmp:discovery-rule-row">
+                            <td>{rule.name}</td>
+                            <td>{rule.patterns}</td>
+                            <td>{rule.group}</td>
+                        </tr>)}</tbody>
+                    </DeviceRulesTable> : <span>No device rules</span>}
                 </Table.Cell></Table.Row>}
                 onExpansion={() => setExpandedRowId(expandedRowId === row._id ? null : row._id)}
                 expanded={row._id === expandedRowId}>
