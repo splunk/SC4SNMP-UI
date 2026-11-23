@@ -104,7 +104,7 @@ function Header(){
         Profiles: "Add profile",
         Groups: "Add group",
         Inventory: "Add device/group",
-        Discovery: "Add discovery"
+        Discovery: "Add network"
     };
 
     const addButtonHandler = {

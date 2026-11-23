@@ -1,6 +1,6 @@
 import React, { act } from 'react';
 import {expect, describe, jest, it, beforeEach} from '@jest/globals';
-import {fireEvent} from '@testing-library/dom';
+import {fireEvent, within} from '@testing-library/dom';
 import api from "../api";
 import {render, screen} from './custom_testing_lib/custom-testing-lib'
 import "@testing-library/jest-dom"
@@ -68,6 +68,11 @@ describe("DiscoveryList", () => {
         expect(screen.getByText("office-lan")).toBeInTheDocument();
         expect(screen.getByText("10.20.0.0/22")).toBeInTheDocument();
         expect(screen.getByText("snmp-ro")).toBeInTheDocument();
+        expect(screen.getAllByDataTest("sc4snmp:discovery-community")[1]).toHaveTextContent(/^$/);
+        expect(screen.getAllByDataTest("sc4snmp:discovery-secret")[0]).toHaveTextContent(/^$/);
+        screen.getAllByDataTest("sc4snmp:discovery-security-engine").forEach((cell) => {
+            expect(cell).toHaveTextContent(/^$/);
+        });
     });
 
     it("expands a row to show device rules in order, even with repeated rule names", async () => {
@@ -75,10 +80,15 @@ describe("DiscoveryList", () => {
         expect(screen.queryByText(/Cisco IOS/)).not.toBeInTheDocument();
         const expandButtons = screen.getAllByRole("button", {name: /expand/i});
         await act(async () => { fireEvent.click(expandButtons[0]); });
-        const items = screen.getAllByRole("listitem");
+        const rulesTable = screen.getByRole("table", {name: "Device rules for office-lan"});
+        expect(within(rulesTable).getAllByRole("columnheader").map((cell) => cell.textContent))
+            .toEqual(["Rule name", "Pattern", "Group name"]);
+        const items = screen.getAllByDataTest("sc4snmp:discovery-rule-row");
         expect(items).toHaveLength(2);
-        expect(items[0]).toHaveTextContent("routers: *Cisco IOS* → routers");
-        expect(items[1]).toHaveTextContent("routers: *Juniper* → juniper");
+        expect(within(items[0]).getAllByRole("cell").map((cell) => cell.textContent))
+            .toEqual(["routers", "*Cisco IOS*", "routers"]);
+        expect(within(items[1]).getAllByRole("cell").map((cell) => cell.textContent))
+            .toEqual(["routers", "*Juniper*", "juniper"]);
     });
 
     it("opens the edit modal for a row", async () => {

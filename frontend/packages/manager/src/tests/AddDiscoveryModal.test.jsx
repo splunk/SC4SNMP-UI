@@ -132,6 +132,14 @@ describe("AddDiscoveryModal", () => {
         await act(async () => renderModal({initialEntry: baseEntry({version: "3", community: "", secret: "s"})}));
         expect(screen.getByDataTest("sc4snmp:discovery:secret-input")).toBeInTheDocument();
         expect(queryTest("sc4snmp:discovery:community-input")).not.toBeInTheDocument();
+        expect(input("secret")).toHaveAccessibleDescription(
+            "The secret name must also be listed in discovery.usernameSecrets in Helm values."
+        );
+        expect(input("securityEngine")).toHaveAttribute("placeholder", "optional");
+        expect(input("securityEngine")).toHaveAccessibleDescription(
+            "If left empty it will be discovered during runtime."
+        );
+        expect(screen.getByText("Delete already discovered")).toBeInTheDocument();
     });
 
     it("keeps device rule order and supports moving rules up and down", async () => {
@@ -165,5 +173,9 @@ describe("AddDiscoveryModal", () => {
         await sleep(10);
         expect(api.post).not.toHaveBeenCalled();
         expect(screen.getByText("Rule 1: name, patterns are required.")).toBeInTheDocument();
+        const removeButton = screen.getByRole("button", {name: "Remove rule"});
+        expect(removeButton).not.toHaveTextContent("Remove rule");
+        fireEvent.click(removeButton);
+        expect(queryTest("sc4snmp:discovery:rule-name")).not.toBeInTheDocument();
     });
 });

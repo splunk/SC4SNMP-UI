@@ -5,6 +5,8 @@ import Select from '@splunk/react-ui/Select';
 import ComboBox from '@splunk/react-ui/ComboBox';
 import RadioBar from '@splunk/react-ui/RadioBar';
 import Button from '@splunk/react-ui/Button';
+import Plus from '@splunk/react-icons/Plus';
+import TrashCanCross from '@splunk/react-icons/TrashCanCross';
 import P from '@splunk/react-ui/Paragraph';
 import { createDOMID } from '@splunk/ui-utils/id';
 import api from '../../api';
@@ -105,8 +107,8 @@ function AddDiscoveryModal() {
     };
     const fieldErrors = (field) => (validation.errors[field] || [])
         .map((message) => <P key={message} style={validationMessage}>{message}</P>);
-    const input = (field, label, value, props = {}) => (
-        <StyledControlGroup label={label} labelWidth={155} key={field}>
+    const input = (field, label, value, { help, ...props } = {}) => (
+        <StyledControlGroup label={label} labelWidth={155} key={field} help={help}>
             <Text data-test={`sc4snmp:discovery:${field}-input`} value={value}
                   onChange={(e, { value: next }) => setField(field, next)} {...props} />
             {fieldErrors(field)}
@@ -116,7 +118,7 @@ function AddDiscoveryModal() {
     const network = ctx.entry.networkAddress || '';
 
     return <Modal open={ctx.addOpen} onRequestClose={close} returnFocus={ctx.addModalToggle} style={{ width: '760px' }}>
-        <StyledModalHeader title={ctx.isEdit ? 'Edit discovery' : 'Add discovery'} />
+        <StyledModalHeader title={ctx.isEdit ? 'Edit network' : 'Add network'} />
         <StyledModalBody>
             {input('name', 'Name', ctx.entry.name, { disabled: ctx.isEdit })}
             {input('networkAddress', 'Network address', network, { placeholder: '10.0.0.0/24' })}
@@ -132,12 +134,15 @@ function AddDiscoveryModal() {
             {input('port', 'Port', ctx.entry.port, { inputMode: 'numeric' })}
             {ctx.entry.version !== '3' && input('community', 'Community', ctx.entry.community)}
             {ctx.entry.version === '3' && <>
-                {input('secret', 'Secret', ctx.entry.secret)}
-                {input('securityEngine', 'Security engine', ctx.entry.securityEngine)}
-                <P>The secret name must also be listed in discovery.usernameSecrets in Helm values.</P>
+                {input('secret', 'Secret', ctx.entry.secret, {
+                    help: 'The secret name must also be listed in discovery.usernameSecrets in Helm values.',
+                })}
+                {input('securityEngine', 'Security engine', ctx.entry.securityEngine, {
+                    placeholder: 'optional', help: 'If left empty it will be discovered during runtime.',
+                })}
             </>}
             {input('frequency', 'Frequency (seconds)', ctx.entry.frequency, { inputMode: 'numeric' })}
-            <StyledControlGroup label="Delete old results" labelWidth={155}>
+            <StyledControlGroup label="Delete already discovered" labelWidth={155}>
                 <RadioBar value={String(ctx.entry.deleteAlreadyDiscovered)} onChange={(e, { value }) => setField('deleteAlreadyDiscovered', value === 'true')}>
                     <RadioBar.Option value="true" label="Yes" /><RadioBar.Option value="false" label="No" />
                 </RadioBar>
@@ -151,10 +156,10 @@ function AddDiscoveryModal() {
                 </ComboBox>
                 <Button data-test="sc4snmp:discovery:rule-up" aria-label="Move rule up" label="↑" disabled={index === 0} onClick={() => moveRule(index, -1)} />
                 <Button data-test="sc4snmp:discovery:rule-down" aria-label="Move rule down" label="↓" disabled={index === rules.length - 1} onClick={() => moveRule(index, 1)} />
-                <Button data-test="sc4snmp:discovery:rule-remove" label="Remove rule" onClick={() => setField('deviceRules', rules.filter((_, i) => i !== index))} />
+                <Button data-test="sc4snmp:discovery:rule-remove" aria-label="Remove rule" appearance="subtle" icon={<TrashCanCross screenReaderText={null} />} onClick={() => setField('deviceRules', rules.filter((_, i) => i !== index))} />
             </div>)}
             {fieldErrors('deviceRules')}
-            <Button data-test="sc4snmp:discovery:add-rule" label="Add rule" onClick={() => setField('deviceRules', [...rules, { id: createDOMID(), name: '', patterns: '', group: '' }])} />
+            <Button data-test="sc4snmp:discovery:add-rule" label="Add rule" icon={<Plus screenReaderText={null} />} onClick={() => setField('deviceRules', [...rules, { id: createDOMID(), name: '', patterns: '', group: '' }])} />
         </StyledModalBody>
         <Modal.Footer>
             <Button data-test="sc4snmp:discovery:cancel" appearance="secondary" label="Cancel" onClick={close} />

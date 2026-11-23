@@ -76,12 +76,26 @@ function DiscoveryList() {
             <Paginator onChange={(e, { page: next }) => fetchRows(next, perPage)} current={page} alwaysShowLastPageLink totalPages={pages} />
         </Pagination>
         <StyledFramedTable data-test="sc4snmp:discovery-table" stripeRows resizableFillLayout rowExpansion="single">
-            <Table.Head><Table.HeadCell>Name</Table.HeadCell><Table.HeadCell>Network</Table.HeadCell><Table.HeadCell>Version</Table.HeadCell><Table.HeadCell>Port</Table.HeadCell><Table.HeadCell>Community</Table.HeadCell><Table.HeadCell>Secret</Table.HeadCell><Table.HeadCell>Security engine</Table.HeadCell><Table.HeadCell>Frequency</Table.HeadCell><Table.HeadCell>Delete old</Table.HeadCell><Table.HeadCell>Actions</Table.HeadCell></Table.Head>
+            <Table.Head><Table.HeadCell>Name</Table.HeadCell><Table.HeadCell>Network</Table.HeadCell><Table.HeadCell>Version</Table.HeadCell><Table.HeadCell>Port</Table.HeadCell><Table.HeadCell>Community</Table.HeadCell><Table.HeadCell>Secret</Table.HeadCell><Table.HeadCell>Security engine</Table.HeadCell><Table.HeadCell>Frequency</Table.HeadCell><Table.HeadCell>Delete already discovered</Table.HeadCell><Table.HeadCell width={100}>Actions</Table.HeadCell></Table.Head>
             <Table.Body>{rows.map((row) => <Table.Row key={row._id} data-test="sc4snmp:discovery-row"
-                expansionRow={<Table.Row><Table.Cell colSpan={10}><strong>Device rules</strong>{(row.deviceRules || []).length ? <ol>{row.deviceRules.map((rule, index) => <li key={`${row._id}-${rule.id || index}`}>{rule.name}: {rule.patterns} → {rule.group}</li>)}</ol> : <span>No device rules</span>}</Table.Cell></Table.Row>}
+                expansionRow={<Table.Row><Table.Cell colSpan={10}>
+                    {(row.deviceRules || []).length ? <StyledFramedTable data-test="sc4snmp:discovery-rules-table" stripeRows>
+                        <Table.Caption>Device rules for {row.name}</Table.Caption>
+                        <Table.Head>
+                            <Table.HeadCell>Rule name</Table.HeadCell>
+                            <Table.HeadCell>Pattern</Table.HeadCell>
+                            <Table.HeadCell>Group name</Table.HeadCell>
+                        </Table.Head>
+                        <Table.Body>{row.deviceRules.map((rule, index) => <Table.Row key={`${row._id}-${rule.id || index}`} data-test="sc4snmp:discovery-rule-row">
+                            <Table.Cell>{rule.name}</Table.Cell>
+                            <Table.Cell>{rule.patterns}</Table.Cell>
+                            <Table.Cell>{rule.group}</Table.Cell>
+                        </Table.Row>)}</Table.Body>
+                    </StyledFramedTable> : <span>No device rules</span>}
+                </Table.Cell></Table.Row>}
                 onExpansion={() => setExpandedRowId(expandedRowId === row._id ? null : row._id)}
                 expanded={row._id === expandedRowId}>
-                    <Table.Cell>{row.name}</Table.Cell><Table.Cell>{row.networkAddress}</Table.Cell><Table.Cell>{row.version}</Table.Cell><Table.Cell>{row.port}</Table.Cell><Table.Cell>{row.community || '—'}</Table.Cell><Table.Cell>{row.secret || '—'}</Table.Cell><Table.Cell>{row.securityEngine || '—'}</Table.Cell><Table.Cell>{row.frequency}</Table.Cell><Table.Cell>{row.deleteAlreadyDiscovered ? 'Yes' : 'No'}</Table.Cell>
+                    <Table.Cell>{row.name}</Table.Cell><Table.Cell>{row.networkAddress}</Table.Cell><Table.Cell>{row.version}</Table.Cell><Table.Cell>{row.port}</Table.Cell><Table.Cell data-test="sc4snmp:discovery-community">{row.community}</Table.Cell><Table.Cell data-test="sc4snmp:discovery-secret">{row.secret}</Table.Cell><Table.Cell data-test="sc4snmp:discovery-security-engine">{row.securityEngine}</Table.Cell><Table.Cell>{row.frequency}</Table.Cell><Table.Cell>{row.deleteAlreadyDiscovered ? 'Yes' : 'No'}</Table.Cell>
                     <Table.Cell><RowActions><Button data-test="sc4snmp:discovery-row-edit" aria-label={`Edit ${row.name}`} icon={<Pencil />} onClick={() => edit(row)} /><Button data-test="sc4snmp:discovery-row-delete" aria-label={`Delete ${row.name}`} icon={<Trash />} onClick={() => askDelete(row)} /></RowActions></Table.Cell>
                 </Table.Row>)}</Table.Body>
         </StyledFramedTable>
