@@ -8,7 +8,7 @@ RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
 RUN yarn install --frozen-lockfile
 RUN yarn run build
 
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine
 COPY --from=build-step /frontend/packages/manager/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf.template nginx/security-headers.conf /etc/nginx/sc4snmp/
