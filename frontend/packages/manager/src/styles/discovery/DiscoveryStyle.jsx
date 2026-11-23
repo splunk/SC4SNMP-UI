@@ -1,6 +1,12 @@
 import styled from 'styled-components';
 import { variables } from '@splunk/themes';
 
+export const DeviceRulesTableContainer = styled.div`
+    width: fit-content;
+    min-width: 50%;
+    max-width: 100%;
+`;
+
 const DeviceRulesTable = styled.table`
     width: 100%;
     table-layout: auto;
@@ -19,6 +25,10 @@ const DeviceRulesTable = styled.table`
         vertical-align: top;
         white-space: normal;
         overflow-wrap: anywhere;
+    }
+
+    th {
+        font-weight: bold;
     }
 `;
 
