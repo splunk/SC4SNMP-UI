@@ -224,3 +224,13 @@ def test_discovery_status_reflects_job_availability(client, available):
 
     assert response.json == {"enabled": available}
     m_available.assert_called_once_with("discovery")
+
+
+def test_unique_index_is_ensured_on_every_add(client, collections):
+    """The connector drops discovery_ui (and its indexes) when UI mode is turned off, so it must not be cached."""
+    client.post("/discovery/add", json=valid_payload)
+    client.post("/discovery/add", json={**valid_payload, "name": "second"})
+
+    assert collections.create_index.call_count == 2
+    assert collections.create_index.call_args.args[1:] == ("name",)
+    assert collections.create_index.call_args.kwargs == {"unique": True}

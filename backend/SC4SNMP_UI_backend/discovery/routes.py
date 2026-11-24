@@ -19,19 +19,17 @@ mongo_config = mongo_client.sc4snmp.config_collection
 discovery_conversion = DiscoveryConversion()
 
 
-_index_ready = False
-
-
 def _mark_discovery_dirty():
     mark_section_dirty("discovery")
 
 
 def _ensure_unique_name_index():
-    """Names are part of the redis schedule name, so they must be unique even under concurrent requests."""
-    global _index_ready
-    if not _index_ready:
-        mongo_discovery.create_index("name", unique=True)
-        _index_ready = True
+    """
+    Names are part of the redis schedule name, so they must be unique even under concurrent requests. The call is
+    idempotent and cheap, and it must not be cached: the connector drops discovery_ui (with its indexes) when the
+    UI mode is switched off.
+    """
+    mongo_discovery.create_index("name", unique=True)
 
 
 def _object_id(value):

@@ -109,6 +109,20 @@ describe("DiscoveryList", () => {
         expect(discoveryMocks.makeChange).toHaveBeenCalled();
     });
 
+    it("collapses the expanded row when that entry is deleted", async () => {
+        api.post.mockResolvedValue({data: {message: "Discovery entry was deleted."}});
+        await act(async () => renderList());
+        await act(async () => { fireEvent.click(screen.getAllByRole("button", {name: /expand/i})[0]); });
+        expect(screen.getByRole("table", {name: "Device rules for office-lan"})).toBeInTheDocument();
+
+        fireEvent.click(screen.getAllByDataTest("sc4snmp:discovery-row-delete")[0]);
+        await act(async () => { fireEvent.click(screen.getByDataTest("sc4snmp:delete-modal:delete-button")); });
+        await act(async () => { await sleep(10); });
+
+        expect(api.post).toHaveBeenCalledWith("/discovery/delete/id1");
+        expect(screen.queryByRole("table", {name: "Device rules for office-lan"})).not.toBeInTheDocument();
+    });
+
     it("fetches once when the page size changes and stays on the current page after a change", async () => {
         await act(async () => renderList());
         const pageFetches = () => api.get.mock.calls.filter(([url]) => /^\/discovery\/\d+\/\d+$/.test(url));

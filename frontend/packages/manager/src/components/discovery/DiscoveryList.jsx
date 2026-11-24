@@ -65,7 +65,9 @@ function DiscoveryList() {
             return undefined;
         }
         return api.post(`/discovery/delete/${target._id}`).then(() => {
-            setDeleting(null); ctx.makeChange();
+            setDeleting(null);
+            setExpandedRowId((expanded) => (expanded === target._id ? null : expanded));
+            ctx.makeChange();
         }).catch((error) => showError(error, 'Unable to delete Discovery entry.'));
     };
 
@@ -76,7 +78,7 @@ function DiscoveryList() {
             </Select>
             <Paginator onChange={(e, { page: next }) => fetchRows(next, perPage)} current={page} alwaysShowLastPageLink totalPages={pages} />
         </Pagination>
-        <StyledFramedTable data-test="sc4snmp:discovery-table" stripeRows resizableFillLayout rowExpansion="single">
+        <StyledFramedTable data-test="sc4snmp:discovery-table" stripeRows resizableFillLayout rowExpansion="controlled">
             <Table.Head><Table.HeadCell>Name</Table.HeadCell><Table.HeadCell>Network</Table.HeadCell><Table.HeadCell>Version</Table.HeadCell><Table.HeadCell>Port</Table.HeadCell><Table.HeadCell>Community</Table.HeadCell><Table.HeadCell>Secret</Table.HeadCell><Table.HeadCell>Security engine</Table.HeadCell><Table.HeadCell>Frequency</Table.HeadCell><Table.HeadCell>Delete already discovered</Table.HeadCell><Table.HeadCell width={100}>Actions</Table.HeadCell></Table.Head>
             <Table.Body>{rows.map((row) => <Table.Row key={row._id} data-test="sc4snmp:discovery-row"
                 expansionRow={<Table.Row><Table.Cell colSpan={10}>

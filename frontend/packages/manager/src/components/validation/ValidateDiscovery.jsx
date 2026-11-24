@@ -1,3 +1,33 @@
+const isDigits = (value) => /^\d+$/.test(String(value ?? '').trim());
+
+// Same rules as python's ipaddress: four decimal octets without leading zeros.
+const isIPv4 = (address) => {
+    const octets = address.split('.');
+    return octets.length === 4 && octets.every((part) => /^(0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255);
+};
+
+// IPv6 with optional "::" compression and an optional embedded IPv4 tail (e.g. ::ffff:192.0.2.1).
+const isIPv6 = (address) => {
+    if (!address.includes(':') || !/^[0-9a-f:.]+$/i.test(address) || (address.match(/::/g) || []).length > 1) {
+        return false;
+    }
+    const halves = address.split('::');
+    const groups = halves.flatMap((half) => (half ? half.split(':') : []));
+    let groupCount = groups.length;
+    const last = groups[groups.length - 1];
+    if (last && last.includes('.')) {
+        if (!address.endsWith(last) || !isIPv4(last)) {
+            return false;
+        }
+        groups.pop();
+        groupCount += 1; // the IPv4 tail takes the place of two groups
+    }
+    if (!groups.every((group) => /^[0-9a-f]{1,4}$/i.test(group))) {
+        return false;
+    }
+    return halves.length === 2 ? groupCount < 8 : groupCount === 8;
+};
+
 const validateDiscovery = (entry) => {
     const errors = {
         name: [], networkAddress: [], port: [], version: [], community: [], secret: [],
@@ -21,24 +51,16 @@ const validateDiscovery = (entry) => {
             throw new Error();
         }
         const [address, bits] = parts;
-        const octets = address.split('.');
-        const ipv4 = octets.length === 4 && octets.every((part) => /^\d+$/.test(part) && Number(part) <= 255);
-        let ipv6 = false;
-        if (address.includes(':') && /^[0-9a-f:]+$/i.test(address) && (address.match(/::/g) || []).length <= 1) {
-            const halves = address.split('::');
-            const groups = halves.flatMap((half) => (half ? half.split(':') : []));
-            const validGroups = groups.every((group) => /^[0-9a-f]{1,4}$/i.test(group));
-            ipv6 = validGroups && (halves.length === 2 ? groups.length < 8 : groups.length === 8);
-        }
+        const ipv4 = isIPv4(address);
         const maxBits = ipv4 ? 32 : 128;
-        if ((!ipv4 && !ipv6) || Number(bits) > maxBits) {
+        if ((!ipv4 && !isIPv6(address)) || Number(bits) > maxBits) {
             throw new Error();
         }
     } catch {
         fail('networkAddress', 'Enter a valid IPv4 or IPv6 CIDR.');
     }
 
-    if (!Number.isInteger(Number(entry.port)) || Number(entry.port) < 1 || Number(entry.port) > 65535) {
+    if (!isDigits(entry.port) || Number(entry.port) < 1 || Number(entry.port) > 65535) {
         fail('port', 'Port must be an integer from 1 to 65535.');
     }
     if (!['1', '2c', '3'].includes(entry.version)) {
@@ -59,7 +81,7 @@ const validateDiscovery = (entry) => {
     if (entry.securityEngine && !/^([A-F0-9]{10,64}|[a-f0-9]{10,64})$/.test(entry.securityEngine)) {
         fail('securityEngine', 'Security engine must be 10 to 64 hexadecimal characters.');
     }
-    if (!Number.isInteger(Number(entry.frequency)) || Number(entry.frequency) < 21600) {
+    if (!isDigits(entry.frequency) || Number(entry.frequency) < 21600) {
         fail('frequency', 'Frequency must be at least 21600 seconds.');
     }
     (entry.deviceRules || []).forEach((rule, index) => {

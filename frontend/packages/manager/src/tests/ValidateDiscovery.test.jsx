@@ -89,4 +89,33 @@ describe("validateDiscovery", () => {
         expect(isLargeSubnet("2001:db8::/112")).toBe(false);
         expect(isLargeSubnet("")).toBe(false);
     });
+
+    it.each([
+        "10.0.0.0/24", "0.0.0.0/0", "2001:db8::/32", "::/0", "fe80::1/64",
+        "::ffff:192.0.2.1/128", "64:ff9b::192.0.2.33/96", "2001:db8:0:0:0:0:0:1/128",
+    ])("accepts network %s", (networkAddress) => {
+        const [ok] = validateDiscovery({...valid(), networkAddress});
+        expect(ok).toBe(true);
+    });
+
+    it.each([
+        "10.0.0.0", "10.0.0/24", "010.0.0.0/24", "300.0.0.0/24", "10.0.0.0/33", "2001:db8::/129",
+        "1::2::3/64", "1.2.3.4::/64", "::ffff:192.0.2/128", "2001:db8:0:0:0:0:0:0:1/128", "gggg::/16",
+    ])("rejects network %s", (networkAddress) => {
+        const [ok, errors] = validateDiscovery({...valid(), networkAddress});
+        expect(ok).toBe(false);
+        expect(errors.networkAddress.length).toBe(1);
+    });
+
+    it.each(["161.0", "1e3", "-1", "0x10", "", " "])("rejects non-integer port '%s'", (port) => {
+        const [ok, errors] = validateDiscovery({...valid(), port});
+        expect(ok).toBe(false);
+        expect(errors.port.length).toBe(1);
+    });
+
+    it.each(["21600.0", "2.16e4", ""])("rejects non-integer frequency '%s'", (frequency) => {
+        const [ok, errors] = validateDiscovery({...valid(), frequency});
+        expect(ok).toBe(false);
+        expect(errors.frequency.length).toBe(1);
+    });
 });
