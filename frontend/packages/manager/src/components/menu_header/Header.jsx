@@ -12,6 +12,7 @@ import { StyledHeader, StyledHeaderLeft, StyledHeaderRight } from "../../styles/
 import api from "../../api";
 import RestoreModal from "../inventory/RestoreModal";
 import { useDiscoveryContext } from "../../store/discovery-contxt";
+import ApplyChangesMessage from './ApplyChangesMessage';
 
 function Header(){
     const MenuCtx = useContext(MenuHeaderContxt);
@@ -69,7 +70,7 @@ function Header(){
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
                     ErrCtx.setErrorType("info");
-                    ErrCtx.setMessage(response.data.message);
+                    ErrCtx.setMessage(<ApplyChangesMessage message={response.data.message} />);
                 }
             })
         .catch((error) => {
