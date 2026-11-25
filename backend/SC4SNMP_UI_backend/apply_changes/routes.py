@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.apply_changes.apply_changes import ApplyChanges
 from SC4SNMP_UI_backend.apply_changes.apply_changes import mongo_discovery
@@ -18,7 +18,7 @@ from SC4SNMP_UI_backend.common.file_to_config_utils import (
     discovery_yaml_to_documents,
 )
 from SC4SNMP_UI_backend.common.mongo_utils import run_write
-from SC4SNMP_UI_backend.common.change_tracking import mark_section_dirty
+from SC4SNMP_UI_backend.common.change_tracking import JOB_TYPES, mark_section_dirty
 import os
 import traceback
 import yaml
@@ -138,8 +138,11 @@ def _describe_results(results, skipped):
 @apply_changes_blueprint.route("/apply-changes", methods=['POST'])
 @login_required
 def apply_changes():
+    section = request.args.get("section")
+    if section is not None and section not in JOB_TYPES:
+        return jsonify({"message": "Apply section must be inventory or discovery."}), 400
     changes = ApplyChanges()
-    results, skipped = changes.apply_changes()
+    results, skipped = changes.apply_changes(section)
     result = jsonify({"message": _describe_results(results, skipped)})
     return result, 200
 

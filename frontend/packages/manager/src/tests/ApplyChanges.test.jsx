@@ -11,7 +11,7 @@ import {MockErrorsContextProvider} from "./mock_context_providers/MockErrorsCont
 import {MockProfileContextProvider} from "./mock_context_providers/MockProfileContextProvider";
 import {MockGroupContextProvider} from "./mock_context_providers/MockGroupContextProvider";
 import {MockInventoryContextProvider} from "./mock_context_providers/MockInventoryContextProvider";
-import {MenuHeaderContxtProvider} from "../store/menu-header-contxt";
+import MenuHeaderContxt from "../store/menu-header-contxt";
 
 jest.mock("../api", () => ({
     __esModule: true,
@@ -27,11 +27,12 @@ jest.mock("../api", () => ({
 const sleep = ms => new Promise(r => { setTimeout(r, ms); });
 
 // Header is rendered without a DiscoveryContextProvider on purpose: it must work with the safe default.
-function renderHeader(){
+function renderHeader(activeTabId = "Profiles"){
+    const menuContext = {activeTabId};
     return render(
         <MockAuthContextProvider>
             <MockErrorsContextProvider>
-                <MenuHeaderContxtProvider>
+                <MenuHeaderContxt.Provider value={menuContext}>
                     <MockProfileContextProvider profileProps={{}}>
                         <MockGroupContextProvider>
                             <MockInventoryContextProvider>
@@ -40,7 +41,7 @@ function renderHeader(){
                             </MockInventoryContextProvider>
                         </MockGroupContextProvider>
                     </MockProfileContextProvider>
-                </MenuHeaderContxtProvider>
+                </MenuHeaderContxt.Provider>
             </MockErrorsContextProvider>
         </MockAuthContextProvider>
     );
@@ -51,15 +52,20 @@ describe("Apply changes", () => {
         api.post.mockReset();
     });
 
-    it("posts /apply-changes without a section and shows the returned message", async () => {
+    it.each([
+        ["Profiles", "inventory"],
+        ["Groups", "inventory"],
+        ["Inventory", "inventory"],
+        ["Discovery", "discovery"],
+    ])("applies the active section from the %s tab and shows the returned message", async (tab, section) => {
         api.post.mockResolvedValueOnce({data: {message: "Configuration will be updated in approximately 1 seconds."}});
-        await act(async () => renderHeader());
+        await act(async () => renderHeader(tab));
         await act(async () => {
             fireEvent.click(screen.getByDataTest("sc4snmp:apply-changes-button"));
             await sleep(10);
         });
         expect(api.post).toHaveBeenCalledTimes(1);
-        expect(api.post).toHaveBeenCalledWith("/apply-changes");
+        expect(api.post).toHaveBeenCalledWith("/apply-changes", null, {params: {section}});
         expect(screen.queryByText("Configuration will be updated in approximately 1 seconds.")).toBeInTheDocument();
     });
 

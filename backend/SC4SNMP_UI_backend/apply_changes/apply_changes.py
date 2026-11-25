@@ -49,33 +49,42 @@ class ApplyChanges(metaclass=SingletonMeta):
         self.__job_chain.set_next(ScheduleHandler())
         ensure_config_record()
 
-    def apply_changes(self):
+    def apply_changes(self, section=None):
         """
-        Saves the configuration and runs the kubernetes job of every section that has unapplied changes. If no
-        section has changes, jobs of all available sections are run again, so that a failed job can be retried.
+        Saves and applies the requested section. An explicit section can also be retried with no new edits.
+        Restore and callers without a section apply all dirty sections, or retry all available jobs when none
+        of the dirty sections can be applied.
 
         :return: dictionary {job_type: (job_delay, currently_scheduled)} for the jobs that were handled and a list of
                  job types with unapplied changes that were skipped because their job is not available (e.g.
                  discovery disabled in helm values)
         """
-        revisions = {section: revision for section, (revision, _) in get_revisions().items()}
-        dirty = dirty_sections()
-        job_types = [job_type for job_type in dirty if job_available(job_type)] \
-            or [job_type for job_type in JOB_TYPES if job_available(job_type)]
-        # Only unavailable jobs with unapplied changes are reported, otherwise every apply would mention them.
-        skipped = [job_type for job_type in dirty if not job_available(job_type)]
+        if section is not None:
+            if not job_available(section):
+                return {}, [section]
+            available = [section]
+            job_types, skipped = available, []
+        else:
+            dirty = dirty_sections()
+            available = [job_type for job_type in JOB_TYPES if job_available(job_type)]
+            job_types = [job_type for job_type in available if job_type in dirty] or available
+            skipped = [job_type for job_type in dirty if job_type not in available]
 
-        yaml_sections = {
-            "scheduler.groups": (mongo_groups, GroupsToYamlDictConversion, GroupsTempHandling),
-            "scheduler.profiles": (mongo_profiles, ProfilesToYamlDictConversion, ProfilesTempHandling),
-            "poller.inventory": (mongo_inventory, InventoryToYamlDictConversion, InventoryTempHandling),
-        }
-        if job_available("discovery") and discovery_seeded():
+        revisions = {job_type: revision for job_type, (revision, _) in get_revisions().items()}
+        yaml_sections = {}
+        if section != "discovery":
+            yaml_sections.update({
+                "scheduler.groups": (mongo_groups, GroupsToYamlDictConversion, GroupsTempHandling),
+                "scheduler.profiles": (mongo_profiles, ProfilesToYamlDictConversion, ProfilesTempHandling),
+                "poller.inventory": (mongo_inventory, InventoryToYamlDictConversion, InventoryTempHandling),
+            })
+        if "discovery" in available and discovery_seeded():
             # Discovery section is written only after discovery_ui was seeded from the configuration by the
             # connector. Otherwise empty collection would overwrite entries defined in values.yaml.
             yaml_sections["discovery.autodiscovery"] = (
                 mongo_discovery, DiscoveryToYamlDictConversion, DiscoveryTempHandling)
-        self.__save_handler.handle({"yaml_sections": yaml_sections})
+        if yaml_sections:
+            self.__save_handler.handle({"yaml_sections": yaml_sections})
 
         results = {}
         for job_type in job_types:

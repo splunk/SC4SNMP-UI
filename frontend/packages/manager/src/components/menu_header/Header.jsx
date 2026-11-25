@@ -65,7 +65,8 @@ function Header(){
     };
 
     const handleApplyChanges = () => {
-        api.post("/apply-changes")
+        const section = MenuCtx.activeTabId === "Discovery" ? "discovery" : "inventory";
+        api.post("/apply-changes", null, { params: { section } })
         .then((response) => {
                 if ('message' in response.data){
                     ErrCtx.setOpen(true);
@@ -127,8 +128,8 @@ function Header(){
                         <span id="project-description">
                             <P>
                                 Collect SNMP data for Splunk Enterprise, Splunk Enterprise Cloud, and Splunk Infrastructure Monitoring.
-                                Make any changes to Profiles, Groups, Inventory, and Discovery, then select Apply changes.
-                                You can only apply changes every 5 minutes.
+                                Select Apply changes in Discovery to apply Discovery settings. In Profiles, Groups,
+                                or Inventory, Apply changes updates their shared inventory configuration.
                             </P>
                         </span>
                     </div>

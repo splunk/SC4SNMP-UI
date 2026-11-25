@@ -346,6 +346,57 @@ def test_apply_changes_runs_only_the_dirty_job(jobs, job_state, client):
     job_state.mark_applied.assert_called_once_with("discovery", 5, mock.ANY)
 
 
+@pytest.mark.parametrize(("section", "expected_files"), [
+    ("discovery", {"discovery_autodiscovery.yaml"}),
+    ("inventory", {"scheduler_groups.yaml", "scheduler_profiles.yaml", "poller_inventory.yaml"}),
+])
+def test_scoped_apply_saves_and_runs_only_the_requested_section(
+        section, expected_files, jobs, job_state, client):
+    job_state.dirty_sections.return_value = ["inventory", "discovery"]
+    job_state.job_available.side_effect = lambda job_type: True
+    job_state.discovery_seeded.return_value = True
+    job_state.get_revisions.return_value = {"inventory": (3, 2), "discovery": (5, 4)}
+
+    response = client.post("/apply-changes", query_string={"section": section})
+
+    assert response.status_code == 200
+    jobs.get_job_config.assert_called_once_with(section)
+    revision = {"inventory": 3, "discovery": 5}[section]
+    job_state.mark_applied.assert_called_once_with(section, revision, mock.ANY)
+    assert response.json["message"].startswith(f"{section.capitalize()}:")
+    generated_files = {
+        filename.removeprefix(TMP_FILE_PREFIX)
+        for filename in os.listdir(VALUES_TEST_DIRECTORY)
+        if filename.startswith(TMP_FILE_PREFIX)
+    }
+    assert generated_files == expected_files
+
+
+def test_scoped_apply_can_retry_when_only_the_other_section_is_dirty(jobs, job_state, client):
+    job_state.dirty_sections.return_value = ["inventory"]
+    job_state.job_available.side_effect = lambda job_type: True
+
+    response = client.post("/apply-changes?section=discovery")
+
+    assert response.status_code == 200
+    jobs.get_job_config.assert_called_once_with("discovery")
+
+
+def test_scoped_discovery_apply_with_no_manifest_does_not_run_inventory(jobs, job_state, client):
+    response = client.post("/apply-changes?section=discovery")
+
+    assert response.status_code == 200
+    assert response.json["message"].startswith("Discovery: skipped")
+    jobs.get_job_config.assert_not_called()
+
+
+def test_invalid_apply_section_is_rejected(jobs, client):
+    response = client.post("/apply-changes?section=unknown")
+
+    assert response.status_code == 400
+    jobs.get_job_config.assert_not_called()
+
+
 def test_apply_changes_runs_both_jobs_independently(jobs, job_state, client):
     job_state.dirty_sections.return_value = ["inventory", "discovery"]
     job_state.job_available.side_effect = lambda job_type: True
