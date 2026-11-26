@@ -1,6 +1,11 @@
 # Changelog
 
+## Unreleased
+
 ### Changed
+- scope **Apply changes** to the active tab. Discovery applies only Discovery settings, while Profiles, Groups, and Inventory apply their shared Inventory configuration.
+- add a Discovery tab for creating, editing, and deleting discovery networks and configuring ordered device rules.
+- store Discovery entries in MongoDB and include them in the YAML configuration save and restore flow.
 
 ## [1.4.0]
 
