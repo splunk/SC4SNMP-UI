@@ -36,8 +36,8 @@ function RestoreModal(props) {
                         disk?
                     </P>
                     <Message appearance="fill" type="warning">
-                        This replaces current Profiles, Groups, and Inventory with the 3
-                        configuration files on disk.
+                        This restores Profiles, Groups, Inventory, and Discovery from their
+                        configuration section files on disk. Sections without a file are skipped.
                         Hosts no longer present in the files will be
                         removed.
                         Configuration from the values filename will be altered.

@@ -1,7 +1,9 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
 from SC4SNMP_UI_backend.auth.utils import login_required
 from SC4SNMP_UI_backend.apply_changes.apply_changes import ApplyChanges
+from SC4SNMP_UI_backend.apply_changes.apply_changes import mongo_discovery
 from SC4SNMP_UI_backend.apply_changes import handling_chain
+from SC4SNMP_UI_backend.apply_changes.tasks import JobNotConfiguredException
 from SC4SNMP_UI_backend.apply_changes.handling_chain import (
     EmptyValuesFileException,
     YamlParserException,
@@ -13,8 +15,10 @@ from SC4SNMP_UI_backend.common.file_to_config_utils import (
     groups_yaml_to_documents,
     profiles_yaml_to_documents,
     inventory_csv_to_documents,
+    discovery_yaml_to_documents,
 )
 from SC4SNMP_UI_backend.common.mongo_utils import run_write
+from SC4SNMP_UI_backend.common.change_tracking import JOB_TYPES, mark_section_dirty
 import os
 import traceback
 import yaml
@@ -29,6 +33,7 @@ SECTION_FILE_KEYS = {
     "groups": "scheduler.groups",
     "profiles": "scheduler.profiles",
     "inventory": "poller.inventory",
+    "discovery": "discovery.autodiscovery",
 }
 
 
@@ -78,7 +83,7 @@ def _reconcile_inventory(inventory_documents, session=None):
         )
 
 
-def _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml):
+def _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml, discovery_yaml):
     """
     Performs all Mongo writes for a restore, forwarding session (possibly
     None) to every write so common.mongo_utils.run_write can commit them
@@ -101,20 +106,44 @@ def _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml):
         inventory_documents = inventory_csv_to_documents(inventory_csv)
         _reconcile_inventory(inventory_documents, session=session)
 
+    if discovery_yaml is not None:
+        discovery_documents = discovery_yaml_to_documents(discovery_yaml)
+        mongo_discovery.delete_many({}, session=session)
+        if discovery_documents:
+            mongo_discovery.insert_many(discovery_documents, session=session)
+
+
+def _describe_results(results, skipped):
+    """
+    Builds a message about the jobs handled by one apply. One sentence per job type, because the types are
+    scheduled independently.
+    """
+    parts = []
+    for job_type, (job_delay, currently_scheduled) in results.items():
+        label = job_type.capitalize()
+        if job_delay <= 1 and currently_scheduled:
+            parts.append(
+                f"{label}: there might be previous kubernetes job still present in the namespace. Configuration update "
+                f"will be retried {JOB_CREATION_RETRIES} times. If your configuration won't be updated in a few "
+                f"minutes, make sure that snmp-splunk-connect-for-snmp-{job_type} job isn't present in your "
+                f"kubernetes deployment namespace and click 'Apply changes' button once again.")
+        else:
+            parts.append(f"{label}: configuration will be updated in approximately {job_delay} seconds.")
+    for job_type in skipped:
+        parts.append(f"{job_type.capitalize()}: skipped, {job_type} is disabled in the helm values "
+                     f"(job configuration is not available).")
+    return " ".join(parts)
+
 
 @apply_changes_blueprint.route("/apply-changes", methods=['POST'])
 @login_required
 def apply_changes():
+    section = request.args.get("section")
+    if section is not None and section not in JOB_TYPES:
+        return jsonify({"message": "Apply section must be inventory or discovery."}), 400
     changes = ApplyChanges()
-    job_delay, currently_scheduled = changes.apply_changes()
-    if job_delay <= 1 and currently_scheduled:
-        message = "There might be previous kubernetes job still present in the namespace. Configuration update will be " \
-                  f"retried {JOB_CREATION_RETRIES} times. If your configuration won't be updated in a few minutes, make sure that " \
-                  f"snmp-splunk-connect-for-snmp-inventory job isn't present in your kubernetes deployment namespace and " \
-                  f"click 'Apply changes' button once again."
-    else:
-        message = f"Configuration will be updated in approximately {job_delay} seconds."
-    result = jsonify({"message": message})
+    results, skipped = changes.apply_changes(section)
+    result = jsonify({"message": _describe_results(results, skipped)})
     return result, 200
 
 
@@ -122,34 +151,32 @@ def apply_changes():
 @login_required
 def load_config():
     """
-    Restores profiles, groups, and inventory from the on-disk section files
+    Restores profiles, groups, inventory and discovery from the on-disk section files
     (sc4snmp_ui_scheduler_groups.yaml / sc4snmp_ui_scheduler_profiles.yaml /
-    sc4snmp_ui_poller_inventory.yaml) into their *_ui Mongo collections, then
-    triggers the same Apply Changes flow as /apply-changes so the connector's
-    inventory Job picks the restored configuration up (both UI visibility and
-    polling). This is the only inverse (file -> Mongo) path in the backend;
-    everywhere else Mongo is the sole source of truth.
+    sc4snmp_ui_poller_inventory.yaml / sc4snmp_ui_discovery_autodiscovery.yaml) into their *_ui Mongo collections,
+    then triggers the same Apply Changes flow as /apply-changes so the connector's Jobs pick the restored
+    configuration up (both UI visibility and polling). This is the only inverse (file -> Mongo) path in the
+    backend; everywhere else Mongo is the sole source of truth.
     """
     groups_yaml = _load_yaml_section("groups")
     profiles_yaml = _load_yaml_section("profiles")
     inventory_yaml = _load_yaml_section("inventory")
+    discovery_yaml = _load_yaml_section("discovery")
 
-    if groups_yaml is None and profiles_yaml is None and inventory_yaml is None:
+    if groups_yaml is None and profiles_yaml is None and inventory_yaml is None and discovery_yaml is None:
         result = jsonify({"message": "No section files found in the values directory to restore from."})
         return result, 400
 
-    run_write(lambda session: _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml))
+    run_write(lambda session: _restore_documents(session, groups_yaml, profiles_yaml, inventory_yaml, discovery_yaml))
+
+    if groups_yaml is not None or profiles_yaml is not None or inventory_yaml is not None:
+        mark_section_dirty("inventory")
+    if discovery_yaml is not None:
+        mark_section_dirty("discovery")
 
     changes = ApplyChanges()
-    job_delay, currently_scheduled = changes.apply_changes()
-    if job_delay <= 1 and currently_scheduled:
-        message = "Configuration was restored from section files. There might be previous kubernetes job still " \
-                  "present in the namespace. Configuration update will be " \
-                  f"retried {JOB_CREATION_RETRIES} times. If your configuration won't be updated in a few minutes, make sure that " \
-                  f"snmp-splunk-connect-for-snmp-inventory job isn't present in your kubernetes deployment namespace and " \
-                  f"click 'Apply changes' button once again."
-    else:
-        message = f"Configuration was restored from section files. It will be updated in approximately {job_delay} seconds."
+    results, skipped = changes.apply_changes()
+    message = "Configuration was restored from section files. " + _describe_results(results, skipped)
     result = jsonify({"message": message})
     return result, 200
 
@@ -157,7 +184,7 @@ def load_config():
 @apply_changes_blueprint.errorhandler(Exception)
 def handle_exception(e):
     current_app.logger.error(traceback.format_exc())
-    if isinstance(e, (EmptyValuesFileException, YamlParserException)):
+    if isinstance(e, (EmptyValuesFileException, YamlParserException, JobNotConfiguredException)):
         result = jsonify({"message": e.message})
         return result, 400
 

@@ -241,11 +241,13 @@ def create_app():
     from SC4SNMP_UI_backend.profiles.routes import profiles_blueprint
     from SC4SNMP_UI_backend.groups.routes import groups_blueprint
     from SC4SNMP_UI_backend.inventory.routes import inventory_blueprint
+    from SC4SNMP_UI_backend.discovery.routes import discovery_blueprint
     from SC4SNMP_UI_backend.apply_changes.routes import apply_changes_blueprint
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(profiles_blueprint)
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(inventory_blueprint)
+    app.register_blueprint(discovery_blueprint)
     app.register_blueprint(apply_changes_blueprint)
 
     from SC4SNMP_UI_backend.auth.utils import (

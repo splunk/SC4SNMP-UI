@@ -144,6 +144,33 @@ class InventoryToYamlDictConversion(MongoToYamlDictConversion):
         }
 
 
+class DiscoveryToYamlDictConversion(MongoToYamlDictConversion):
+    def convert(self, documents: list) -> dict:
+        result = {}
+        for document in documents:
+            entry = {
+                "network_address": document["network_address"],
+                "version": single_quote(str(document.get("version", "2c"))),
+                "port": int(document.get("port", 161)),
+                "frequency": int(document.get("frequency", 86400)),
+                "delete_already_discovered": bool(document.get("delete_already_discovered", False)),
+            }
+            for key in ("community", "secret", "security_engine"):
+                value = document.get(key)
+                if value:
+                    entry[key] = single_quote(str(value))
+            rules = document.get("device_rules") or []
+            if rules:
+                entry["device_rules"] = [
+                    {"name": single_quote(rule["name"]),
+                     "patterns": single_quote(rule["patterns"]),
+                     "group": single_quote(rule["group"])}
+                    for rule in rules
+                ]
+            result[document["name"]] = entry
+        return result
+
+
 class TempFileHandling:
     """
     After converting configurations from mongo to dictionaries ready to be dumped to yaml file, those dictionaries
@@ -232,3 +259,23 @@ class GroupsTempHandling(TempFileHandling):
         if delete_tmp:
             self._delete_temp()
         return literal_string(lines)
+
+
+class DiscoveryTempHandling(TempFileHandling):
+    def __init__(self, file_path: str):
+        super().__init__(file_path)
+
+    def parse_dict_to_yaml(self, document: dict, delete_tmp: bool = True):
+        """
+        discovery.autodiscovery is a mapping in values.yaml (values.schema.json declares it as an object), so,
+        unlike profiles and groups, it must not be converted to a literal string. The temporary file contains the
+        mapping itself, which is what the restore reads back.
+
+        :param document: dictionary with discovery configuration
+        :param delete_tmp: whether to delete temporary file after parsing
+        :return: parsed configuration ready to be saved to values.yaml
+        """
+        self._save_temp(document)
+        if delete_tmp:
+            self._delete_temp()
+        return document

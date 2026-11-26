@@ -149,7 +149,8 @@ def test_load_config_restores_from_section_files(m_find, m_update, m_insert_many
 
     assert response.status_code == 200
     assert response.json == {
-        "message": "Configuration was restored from section files. It will be updated in approximately 1 seconds."
+        "message": "Configuration was restored from section files. "
+                   "Inventory: configuration will be updated in approximately 1 seconds."
     }
 
 
@@ -214,7 +215,8 @@ def test_load_config_restores_from_section_files_uses_transaction_in_replication
 
     assert response.status_code == 200
     assert response.json == {
-        "message": "Configuration was restored from section files. It will be updated in approximately 1 seconds."
+        "message": "Configuration was restored from section files. "
+                   "Inventory: configuration will be updated in approximately 1 seconds."
     }
 
 
@@ -275,3 +277,28 @@ def test_load_config_returns_400_when_no_section_files_present(client, tmp_path,
 
     assert response.status_code == 400
     assert response.json == {"message": "No section files found in the values directory to restore from."}
+
+
+def test_load_config_restores_discovery_and_marks_it_dirty(client, tmp_path, monkeypatch, mark_dirty, job_state):
+    monkeypatch.setattr(handling_chain, "VALUES_DIRECTORY", str(tmp_path))
+    monkeypatch.setattr(handling_chain, "TMP_DIR", str(tmp_path))
+    (tmp_path / f"{TMP_FILE_PREFIX}discovery_autodiscovery.yaml").write_text(
+        "office-lan:\n  network_address: 10.0.0.0/24\n  port: null\n  version: '2c'\n  community: public\n"
+        "  device_rules:\n  - name: b\n    patterns: '*b*'\n    group: g2\n"
+        "  - name: a\n    patterns: '*a*'\n    group: g1\n")
+    job_state.job_available.side_effect = lambda job_type: True
+    job_state.dirty_sections.return_value = ["discovery"]
+
+    with mock.patch("pymongo.collection.Collection.delete_many") as m_delete_many, \
+            mock.patch("pymongo.collection.Collection.insert_many") as m_insert_many, \
+            mock.patch("SC4SNMP_UI_backend.apply_changes.routes.ApplyChanges") as m_apply:
+        m_apply.return_value.apply_changes.return_value = ({"discovery": (1, False)}, [])
+        response = client.post("/load-config")
+
+    assert response.status_code == 200
+    m_delete_many.assert_called_once_with({}, session=None)
+    inserted = m_insert_many.call_args.args[0]
+    assert inserted[0]["name"] == "office-lan" and inserted[0]["port"] == 161
+    assert [rule["name"] for rule in inserted[0]["device_rules"]] == ["b", "a"]
+    mark_dirty.assert_called_once_with("discovery")
+    assert response.json["message"].endswith("Discovery: configuration will be updated in approximately 1 seconds.")

@@ -14,8 +14,49 @@ def _disable_auth(monkeypatch, tmp_path):
     monkeypatch.setenv("REDIS_URL", "memory://")
 
 
+@pytest.fixture(autouse=True)
+def mark_dirty():
+    """
+    Routes register edits of a section with change_tracking.mark_section_dirty, which writes to the config record in
+    mongo. Handler tests don't need mongo for that, so it is replaced with a mock that tests can inspect. The patch is
+    active before the app fixture reloads the route modules, so they bind to the mock.
+    """
+    from unittest import mock
+    with mock.patch("SC4SNMP_UI_backend.common.change_tracking.mark_section_dirty") as marker:
+        yield marker
+
+
+@pytest.fixture(autouse=True)
+def job_state():
+    """
+    Replaces the mongo-backed revisions and per-job state used by the apply flow. By default only the inventory section
+    has unapplied changes, the discovery job is not available (discovery disabled) and no job is currently scheduled.
+    Tests can change the return values of the returned mocks.
+    """
+    from types import SimpleNamespace
+    from unittest import mock
+    apply_mod = "SC4SNMP_UI_backend.apply_changes.apply_changes"
+    chain_mod = "SC4SNMP_UI_backend.apply_changes.handling_chain"
+    patches = {
+        "ensure_config_record": mock.patch(f"{apply_mod}.ensure_config_record"),
+        "get_revisions": mock.patch(f"{apply_mod}.get_revisions",
+                                    return_value={"inventory": (2, 1), "discovery": (1, 1)}),
+        "dirty_sections": mock.patch(f"{apply_mod}.dirty_sections", return_value=["inventory"]),
+        "job_available": mock.patch(f"{apply_mod}.job_available", side_effect=lambda job_type: job_type == "inventory"),
+        "discovery_seeded": mock.patch(f"{apply_mod}.discovery_seeded", return_value=False),
+        "get_job_state": mock.patch(f"{chain_mod}.get_job_state", return_value={
+            "previous_job_start_time": None, "currently_scheduled": False, "task_id": None, "pending_revision": 0}),
+        "set_job_state": mock.patch(f"{chain_mod}.set_job_state"),
+        "mark_applied": mock.patch(f"{chain_mod}.mark_applied"),
+    }
+    started = {name: patcher.start() for name, patcher in patches.items()}
+    yield SimpleNamespace(**started)
+    for patcher in patches.values():
+        patcher.stop()
+
+
 @pytest.fixture()
-def app(_disable_auth):
+def app(_disable_auth, mark_dirty):
     # The auth module-level constant AUTH_ENABLED is captured at import time.
     # The route modules apply @login_required at import time, capturing a
     # closure over auth.utils' module globals. If tests/auth/* ran first,
@@ -32,6 +73,7 @@ def app(_disable_auth):
         "SC4SNMP_UI_backend.groups.routes",
         "SC4SNMP_UI_backend.inventory.routes",
         "SC4SNMP_UI_backend.apply_changes.routes",
+        "SC4SNMP_UI_backend.discovery.routes",
     ):
         if mod_name in sys.modules:
             importlib.reload(sys.modules[mod_name])
@@ -54,6 +96,7 @@ def app(_disable_auth):
             "SC4SNMP_UI_backend.groups.routes",
             "SC4SNMP_UI_backend.inventory.routes",
             "SC4SNMP_UI_backend.apply_changes.routes",
+            "SC4SNMP_UI_backend.discovery.routes",
         ):
             if mod_name in sys.modules:
                 importlib.reload(sys.modules[mod_name])

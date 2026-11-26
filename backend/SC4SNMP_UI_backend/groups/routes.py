@@ -7,6 +7,7 @@ from SC4SNMP_UI_backend.common.backend_ui_conversions import GroupConversion, Gr
 from copy import copy
 from SC4SNMP_UI_backend.common.inventory_utils import HandleNewDevice, get_inventory_type
 from SC4SNMP_UI_backend.common.mongo_utils import run_write
+from SC4SNMP_UI_backend.common.change_tracking import mark_section_dirty
 
 groups_blueprint = Blueprint('groups_blueprint', __name__)
 
@@ -15,6 +16,16 @@ group_device_conversion = GroupDeviceConversion()
 inventory_conversion = InventoryConversion()
 mongo_groups = mongo_client.sc4snmp.groups_ui
 mongo_inventory = mongo_client.sc4snmp.inventory_ui
+
+@groups_blueprint.route('/groups/names')
+@login_required
+def get_group_names():
+    """Names of the groups, used as suggestions for the discovery device rules."""
+    names = []
+    for group in mongo_groups.find({}, {"_id": 0}):
+        names.extend(key for key in group if key != "_id")
+    return jsonify(sorted(set(names)))
+
 
 @groups_blueprint.route('/groups/count')
 @login_required
@@ -67,6 +78,7 @@ def add_group_record():
     else:
         group_obj = group_conversion.ui2backend(group_obj)
         mongo_groups.insert_one(group_obj)
+        mark_section_dirty("inventory")
         result = jsonify("success")
     return result
 
@@ -90,6 +102,7 @@ def update_group(group_id):
 
         # Rename corresponding group in the inventory
         mongo_inventory.update_one({"address": old_group_name}, {"$set": {"address": group_obj['groupName']}})
+        mark_section_dirty("inventory")
         result = jsonify({"message": f"{old_group_name} was also renamed to {group_obj['groupName']} in the inventory"}), 200
     return result
 
@@ -107,6 +120,7 @@ def delete_group_and_devices(group_id):
         return configured
 
     configured_in_inventory = run_write(_delete)
+    mark_section_dirty("inventory")
     if configured_in_inventory:
         message = f"Group {group_name} was deleted. It was also deleted from the inventory."
     else:
@@ -163,6 +177,7 @@ def add_device_to_group():
     handler = HandleNewDevice(mongo_groups, mongo_inventory)
     host_added, message = handler.add_group_host(group_name, ObjectId(group_id), device_obj)
     if host_added:
+        mark_section_dirty("inventory")
         result = jsonify("success"), 200
     else:
         result = jsonify({"message": message}), 400
@@ -216,6 +231,8 @@ def add_devices_to_group_bulk():
     ordered_results = [results_by_index[i] for i in range(len(devices))]
     added = sum(1 for r in ordered_results if r["added"])
     failed = len(ordered_results) - added
+    if added:
+        mark_section_dirty("inventory")
 
     return jsonify({"added": added, "failed": failed, "results": ordered_results}), 200
 
@@ -233,6 +250,7 @@ def update_device_from_group(device_id):
 
     host_edited, message = handler.edit_group_host(group_name, ObjectId(group_id), device_id, device_obj, )
     if host_edited:
+        mark_section_dirty("inventory")
         result = jsonify("success"), 200
     else:
         result = jsonify({"message": message}), 400
@@ -250,4 +268,5 @@ def delete_device_from_group_record(device_id: str):
     device_name = f"{removed_device['address']}:{removed_device.get('port','')}"
     new_values = {"$set": group}
     mongo_groups.update_one({"_id": ObjectId(group_id)}, new_values)
+    mark_section_dirty("inventory")
     return jsonify({"message": f"Device {device_name} from group {group_name} was deleted."}), 200

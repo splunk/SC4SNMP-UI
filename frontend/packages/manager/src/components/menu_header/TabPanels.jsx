@@ -3,6 +3,8 @@ import MenuHeaderContxt from '../../store/menu-header-contxt';
 import ProfilesPage from "../../pages/ProfilesPage";
 import InventoryPage from "../../pages/InventoryPage";
 import GroupsPage from "../../pages/GroupsPage";
+import DiscoveryPage from "../../pages/DiscoveryPage";
+import { DiscoveryValidationContextProvider } from "../../store/discovery-validation-contxt";
 
 import { InventoryDevicesValidationContxtProvider } from "../../store/inventory-devices-validation-contxt";
 import { ProfilesValidationContxtProvider } from "../../store/profiles-validation-contxt";
@@ -34,6 +36,11 @@ function TabPanels(){
                             <InventoryPage />
                         </InventoryDevicesValidationContxtProvider>
                      : null
+            }
+            {
+                MenuCtx.activeTabId === "Discovery" ?
+                    <DiscoveryValidationContextProvider><DiscoveryPage /></DiscoveryValidationContextProvider>
+                    : null
             }
         </div>
     )

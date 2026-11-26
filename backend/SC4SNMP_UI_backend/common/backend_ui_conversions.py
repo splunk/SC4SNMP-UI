@@ -309,3 +309,47 @@ class InventoryConversion(Conversion):
             'maxOidToProcess': '' if document.get('max_oid_to_process') is None else document['max_oid_to_process']
         }
         return result
+
+
+class DiscoveryConversion(Conversion):
+    fields = (
+        "network_address", "version", "port", "community", "secret",
+        "security_engine", "frequency", "delete_already_discovered", "device_rules",
+    )
+
+    def ui2backend(self, document: dict, **kwargs):
+        delete_value = document.get("deleteAlreadyDiscovered", False)
+        if isinstance(delete_value, str):
+            delete_value = delete_value.strip().lower() in ("true", "t", "yes", "y", "1")
+        return {
+            "name": str(document.get("name", "")).strip(),
+            "network_address": str(document.get("networkAddress", "")).strip(),
+            "version": str(document.get("version") or "2c"),
+            "port": int(document.get("port") or 161),
+            "community": str(document.get("community") or ""),
+            "secret": str(document.get("secret") or ""),
+            "security_engine": str(document.get("securityEngine") or ""),
+            "frequency": int(document.get("frequency") or 86400),
+            "delete_already_discovered": delete_value,
+            "device_rules": [
+                {"name": str(rule.get("name", "")).strip(),
+                 "patterns": str(rule.get("patterns", "")).strip(),
+                 "group": str(rule.get("group", "")).strip()}
+                for rule in document.get("deviceRules", [])
+            ] or None,
+        }
+
+    def backend2ui(self, document: dict, **kwargs):
+        return {
+            "_id": str(document["_id"]),
+            "name": document["name"],
+            "networkAddress": document["network_address"],
+            "version": document.get("version", "2c"),
+            "port": str(document.get("port", 161)),
+            "community": document.get("community") or "",
+            "secret": document.get("secret") or "",
+            "securityEngine": document.get("security_engine") or "",
+            "frequency": str(document.get("frequency", 86400)),
+            "deleteAlreadyDiscovered": document.get("delete_already_discovered", False),
+            "deviceRules": document.get("device_rules") or [],
+        }
